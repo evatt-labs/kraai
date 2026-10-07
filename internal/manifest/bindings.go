@@ -1,8 +1,8 @@
 package manifest
 
 import (
+	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -58,11 +58,6 @@ func normalizeBindingKeys(services map[string]Service) error {
 // manifest with more than one problem reports the same one first on every
 // run, rather than whichever Go's map iteration happened to visit first.
 func (l *Loader) validateServices(root *Root, services map[string]Service) error {
-	known := make(map[string]bool, len(l.vocabulary.Names()))
-	for _, name := range l.vocabulary.Names() {
-		known[name] = true
-	}
-
 	for _, name := range sortedServiceNames(services) {
 		svc := services[name]
 		if svc.Compute != nil {
@@ -73,7 +68,7 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 					name, TriggerHTTP, TriggerSchedule, svc.Compute.Trigger)
 			}
 		}
-		references, err := l.validateBindings(root, name, svc, known)
+		references, err := l.validateBindings(root, name, svc)
 		if err != nil {
 			return err
 		}
@@ -99,7 +94,7 @@ func (l *Loader) validateServices(root *Root, services map[string]Service) error
 // place with both the entries and the vocabulary saying which keys are
 // references. A capability with no vendor configured is left alone; the
 // planner reports that once, with the binding it failed to expand.
-func (l *Loader) validateBindings(root *Root, name string, svc Service, known map[string]bool) (map[string]map[string]string, error) {
+func (l *Loader) validateBindings(root *Root, name string, svc Service) (map[string]map[string]string, error) {
 	bindings := svc.Bindings
 	capabilities := make([]string, 0, len(bindings))
 	for capability := range bindings {
@@ -109,10 +104,8 @@ func (l *Loader) validateBindings(root *Root, name string, svc Service, known ma
 
 	var references map[string]map[string]string
 	for _, capability := range capabilities {
-		if !known[capability] {
-			return nil, kerrors.Validation(
-				"services.%s.%s: no registered provider declares capability %q — declared: %s",
-				name, capability, capability, strings.Join(l.vocabulary.Names(), ", "))
+		if err := l.checkCapability(fmt.Sprintf("services.%s.%s", name, capability), capability); err != nil {
+			return nil, err
 		}
 
 		configured, hasVendor := root.Providers.For(capability)

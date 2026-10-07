@@ -99,11 +99,7 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 
 	// No naming overlay, or an empty prefix, gets the zero-value Namer,
 	// whose output is byte-identical to the unprefixed naming helpers.
-	var prefix string
-	if m.Environment.Naming != nil {
-		prefix = m.Environment.Naming.Prefix
-	}
-	namer := naming.NewNamer(prefix)
+	namer := naming.NewNamer(m.Environment.NamePrefix())
 
 	items, err := p.expand(m, environmentName, namer)
 	if err != nil {
@@ -187,11 +183,7 @@ func (p *Planner) Expand(m *manifest.Manifest, environmentName string) ([]Item, 
 	if environmentName == "" {
 		return nil, kerrors.Validation("plan: environment name must not be empty")
 	}
-	var prefix string
-	if m.Environment.Naming != nil {
-		prefix = m.Environment.Naming.Prefix
-	}
-	items, err := p.expand(m, environmentName, naming.NewNamer(prefix))
+	items, err := p.expand(m, environmentName, naming.NewNamer(m.Environment.NamePrefix()))
 	if err != nil {
 		return nil, err
 	}

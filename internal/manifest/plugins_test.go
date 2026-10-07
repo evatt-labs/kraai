@@ -139,7 +139,6 @@ func TestValidatePluginsAcceptsNone(t *testing.T) {
 // adopted resource has no identity kraai can derive, so both-or-neither
 // leaves kraai guessing which value a provider's lookup should use.
 func TestValidateImportsRequiresExactlyOneIdentity(t *testing.T) {
-	known := map[string]bool{CapabilityDatabase: true}
 	l := loaderWith(CapabilityDatabase)
 
 	cases := []struct {
@@ -155,7 +154,7 @@ func TestValidateImportsRequiresExactlyOneIdentity(t *testing.T) {
 			env := &Environment{Resources: map[string]ResourceImports{
 				"api": {CapabilityDatabase: {"DB": c.ref}},
 			}}
-			err := l.validateImports("environments/dev.yaml", env, known)
+			err := l.validateImports("environments/dev.yaml", env)
 			if err == nil {
 				t.Fatalf("accepted %+v", c.ref)
 			}
@@ -179,7 +178,7 @@ func TestValidateImportsRejectsAnUndeclaredCapability(t *testing.T) {
 		"api": {"frobnicate": {"X": {ID: "a"}}},
 	}}
 
-	err := l.validateImports("environments/dev.yaml", env, map[string]bool{CapabilityDatabase: true})
+	err := l.validateImports("environments/dev.yaml", env)
 	if err == nil {
 		t.Fatal("an import under an undeclared capability was accepted")
 	}
@@ -192,7 +191,6 @@ func TestValidateImportsRejectsAnUndeclaredCapability(t *testing.T) {
 
 func TestValidateImportsAcceptsAValidReference(t *testing.T) {
 	l := loaderWith(CapabilityDatabase, CapabilityNetwork)
-	known := map[string]bool{CapabilityDatabase: true, CapabilityNetwork: true}
 	env := &Environment{Resources: map[string]ResourceImports{
 		"api": {
 			CapabilityDatabase: {"DB": {ID: "0e1f-uuid"}},
@@ -201,7 +199,7 @@ func TestValidateImportsAcceptsAValidReference(t *testing.T) {
 		},
 	}}
 
-	if err := l.validateImports("environments/dev.yaml", env, known); err != nil {
+	if err := l.validateImports("environments/dev.yaml", env); err != nil {
 		t.Fatalf("a valid set of imports was rejected: %v", err)
 	}
 }

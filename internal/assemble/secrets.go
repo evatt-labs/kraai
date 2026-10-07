@@ -41,11 +41,7 @@ type SecretEntry struct {
 // to narrow with serviceKey, since kraai has no other way to tell them
 // apart from the arguments `kraai secret set` takes.
 func LocateSecretEntry(m *manifest.Manifest, environmentName, serviceKey, binding, entry string) (SecretEntry, error) {
-	var prefix string
-	if m.Environment.Naming != nil {
-		prefix = m.Environment.Naming.Prefix
-	}
-	namer := naming.NewNamer(prefix)
+	namer := naming.NewNamer(m.Environment.NamePrefix())
 
 	var matches []SecretEntry
 	for _, svcKey := range sortedServiceKeys(m.Services) {

@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -31,12 +32,6 @@ func (l *Loader) validateRoot(root *Root) error {
 		return err
 	}
 
-	declared := l.vocabulary.Names()
-	known := make(map[string]bool, len(declared))
-	for _, name := range declared {
-		known[name] = true
-	}
-
 	written := make([]string, 0, len(root.Providers))
 	for capability := range root.Providers {
 		written = append(written, capability)
@@ -47,10 +42,8 @@ func (l *Loader) validateRoot(root *Root) error {
 		// Every failure here is caught at load, naming the file and the key,
 		// rather than at plan time as a registry lookup with nothing pointing
 		// back at the line that caused it.
-		if !known[capability] {
-			return kerrors.Validation(
-				"%s: providers.%s: no registered provider declares capability %q — declared: %s",
-				rootFile, capability, capability, strings.Join(declared, ", "))
+		if err := l.checkCapability(fmt.Sprintf("%s: providers.%s", rootFile, capability), capability); err != nil {
+			return err
 		}
 		provider, ok := root.Providers.For(capability)
 		if !ok {

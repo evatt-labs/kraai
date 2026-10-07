@@ -3,7 +3,9 @@ package manifest
 import (
 	"errors"
 	"io/fs"
+	"slices"
 	"sort"
+	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 )
@@ -236,14 +238,21 @@ func (l *Loader) loadEnvironment(envName string) (*Environment, error) {
 	if err := validateEnvironment(path, &env); err != nil {
 		return nil, err
 	}
-	known := make(map[string]bool, len(l.vocabulary.Names()))
-	for _, name := range l.vocabulary.Names() {
-		known[name] = true
-	}
-	if err := l.validateImports(path, &env, known); err != nil {
+	if err := l.validateImports(path, &env); err != nil {
 		return nil, err
 	}
 	return &env, nil
+}
+
+// checkCapability refuses a capability no registered provider declares,
+// naming where the manifest wrote it.
+func (l *Loader) checkCapability(where, capability string) error {
+	declared := l.vocabulary.Names()
+	if slices.Contains(declared, capability) {
+		return nil
+	}
+	return kerrors.Validation("%s: no registered provider declares capability %q — declared: %s",
+		where, capability, strings.Join(declared, ", "))
 }
 
 // sortedKeysOf returns m's keys in ascending order.
