@@ -209,12 +209,10 @@ func newSecretParameterResource(client *Client) *secretParameterResource {
 // type must never hold that, not even encrypted, outside the one call
 // Secrets' producer makes at the moment of use.
 //
-// This package's byName ownership rule guards against a foreign resource in
-// a globally unique namespace (S3 bucket names); an SSM parameter name is
-// unique per account and region, so no other account can ever hold the name
-// this type derives, and there is no "owns" question to ask. The entry-tag
-// check below is this type's own, narrower ownership check: not "is this
-// ours", but "which entry is this".
+// The entry tag below is this type's ownership check: kraai writes it in the
+// create call of every parameter it makes, so a parameter of the derived
+// name without it was made by someone else in this account and is refused.
+// Its value also says which entry the parameter holds.
 func (r *secretParameterResource) Get(ctx context.Context, ref resource.Ref) (*resource.State, error) {
 	meta, err := r.client.describeSSMParameter(ctx, ref.Name)
 	if err != nil || meta == nil {
@@ -366,9 +364,28 @@ func (r *secretParameterResource) Update(ctx context.Context, ref resource.Ref, 
 }
 
 // Delete removes the parameter. A parameter already gone is success, the
-// same contract as every other type here.
+// same contract as every other type here. One without kraai's entry tag is
+// refused untouched, as Get refuses it: destroy deletes whether or not Get
+// succeeded, so the check cannot be left to Get, and a secret someone else
+// made under the derived name must never be deleted.
 func (r *secretParameterResource) Delete(ctx context.Context, ref resource.Ref) error {
-	_, err := r.client.ssm.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String(ref.Name)})
+	meta, err := r.client.describeSSMParameter(ctx, ref.Name)
+	if err != nil {
+		return err
+	}
+	if meta == nil {
+		return nil
+	}
+	entry, err := r.entryTag(ctx, ref.Name)
+	if err != nil {
+		return err
+	}
+	if entry == "" {
+		return kerrors.Validation(
+			"SSM parameter %q exists but carries no %q tag, so kraai did not create it; "+
+				"it was left in place", ref.Name, secretEntryTagKey)
+	}
+	_, err = r.client.ssm.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String(ref.Name)})
 	if err != nil && !parameterNotFound(err) {
 		return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting SSM parameter %q", ref.Name)
 	}
