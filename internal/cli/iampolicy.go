@@ -8,10 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
-	"github.com/evatt-labs/kraai/internal/naming"
 	"github.com/evatt-labs/kraai/internal/plan"
 	"github.com/evatt-labs/kraai/internal/provider/aws"
 )
@@ -71,17 +69,11 @@ func runIAMPolicy(
 	assembler RegistryAssembler, resolve ManifestResolver, actions PolicyActions,
 	secretRefs SecretRefStatements, secrets SecretsStatements,
 ) error {
-	if !naming.IsValidEnvironmentReference(envName) {
-		return kerrors.Validation(
-			"invalid environment name %q: must match kraai's ephemeral grammar (%s) "+
-				"or its persistent grammar (%s)",
-			envName, naming.NamePattern, naming.PersistentNamePattern)
-	}
-	fsys, err := manifest.NewFS(dir)
-	if err != nil {
+	if err := checkEnvironmentName(envName); err != nil {
 		return err
 	}
-	if err := env.LoadDotEnv(dir); err != nil {
+	fsys, err := openManifestDir(dir)
+	if err != nil {
 		return err
 	}
 	ctx := cmd.Context()

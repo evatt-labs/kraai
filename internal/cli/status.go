@@ -8,11 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
-	"github.com/evatt-labs/kraai/internal/manifest"
-	"github.com/evatt-labs/kraai/internal/naming"
 )
 
 func newStatusCommand(resolve ManifestResolver, stores LockStoreAssembler) *cobra.Command {
@@ -51,17 +48,11 @@ func runStatus(
 	cmd *cobra.Command, envName, dir string, setArgs []string, jsonOut bool,
 	resolve ManifestResolver, stores LockStoreAssembler,
 ) error {
-	if !naming.IsValidEnvironmentReference(envName) {
-		return kerrors.Validation(
-			"invalid environment name %q: must match kraai's ephemeral grammar (%s) "+
-				"or its persistent grammar (%s)",
-			envName, naming.NamePattern, naming.PersistentNamePattern)
-	}
-	fsys, err := manifest.NewFS(dir)
-	if err != nil {
+	if err := checkEnvironmentName(envName); err != nil {
 		return err
 	}
-	if err := env.LoadDotEnv(dir); err != nil {
+	fsys, err := openManifestDir(dir)
+	if err != nil {
 		return err
 	}
 	ctx := cmd.Context()

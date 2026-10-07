@@ -11,10 +11,8 @@ import (
 	"golang.org/x/term"
 
 	"github.com/evatt-labs/kraai/internal/assemble"
-	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
-	"github.com/evatt-labs/kraai/internal/naming"
 )
 
 // SecretSetter writes a secrets binding entry's value. assemble.AWSSetSecret
@@ -74,22 +72,16 @@ func runSecretSet(
 	cmd *cobra.Command, envName, target, dir, serviceKey string, setArgs []string,
 	resolve ManifestResolver, locate SecretLocator, set SecretSetter, interactive isInteractive,
 ) error {
-	if !naming.IsValidEnvironmentReference(envName) {
-		return kerrors.Validation(
-			"invalid environment name %q: must match kraai's ephemeral grammar (%s) "+
-				"or its persistent grammar (%s)",
-			envName, naming.NamePattern, naming.PersistentNamePattern)
+	if err := checkEnvironmentName(envName); err != nil {
+		return err
 	}
 	binding, entry, err := splitTarget(target)
 	if err != nil {
 		return err
 	}
 
-	fsys, err := manifest.NewFS(dir)
+	fsys, err := openManifestDir(dir)
 	if err != nil {
-		return err
-	}
-	if err := env.LoadDotEnv(dir); err != nil {
 		return err
 	}
 	ctx := cmd.Context()
