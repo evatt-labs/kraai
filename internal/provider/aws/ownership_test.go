@@ -154,8 +154,9 @@ func TestEveryTaggableByNameTypeHasAnIdentity(t *testing.T) {
 			continue
 		}
 		if reg.Type == TypeSecretParameter {
-			// It writes SSM through its own calls, not the engine; its
-			// identity check is #487.
+			// It writes SSM through its own calls, not the engine, and its
+			// ownership is the kraai:secret-entry tag it has always written
+			// at create, checked by its own Get and Delete.
 			continue
 		}
 		withEngine, ok := reg.Resource.(interface{ engine() *resourceType })

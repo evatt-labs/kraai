@@ -494,8 +494,16 @@ func TestSecretParameterResource_Update_AddTagsErrorPropagates(t *testing.T) {
 
 // --- Delete ------------------------------------------------------------
 
+// kraaiParameter is a fake holding name as a parameter kraai made for entry.
+func kraaiParameter(name, entry string) *fakeSSM {
+	return &fakeSSM{
+		describeParameters: []ssmtypes.ParameterMetadata{{Name: aws.String(name), Type: ssmtypes.ParameterTypeSecureString}},
+		tags:               []ssmtypes.Tag{{Key: aws.String(secretEntryTagKey), Value: aws.String(entry)}},
+	}
+}
+
 func TestSecretParameterResource_Delete(t *testing.T) {
-	f := &fakeSSM{}
+	f := kraaiParameter("/dev/api/secrets/pepper_key", "pepper_key")
 	r := newSecretParameterResource(&Client{ssm: f})
 	if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"}); err != nil {
 		t.Fatalf("Delete: %v", err)
@@ -511,7 +519,9 @@ func TestSecretParameterResource_Delete_AlreadyGoneIsSuccess(t *testing.T) {
 		"generic smithy error, same code": &smithy.GenericAPIError{Code: "ParameterNotFound"},
 	} {
 		t.Run(label, func(t *testing.T) {
-			f := &fakeSSM{deleteParameterErr: err}
+			// Found when checked, gone by the time it is deleted.
+			f := kraaiParameter("/dev/api/secrets/pepper_key", "pepper_key")
+			f.deleteParameterErr = err
 			r := newSecretParameterResource(&Client{ssm: f})
 			if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"}); err != nil {
 				t.Fatalf("Delete over an already-gone parameter = %v, want nil", err)
@@ -520,8 +530,24 @@ func TestSecretParameterResource_Delete_AlreadyGoneIsSuccess(t *testing.T) {
 	}
 }
 
+// A parameter of the derived name without kraai's entry tag was made by
+// someone else: destroy refuses it and leaves it in place.
+func TestSecretParameterResource_Delete_RefusesAParameterKraaiDidNotMake(t *testing.T) {
+	f := kraaiParameter("/dev/api/secrets/pepper_key", "")
+	f.tags = nil
+	r := newSecretParameterResource(&Client{ssm: f})
+	err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/pepper_key"})
+	if err == nil || !strings.Contains(err.Error(), "kraai did not create it") {
+		t.Fatalf("Delete = %v, want refused", err)
+	}
+	if len(f.deleteParameterIn) != 0 {
+		t.Fatalf("DeleteParameter called %d times on a parameter kraai did not make", len(f.deleteParameterIn))
+	}
+}
+
 func TestSecretParameterResource_Delete_UnexpectedErrorPropagates(t *testing.T) {
-	f := &fakeSSM{deleteParameterErr: errors.New("throttled")}
+	f := kraaiParameter("/dev/api/secrets/x", "x")
+	f.deleteParameterErr = errors.New("throttled")
 	r := newSecretParameterResource(&Client{ssm: f})
 	if err := r.Delete(context.Background(), resource.Ref{Name: "/dev/api/secrets/x"}); err == nil {
 		t.Fatal("Delete succeeded, want the throttled error")
