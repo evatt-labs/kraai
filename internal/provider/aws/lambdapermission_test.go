@@ -196,3 +196,26 @@ func TestLambdaPermissionDiffNeverCallsSTS(t *testing.T) {
 		t.Fatalf("STS called %d times during Diff, want 0", fsts.calls)
 	}
 }
+
+// Cloud Control reads FunctionName back as the function's ARN, so a
+// permission on the derived function is unchanged in either form, and one
+// on another function, in either form, is replaced.
+func TestLambdaPermissionDiffTakesTheFunctionInEitherForm(t *testing.T) {
+	fc := &fakeClient{schema: cfschema.Facts{CreateOnly: []string{"/properties/FunctionName", "/properties/Principal"}}}
+	perm := newEventsRulePermissionForTest(fc, &fakeSTS{account: "123456789012"})
+	for current, want := range map[string]resource.Difference{
+		"myenv-tick": resource.Same,
+		"arn:aws:lambda:us-east-1:123456789012:function:myenv-tick":     resource.Same,
+		"arn:aws:lambda:us-east-1:123456789012:function:myenv-tick-old": resource.Immutable,
+		"myenv-tick-old": resource.Immutable,
+	} {
+		state := &resource.State{Attributes: map[string]any{"FunctionName": current, "Principal": "events.amazonaws.com"}}
+		got, err := perm.Diff(resource.Spec{Name: "myenv-tick"}, state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != want {
+			t.Errorf("Diff with FunctionName %q = %v, want %v", current, got, want)
+		}
+	}
+}

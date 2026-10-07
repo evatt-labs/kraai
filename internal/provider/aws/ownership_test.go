@@ -168,8 +168,8 @@ func TestEveryTaggableByNameTypeHasAnIdentity(t *testing.T) {
 		}
 		checked++
 	}
-	if checked < 10 {
-		t.Fatalf("checked %d types, want the ten curated byName types at least", checked)
+	if checked < 9 {
+		t.Fatalf("checked %d types, want the nine curated byName types at least", checked)
 	}
 }
 

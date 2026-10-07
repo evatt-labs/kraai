@@ -29,8 +29,9 @@ type eventsRuleResource struct {
 
 func newEventsRuleResource(client *Client) *eventsRuleResource {
 	e := &eventsRuleResource{
-		resourceType: withIdentity(&resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByName, client: client}),
-		client:       client,
+		resourceType: &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByTag, client: client,
+			match: arrayTagsMatch, matchIsTag: true, stampTag: arrayTagsStampTag},
+		client: client,
 	}
 	e.resourceType.translate = e.translate
 	return e

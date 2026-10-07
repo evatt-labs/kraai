@@ -42,8 +42,6 @@ var typeActions = map[string][]string{
 	TypeLambdaFunction: {"s3:PutObject"},
 	TypeS3Bucket:       {"s3:ListAllMyBuckets"},
 	TypeRDSDBCluster:   {"secretsmanager:GetSecretValue"},
-	// A plan finds a task definition through the tagging API.
-	typeECSTaskDefinition: {"tag:GetResources"},
 }
 
 // PolicyActions returns, sorted and without duplicates, every IAM action a
@@ -77,6 +75,10 @@ func (c *Client) PolicyActions(ctx context.Context, vendorTypes []string) ([]str
 		}
 		for _, action := range typeActions[typeName] {
 			set[action] = true
+		}
+		// A type the tagging index serves is looked up through it.
+		if _, indexed := indexedTypes[typeName]; indexed {
+			set["tag:GetResources"] = true
 		}
 	}
 	return sortedActions(set), nil

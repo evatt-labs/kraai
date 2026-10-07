@@ -69,11 +69,18 @@ func TestEventsRuleCreateRequiresASchedule(t *testing.T) {
 	}
 }
 
+// The rule is found by its identity tag among the rules listed, and read,
+// updated and deleted by the ARN that is its primary identifier.
 func TestEventsRuleGetUpdateDeletePassThroughUnchanged(t *testing.T) {
+	const arn = "arn:aws:events:us-east-1:123456789012:rule/myenv-tick"
 	fc := &fakeClient{
-		byIdentifier: map[string]map[string]any{"myenv-tick": {"Name": "myenv-tick", "Tags": identityTags("myenv-tick")}},
-		updateProps:  map[string]any{"Name": "myenv-tick"},
-		schema:       cfschema.Facts{HasUpdate: true},
+		list: []string{"arn:aws:events:us-east-1:123456789012:rule/other", arn},
+		byIdentifier: map[string]map[string]any{
+			"arn:aws:events:us-east-1:123456789012:rule/other": {"Name": "other", "Tags": identityTags("other")},
+			arn: {"Name": "myenv-tick", "Arn": arn, "Tags": identityTags("myenv-tick")},
+		},
+		updateProps: map[string]any{"Name": "myenv-tick"},
+		schema:      cfschema.Facts{HasUpdate: true},
 	}
 	sts := &fakeSTS{account: "123456789012"}
 	rule := newEventsRuleResourceForTest(fc, sts)
@@ -90,7 +97,7 @@ func TestEventsRuleGetUpdateDeletePassThroughUnchanged(t *testing.T) {
 	if err := rule.Delete(context.Background(), resource.Ref{Name: "myenv-tick"}); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
-	if len(fc.deleteCalls) == 0 || fc.deleteCalls[0] != "myenv-tick" {
+	if len(fc.deleteCalls) == 0 || fc.deleteCalls[0] != arn {
 		t.Fatalf("deleteCalls = %v", fc.deleteCalls)
 	}
 }
