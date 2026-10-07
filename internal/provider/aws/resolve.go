@@ -11,6 +11,7 @@ import (
 	cctypes "github.com/aws/aws-sdk-go-v2/service/cloudcontrol/types"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -162,7 +163,15 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 
 // firstMatch reads candidates in order and returns the first that match
 // reports is name.
+//
+// In a run allowed to adopt, a type with adoptMatch takes, when no
+// candidate matches, the first one adoptMatch reports is name and that
+// carries no identity tag at all: one an earlier kraai found that way and
+// never tagged.
 func (r *resourceType) firstMatch(ctx context.Context, name string, candidates []string) (string, map[string]any, bool, error) {
+	adopting := r.adoptMatch != nil && r.tags != nil && resource.AdoptsUntagged(ctx, r.taggedSince)
+	var adoptID string
+	var adoptProps map[string]any
 	for _, candidate := range candidates {
 		props, ok, err := r.client.GetResource(ctx, r.typeName, candidate)
 		if err != nil {
@@ -175,6 +184,13 @@ func (r *resourceType) firstMatch(ctx context.Context, name string, candidates [
 		if r.match(props, name) {
 			return candidate, props, true, nil
 		}
+		if adopting && adoptID == "" && r.adoptMatch(props, name) &&
+			!hasIdentityTag(props, cfschema.Facts{TagProperty: r.tags.property, TagShape: r.tags.shape}) {
+			adoptID, adoptProps = candidate, props
+		}
+	}
+	if adoptID != "" {
+		return adoptID, adoptProps, true, nil
 	}
 	return "", nil, false, nil
 }

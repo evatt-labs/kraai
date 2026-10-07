@@ -44,7 +44,7 @@ func TestByNameOwnership(t *testing.T) {
 			rt := roleOver(&fakeClient{byIdentifier: map[string]map[string]any{"env-api": props}})
 			ctx := context.Background()
 			if c.adopt {
-				ctx = resource.WithAdoptUntagged(ctx)
+				ctx = resource.WithTagVersion(ctx, 0)
 			}
 			state, err := rt.Get(ctx, resource.Ref{Name: "env-api"})
 			if !c.owned {
@@ -75,7 +75,7 @@ func TestAdoptionTagsAndKeepsTheInstancesTags(t *testing.T) {
 		},
 	}}}
 	rt := roleOver(fc)
-	if _, err := rt.Update(resource.WithAdoptUntagged(context.Background()), resource.Ref{Name: "env-api"}, resource.Spec{Name: "env-api", Config: map[string]any{}}); err != nil {
+	if _, err := rt.Update(resource.WithTagVersion(context.Background(), 0), resource.Ref{Name: "env-api"}, resource.Spec{Name: "env-api", Config: map[string]any{}}); err != nil {
 		t.Fatal(err)
 	}
 	if len(fc.updatePatches) != 1 {
@@ -184,8 +184,28 @@ func TestNativeByNameNeverAdopts(t *testing.T) {
 	fc := &fakeClient{byIdentifier: map[string]map[string]any{"env-db": {"TableName": "env-db"}}}
 	fc.schema.HasUpdate = true
 	n := newNativeResourceWith(fc, nil, facts, resource.LookupByName)
-	_, err = n.Get(resource.WithAdoptUntagged(context.Background()), resource.Ref{Name: "env-db"})
+	_, err = n.Get(resource.WithTagVersion(context.Background(), 0), resource.Ref{Name: "env-db"})
 	if err == nil || !strings.Contains(err.Error(), "kraai did not create it") {
 		t.Fatalf("Get = %v, want an untagged native instance refused even where adoption is allowed", err)
+	}
+}
+
+// Each type adopts only in an environment applied before kraai began
+// tagging it: one already wholly tagged by name (generation 1) adopts an
+// untagged queue, tagged from generation 2, but refuses an untagged role.
+func TestAdoptionFollowsEachTypesGeneration(t *testing.T) {
+	ctx := resource.WithTagVersion(context.Background(), 1)
+	role := roleOver(&fakeClient{byIdentifier: map[string]map[string]any{"env-api": {"RoleName": "env-api"}}})
+	if _, err := role.Get(ctx, resource.Ref{Name: "env-api"}); err == nil || !strings.Contains(err.Error(), "kraai did not create it") {
+		t.Fatalf("role Get = %v, want an untagged role refused in an environment tagged by name", err)
+	}
+	queues := &fakeClient{
+		list:         []string{"https://sqs/env-q"},
+		byIdentifier: map[string]map[string]any{"https://sqs/env-q": {"QueueName": "env-q"}},
+		schema:       cfschema.Facts{HasUpdate: true},
+	}
+	state, err := newQueueResource(queues).Get(ctx, resource.Ref{Name: "env-q"})
+	if err != nil || state == nil || !state.Adopt {
+		t.Fatalf("queue Get = %+v, %v; want the untagged queue adopted", state, err)
 	}
 }

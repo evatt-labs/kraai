@@ -36,7 +36,7 @@ func TestRegisterWiresEveryType(t *testing.T) {
 			[]string{key(TypeCacheSecurityGroup)}, resource.LookupByName},
 		{Provider + "/" + TypeDynamoDBTable, manifest.CapabilityDatabase, nil, resource.LookupByName},
 		{Provider + "/" + TypeDSQLCluster, manifest.CapabilityDatabase, nil, resource.LookupByTag},
-		{Provider + "/" + TypeSQSQueue, manifest.CapabilityQueues, nil, resource.LookupByAttr},
+		{Provider + "/" + TypeSQSQueue, manifest.CapabilityQueues, nil, resource.LookupByTag},
 		{Provider + "/" + TypeLambdaFunction, manifest.CapabilityCompute,
 			[]string{key(TypeArtifactBucket), key(TypeIAMRole)}, resource.LookupByName},
 		{Provider + "/" + TypeAPIGatewayV2API, manifest.CapabilityCompute, nil, resource.LookupByTag},

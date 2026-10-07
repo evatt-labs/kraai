@@ -18,11 +18,17 @@ import (
 //
 // A value referencing a resource that does not exist yet is not judged
 // against the schema; the property it names on that resource's type is.
+//
+// A curated capability's properties are kraai's own, built from config the
+// capability's schema already validated, so they are not checked again.
 func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	if n.refused != nil {
 		return n.refusal()
 	}
-	properties, err := nativeProperties(spec)
+	if n.fromCapability != nil {
+		return nil
+	}
+	properties, err := n.properties(spec)
 	if err != nil {
 		return err
 	}

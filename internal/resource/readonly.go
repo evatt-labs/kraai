@@ -34,19 +34,22 @@ func ReadOnly(ctx context.Context) bool {
 	return readOnly
 }
 
-type adoptUntaggedKey struct{}
+type tagVersionKey struct{}
 
-// WithAdoptUntagged marks ctx as a run against an environment kraai has
-// applied before it marked every resource it creates with its identity tag:
-// an instance that answers to a derived name without the tag is one an
-// earlier kraai made, and is adopted, tagged on this run, rather than
-// refused as someone else's.
-func WithAdoptUntagged(ctx context.Context) context.Context {
-	return context.WithValue(ctx, adoptUntaggedKey{}, true)
+// WithTagVersion marks ctx as a run against an environment kraai last
+// applied under generation version of its identity tagging, older than this
+// kraai's: a type this kraai tags that the environment's kraai did not may
+// have instances of the environment's own without the tag.
+func WithTagVersion(ctx context.Context, version int) context.Context {
+	return context.WithValue(ctx, tagVersionKey{}, version)
 }
 
-// AdoptUntagged reports whether ctx was marked by WithAdoptUntagged.
-func AdoptUntagged(ctx context.Context) bool {
-	adopt, _ := ctx.Value(adoptUntaggedKey{}).(bool)
-	return adopt
+// AdoptsUntagged reports whether, in ctx, an instance of a type kraai began
+// tagging at generation since, answering to a derived name without the tag,
+// is one an earlier kraai made: adopted, tagged on this run, rather than
+// refused as someone else's. Only when the environment was last applied
+// before since; a type tagged since generation 0 never adopts.
+func AdoptsUntagged(ctx context.Context, since int) bool {
+	version, marked := ctx.Value(tagVersionKey{}).(int)
+	return marked && since > 0 && version < since
 }

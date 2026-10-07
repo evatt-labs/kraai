@@ -57,11 +57,28 @@ type Status struct {
 	// asked about. Zero, as a record written before it existed has it,
 	// trusts nothing.
 	StartedAt time.Time `json:"startedAt,omitzero"`
-	// IdentityTagged is set by an apply that finished without a failure
-	// while kraai marked every resource it creates, and adopted every one an
-	// earlier kraai left unmarked, with its identity tag. Once set, an
-	// unmarked resource answering to a derived name is never adopted again.
+	// IdentityTagVersion is the generation of kraai's identity tagging the
+	// environment is wholly under: set by an apply that finished without a
+	// failure, every resource it planned carries the tag that generation
+	// gives, adopted if an earlier kraai left it untagged. Each generation
+	// tags more types, so a record below CurrentIdentityTagVersion still
+	// adopts an untagged resource of a type tagged since.
+	IdentityTagVersion int `json:"identityTagVersion,omitempty"`
+	// IdentityTagged is the first generation's record, read as version 1,
+	// and still written beside the version for a kraai that reads only it.
 	IdentityTagged bool `json:"identityTagged,omitempty"`
+}
+
+// CurrentIdentityTagVersion is this kraai's generation of identity
+// tagging: 1 tagged every AWS type found by name, 2 also the queue.
+const CurrentIdentityTagVersion = 2
+
+// TagVersion is the identity tagging generation the record is under.
+func (s Status) TagVersion() int {
+	if s.IdentityTagged && s.IdentityTagVersion < 1 {
+		return 1
+	}
+	return s.IdentityTagVersion
 }
 
 // Store holds locks and status records for environments.

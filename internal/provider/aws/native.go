@@ -196,6 +196,11 @@ type nativeResource struct {
 	// legacy are the identities earlier indexes found this type by, still
 	// searched, so what an older kraai created is not stranded.
 	legacy []*nativeResource
+
+	// fromCapability, set on a type a curated capability provisions,
+	// builds its properties from the capability's vendor-neutral config,
+	// which names none of the type's own; nil reads them from the entry.
+	fromCapability func(spec resource.Spec) (map[string]any, error)
 	// refused is why the current index no longer manages this type, when
 	// only its legacy identities remain: nothing is created or updated, and
 	// what exists is found only to be destroyed.
@@ -246,9 +251,10 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 		case resource.LookupByTag:
 			rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
 			rt.matchIsTag = true
+			rt.tags = &tagPlacement{property: facts.TagProperty, shape: facts.TagShape}
 		case resource.LookupByName:
 			rt.tags = &tagPlacement{property: facts.TagProperty, shape: facts.TagShape}
-			rt.owns = taggedByKraai(facts.TypeName, *rt.tags, false)
+			rt.owns = taggedByKraai(facts.TypeName, *rt.tags, 0)
 		case resource.LookupByAPI, resource.LookupByAttr:
 		}
 	}
@@ -273,7 +279,7 @@ func (n *nativeResource) translate(_ context.Context, spec resource.Spec) (resou
 // time, leniently: a value naming a resource that has not published yet is
 // left as written and reported in the resolution.
 func (n *nativeResource) translateWith(spec resource.Spec, strict bool) (resource.Spec, resolution, error) {
-	properties, err := nativeProperties(spec)
+	properties, err := n.properties(spec)
 	if err != nil {
 		return resource.Spec{}, resolution{}, err
 	}
@@ -293,6 +299,15 @@ func (n *nativeResource) translateWith(spec resource.Spec, strict bool) (resourc
 	translated := spec
 	translated.Config = properties
 	return translated, res, nil
+}
+
+// properties is the type's properties for spec: built from a curated
+// capability's config, or the entry's own.
+func (n *nativeResource) properties(spec resource.Spec) (map[string]any, error) {
+	if n.fromCapability != nil {
+		return n.fromCapability(spec)
+	}
+	return nativeProperties(spec)
 }
 
 // nativeProperties returns a copy of the entry's properties, empty when it

@@ -110,10 +110,22 @@ type resourceType struct {
 	// asserting ownership by hand.
 	owns ownsFunc
 
-	// tags, set by withIdentity on a byName type, is where its identity tag
-	// lives: kept through every update, and added to an instance an earlier
-	// kraai made without it.
+	// tags, set by withIdentity on a byName type and by the native family
+	// on a tagged one, is where its identity tag lives: kept through every
+	// update, and added to an instance an earlier kraai made without it.
 	tags *tagPlacement
+
+	// adoptMatch, set on a type found by tag that an earlier kraai found
+	// another way, reports whether an untagged instance is the one that way
+	// found, such as a queue by its QueueName. A run allowed to adopt takes
+	// such an instance when none carries the tag.
+	adoptMatch matchFunc
+
+	// taggedSince is the generation of kraai's identity tagging (see
+	// lock.CurrentIdentityTagVersion) this type began carrying the tag at:
+	// only an environment applied before it may hold an untagged instance
+	// of its own. 0 is a type that always tagged, which never adopts.
+	taggedSince int
 
 	// listScope is non-nil exactly for a type whose list handler is
 	// parent-scoped, such as AWS::Lambda::Permission's, which requires the

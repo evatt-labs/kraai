@@ -158,8 +158,9 @@ func Registrations(client *Client) []resource.Registration {
 			Capability: manifest.CapabilityQueues,
 			// The function that receives its URL reads every binding on the
 			// service and is ordered after it; the role that grants it
-			// builds the ARN locally. See queue.go for why byAttr.
-			Lookup:   resource.LookupByAttr,
+			// builds the ARN locally. Found by tag, as a native queue is;
+			// see queue.go.
+			Lookup:   resource.LookupByTag,
 			Resource: newQueueResource(client),
 		},
 		{
