@@ -70,3 +70,23 @@ func TestRecordStatusMarksTheEnvironmentTagged(t *testing.T) {
 		}
 	}
 }
+
+// A new environment never adopts, even after an apply that failed part way:
+// nothing in it was made by a kraai that did not tag. Only a record that
+// predates tagging leaves adoption open.
+func TestANewEnvironmentNeverAdopts(t *testing.T) {
+	store := lock.NewMemory()
+	if err := recordStart(t.Context(), store, "env", &manifest.Manifest{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied with failures", false); err != nil {
+		t.Fatal(err)
+	}
+	status, found, err := store.ReadStatus(t.Context(), "env")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if adoptsUntagged(status, found) {
+		t.Fatalf("a new environment's record %+v adopts untagged resources", status)
+	}
+}

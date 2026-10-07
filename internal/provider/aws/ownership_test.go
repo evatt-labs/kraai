@@ -172,3 +172,19 @@ func TestEveryTaggableByNameTypeHasAnIdentity(t *testing.T) {
 		t.Fatalf("checked %d types, want the ten curated byName types at least", checked)
 	}
 }
+
+// A native type always tagged what it created, so even a run allowed to
+// adopt refuses an untagged native instance of its name.
+func TestNativeByNameNeverAdopts(t *testing.T) {
+	facts, err := cfschema.Lookup(TypeDynamoDBTable)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{"env-db": {"TableName": "env-db"}}}
+	fc.schema.HasUpdate = true
+	n := newNativeResourceWith(fc, nil, facts, resource.LookupByName)
+	_, err = n.Get(resource.WithAdoptUntagged(context.Background()), resource.Ref{Name: "env-db"})
+	if err == nil || !strings.Contains(err.Error(), "kraai did not create it") {
+		t.Fatalf("Get = %v, want an untagged native instance refused even where adoption is allowed", err)
+	}
+}

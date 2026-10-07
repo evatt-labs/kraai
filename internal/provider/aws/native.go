@@ -248,7 +248,7 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 			rt.matchIsTag = true
 		case resource.LookupByName:
 			rt.tags = &tagPlacement{property: facts.TagProperty, shape: facts.TagShape}
-			rt.owns = taggedByKraai(facts.TypeName, *rt.tags)
+			rt.owns = taggedByKraai(facts.TypeName, *rt.tags, false)
 		case resource.LookupByAPI, resource.LookupByAttr:
 		}
 	}

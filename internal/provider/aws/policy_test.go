@@ -83,6 +83,21 @@ func TestClientPolicyActionsGrantsSecretsManagerForAurora(t *testing.T) {
 	}
 }
 
+// Every policy lets plan read the status record, and apply and destroy
+// lock and record, in the operator's lock bucket.
+func TestClientPolicyActionsGrantsTheLockStore(t *testing.T) {
+	cf := &fakeCF{out: &cloudformation.DescribeTypeOutput{Schema: aws.String(`{"handlers": {}}`)}}
+	actions, err := (&Client{cf: cf}).PolicyActions(context.Background(), []string{TypeSQSQueue})
+	if err != nil {
+		t.Fatalf("PolicyActions: %v", err)
+	}
+	for _, want := range []string{"s3:GetObject", "s3:ListBucket", "s3:PutObject", "s3:DeleteObject", "s3:CreateBucket", "s3:PutBucketPublicAccessBlock"} {
+		if !contains(actions, want) {
+			t.Errorf("policy lacks %s, which the lock store calls: %v", want, actions)
+		}
+	}
+}
+
 func TestSecretRefPolicyStatements(t *testing.T) {
 	c := &Client{sts: &fakeSTS{account: "111111111111"}, region: "us-east-1"}
 

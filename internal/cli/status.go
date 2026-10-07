@@ -91,7 +91,11 @@ func writeStatusText(w io.Writer, status lock.Status) error {
 			expires += " (elapsed)"
 		}
 	}
-	_, err := fmt.Fprintf(w, "environment: %s\nkind:        %s\napplied:     %s by %s\noutcome:     %s\nexpires:     %s\n",
-		status.Environment, status.Kind, status.AppliedAt.UTC().Format(time.RFC3339), status.Holder, status.Outcome, expires)
+	ownership := "an untagged resource of a derived name is refused"
+	if adoptsUntagged(status, true) {
+		ownership = "an untagged resource of a derived name is adopted until an apply finishes cleanly"
+	}
+	_, err := fmt.Fprintf(w, "environment: %s\nkind:        %s\napplied:     %s by %s\noutcome:     %s\nexpires:     %s\nownership:   %s\n",
+		status.Environment, status.Kind, status.AppliedAt.UTC().Format(time.RFC3339), status.Holder, status.Outcome, expires, ownership)
 	return err
 }

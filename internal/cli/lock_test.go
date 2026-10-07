@@ -195,7 +195,8 @@ func TestStatusPrintsTheRecordOrSaysThereIsNone(t *testing.T) {
 	if err != nil {
 		t.Fatalf("status: %v", err)
 	}
-	for _, want := range []string{testEnvName, "ephemeral", "github-actions:42", "3 created", "expires:", "(in "} {
+	// A record from before kraai tagged what it creates still adopts.
+	for _, want := range []string{testEnvName, "ephemeral", "github-actions:42", "3 created", "expires:", "(in ", "is adopted until an apply finishes cleanly"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("status output lacks %q:\n%s", want, out)
 		}

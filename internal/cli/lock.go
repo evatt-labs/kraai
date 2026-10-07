@@ -130,7 +130,9 @@ func recordStart(ctx context.Context, store lock.Store, envName string, m *manif
 		return err
 	}
 	if !found {
-		status = lock.Status{Environment: envName, Kind: m.Environment.Kind}
+		// No kraai has run against this environment, so none left anything
+		// in it untagged: it never adopts.
+		status = lock.Status{Environment: envName, Kind: m.Environment.Kind, IdentityTagged: true}
 	}
 	status.StartedAt = time.Now().UTC()
 	return store.WriteStatus(ctx, status)

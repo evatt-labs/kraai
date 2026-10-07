@@ -12,9 +12,18 @@ import (
 
 // The actions kraai itself makes against AWS, beside what each resource
 // type's handlers need: the Cloud Control control plane every verb goes
-// through, the schema fetch behind every Diff, and the account lookup
-// behind every locally built ARN.
+// through, the schema fetch behind every Diff, the account lookup behind
+// every locally built ARN, and the lock store: the bucket apply and destroy
+// lock and record status in, and plan reads the status record from to know
+// whether it may adopt. ListBucket is HeadBucket's permission, and lets a
+// missing record read as absent rather than as access denied.
 var kraaiActions = []string{
+	"s3:CreateBucket",
+	"s3:DeleteObject",
+	"s3:GetObject",
+	"s3:ListBucket",
+	"s3:PutBucketPublicAccessBlock",
+	"s3:PutObject",
 	"cloudcontrol:CreateResource",
 	"cloudcontrol:DeleteResource",
 	"cloudcontrol:GetResource",

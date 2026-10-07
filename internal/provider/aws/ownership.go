@@ -29,7 +29,7 @@ func withIdentity(rt *resourceType) *resourceType {
 	placement := tagPlacement{property: facts.TagProperty, shape: facts.TagShape}
 	rt.tags = &placement
 	rt.stampTag = tagStamper(placement.property, placement.shape)
-	rt.owns = allOwned(rt.owns, taggedByKraai(rt.typeName, placement))
+	rt.owns = allOwned(rt.owns, taggedByKraai(rt.typeName, placement, true))
 	return rt
 }
 
@@ -37,17 +37,19 @@ func withIdentity(rt *resourceType) *resourceType {
 // derived name, so an instance answering to it without kraai's tag for that
 // name was made by someone else, and is refused rather than reported
 // absent: absent would plan a create the vendor then refuses, and owned
-// would let apply and destroy act on it. The exception is a run allowed to
-// adopt (resource.AdoptUntagged): an instance with no identity tag at all
-// is one an earlier kraai made before it tagged by name, and is taken as
-// kraai's. One carrying the tag for another name never is.
-func taggedByKraai(typeName string, placement tagPlacement) ownsFunc {
+// would let apply and destroy act on it. The exception, where adoptable,
+// is a run allowed to adopt (resource.AdoptUntagged): an instance with no
+// identity tag at all is one an earlier kraai made before it tagged by
+// name, and is taken as kraai's. One carrying the tag for another name
+// never is. A native type always tagged what it created, so for it an
+// untagged instance is always someone else's.
+func taggedByKraai(typeName string, placement tagPlacement, adoptable bool) ownsFunc {
 	match := tagMatcher(placement.property, placement.shape)
 	return func(ctx context.Context, identifier string, properties map[string]any) (bool, error) {
 		if match(properties, identifier) {
 			return true, nil
 		}
-		if resource.AdoptUntagged(ctx) && !hasIdentityTag(properties, cfschema.Facts{TagProperty: placement.property, TagShape: placement.shape}) {
+		if adoptable && resource.AdoptUntagged(ctx) && !hasIdentityTag(properties, cfschema.Facts{TagProperty: placement.property, TagShape: placement.shape}) {
 			return true, nil
 		}
 		return false, kerrors.Validation(
