@@ -114,42 +114,25 @@ func harnessIDs(typeName string) []string {
 // with the outcome. A difference or a failed direct read fails t; what
 // only Cloud Control could not do is recorded as inconclusive instead.
 func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, r Reader, e TypeEvidence, perType int) TypeEvidence {
-	// A type with a direct list is listed through it: Cloud Control's list
-	// omits its instances. Cloud Control still reads each one.
 	var ids []string
-	if HasList(r.Type) {
-		var err error
-		if ids, err = client.List(ctx, r.Type); err != nil {
-			t.Errorf("listing directly: %v", err)
-			e.Outcome, e.Note = "direct-unreadable", "the direct list failed"
-			return e
-		}
-	} else if parent, ok := scopedLists[r.Type]; ok {
-		var err error
-		if ids, err = listWithin(ctx, cc, r.Type, parent, perType); err != nil {
-			e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type within "+parent[0]
+	listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(int32(perType))})
+	if err != nil {
+		// A type Cloud Control lists only under a parent, such as a
+		// function, is given its instances by the environment.
+		if ids = harnessIDs(r.Type); len(ids) == 0 {
+			// The error code alone: a throttle and a refusal read
+			// differently, and neither names an instance.
+			code := "unknown"
+			var apiErr smithy.APIError
+			if errors.As(err, &apiErr) {
+				code = apiErr.ErrorCode()
+			}
+			e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type: "+code
 			return e
 		}
 	} else {
-		listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(r.Type), MaxResults: aws.Int32(int32(perType))})
-		if err != nil {
-			// A type Cloud Control lists only under a parent, such as a
-			// function, is given its instances by the environment.
-			if ids = harnessIDs(r.Type); len(ids) == 0 {
-				// The error code alone: a throttle and a refusal read
-				// differently, and neither names an instance.
-				code := "unknown"
-				var apiErr smithy.APIError
-				if errors.As(err, &apiErr) {
-					code = apiErr.ErrorCode()
-				}
-				e.Outcome, e.Note = "unlisted", "Cloud Control could not list the type: "+code
-				return e
-			}
-		} else {
-			for _, d := range listed.ResourceDescriptions {
-				ids = append(ids, aws.ToString(d.Identifier))
-			}
+		for _, d := range listed.ResourceDescriptions {
+			ids = append(ids, aws.ToString(d.Identifier))
 		}
 	}
 	if len(ids) > perType {
@@ -209,42 +192,10 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 	if unreadable > 0 && e.Instances > 0 {
 		e.Note = "Cloud Control could not read some listed instances"
 	}
-	if r.Probe != nil || len(r.AbsentIDs) > 0 {
+	if len(r.AbsentIDs) > 0 {
 		e = absenceParity(ctx, t, cc, client, r, e, perType)
 	}
 	return e
-}
-
-// scopedLists names, for a type whose Cloud Control list needs a property
-// of another type, that type and the property: the type is listed within
-// each instance of it. No checked-in type needs one.
-var scopedLists = map[string][2]string{}
-
-// listWithin lists typeName within each instance of its parent type, up to
-// limit identifiers.
-func listWithin(ctx context.Context, cc *cloudcontrol.Client, typeName string, parent [2]string, limit int) ([]string, error) {
-	var ids []string
-	parents := cloudcontrol.NewListResourcesPaginator(cc, &cloudcontrol.ListResourcesInput{TypeName: aws.String(parent[0])})
-	for parents.HasMorePages() && len(ids) < limit {
-		page, err := parents.NextPage(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, d := range page.ResourceDescriptions {
-			model, err := json.Marshal(map[string]string{parent[1]: aws.ToString(d.Identifier)})
-			if err != nil {
-				return nil, err
-			}
-			listed, err := cc.ListResources(ctx, &cloudcontrol.ListResourcesInput{TypeName: aws.String(typeName), ResourceModel: aws.String(string(model))})
-			if err != nil {
-				return nil, err
-			}
-			for _, d := range listed.ResourceDescriptions {
-				ids = append(ids, aws.ToString(d.Identifier))
-			}
-		}
-	}
-	return ids, nil
 }
 
 // absenceParity reads up to perType of r's absentIds, each of which Cloud
