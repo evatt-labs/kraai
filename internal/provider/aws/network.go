@@ -7,6 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/smithy-go"
+
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
 	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
@@ -83,53 +88,68 @@ func networkVPC(spec resource.Spec) (string, error) {
 }
 
 // registerNetwork returns the registration for a network binding's
-// security group.
-func registerNetwork(client ccAPI) []resource.Registration {
+// security group, whose delete clears Lambda's interfaces through
+// interfaces.
+func registerNetwork(client ccAPI, interfaces ec2API) []resource.Registration {
 	return []resource.Registration{{
 		Provider: Provider, Type: TypeNetworkSecurityGroup, VendorType: TypeSecurityGroup,
 		Capability: manifest.CapabilityNetwork,
 		Lookup:     resource.LookupByTag,
-		Resource: &networkGroupResource{releaseWait: networkReleaseWait, releaseTimeout: networkReleaseTimeout, translatedResource: translated(taggedLookup(client, TypeSecurityGroup),
-			func(spec resource.Spec) (resource.Spec, error) {
-				vpcID, err := networkVPC(spec)
-				if err != nil {
-					return spec, err
-				}
-				translated := spec
-				translated.Config = map[string]any{
-					"GroupName":        spec.Name + "-network",
-					"GroupDescription": "kraai: the members of the " + spec.Binding + " network",
-					"VpcId":            vpcID,
-				}
-				return translated, nil
-			},
-			map[string]func(resource.Spec) (string, error){"VpcId": networkVPC})},
+		Resource: &networkGroupResource{
+			releaseWait: networkReleaseWait, releaseTimeout: networkReleaseTimeout, interfaces: interfaces,
+			translatedResource: translated(taggedLookup(client, TypeSecurityGroup),
+				func(spec resource.Spec) (resource.Spec, error) {
+					vpcID, err := networkVPC(spec)
+					if err != nil {
+						return spec, err
+					}
+					translated := spec
+					translated.Config = map[string]any{
+						"GroupName":        spec.Name + "-network",
+						"GroupDescription": "kraai: the members of the " + spec.Binding + " network",
+						"VpcId":            vpcID,
+					}
+					return translated, nil
+				},
+				map[string]func(resource.Spec) (string, error){"VpcId": networkVPC}),
+		},
 	}}
 }
 
 // How long a network's group waits for Lambda to let go of it. A function's
-// network interfaces outlive the function by up to about twenty minutes,
-// and while one holds the group EC2 refuses to delete it.
+// network interfaces outlive the function, attached for up to about twenty
+// minutes and then detached but never deleted, and while one is in the
+// group EC2 refuses to delete it.
 const (
 	networkReleaseWait    = 30 * time.Second
 	networkReleaseTimeout = 45 * time.Minute
 )
 
-// networkGroupResource is the network's group, whose delete waits out the
+// networkGroupResource is the network's group, whose delete clears the
 // interfaces of the functions destroyed before it.
 type networkGroupResource struct {
 	*translatedResource
 	releaseWait, releaseTimeout time.Duration
+	interfaces                  ec2API
 }
 
+// lambdaInterfacePrefix begins the description Lambda gives each network
+// interface it creates for a function, followed by the function's name.
+const lambdaInterfacePrefix = "AWSLambdaVPCENI-"
+
 // Delete retries while the group is held by a network interface, up to
-// releaseTimeout, and fails on anything else at once.
+// releaseTimeout, and fails on anything else at once. Each time, it first
+// deletes the interfaces Lambda has detached in the group, which nothing
+// else ever removes; one still attached is waited for.
 func (n *networkGroupResource) Delete(ctx context.Context, ref resource.Ref) error {
 	deadline := time.Now().Add(n.releaseTimeout)
 	for {
 		err := n.translatedResource.Delete(ctx, ref)
 		if err == nil || !heldByAnInterface(err) {
 			return err
+		}
+		if rerr := n.releaseLambdaInterfaces(ctx, ref); rerr != nil {
+			return rerr
 		}
 		if time.Now().After(deadline) {
 			return kerrors.Wrap(err, kerrors.CodeUnexpected,
@@ -236,4 +256,48 @@ func taggedLookup(client ccAPI, typeName string) *resourceType {
 		stampTag: arrayTagsStampTag,
 		client:   client,
 	}
+}
+
+// releaseLambdaInterfaces deletes the network interfaces Lambda left
+// detached in the group: available, carrying Lambda's description. The
+// group is kraai's own, made for this binding, so any function interface
+// in it was made for one of this environment's functions.
+func (n *networkGroupResource) releaseLambdaInterfaces(ctx context.Context, ref resource.Ref) error {
+	if n.interfaces == nil {
+		return nil
+	}
+	state, err := n.Get(ctx, ref)
+	if err != nil || state == nil {
+		return err
+	}
+	groupID, _ := state.Attributes["GroupId"].(string)
+	if groupID == "" {
+		groupID = state.ID
+	}
+	pages := ec2.NewDescribeNetworkInterfacesPaginator(n.interfaces, &ec2.DescribeNetworkInterfacesInput{
+		Filters: []ec2types.Filter{
+			{Name: aws.String("group-id"), Values: []string{groupID}},
+			{Name: aws.String("status"), Values: []string{string(ec2types.NetworkInterfaceStatusAvailable)}},
+		},
+	})
+	for pages.HasMorePages() {
+		page, err := pages.NextPage(ctx)
+		if err != nil {
+			return kerrors.Wrap(err, kerrors.CodeUnexpected, "listing the network interfaces in %s", groupID)
+		}
+		for _, eni := range page.NetworkInterfaces {
+			if !strings.HasPrefix(aws.ToString(eni.Description), lambdaInterfacePrefix) {
+				continue
+			}
+			_, err := n.interfaces.DeleteNetworkInterface(ctx, &ec2.DeleteNetworkInterfaceInput{NetworkInterfaceId: eni.NetworkInterfaceId})
+			var apiErr smithy.APIError
+			if errors.As(err, &apiErr) && apiErr.ErrorCode() == "InvalidNetworkInterfaceID.NotFound" {
+				continue
+			}
+			if err != nil {
+				return kerrors.Wrap(err, kerrors.CodeUnexpected, "deleting %s, a network interface Lambda left in %s", aws.ToString(eni.NetworkInterfaceId), groupID)
+			}
+		}
+	}
+	return nil
 }

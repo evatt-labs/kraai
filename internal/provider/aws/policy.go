@@ -40,8 +40,11 @@ var kraaiActions = []string{
 // ListBuckets; an Aurora cluster's credential is read from Secrets Manager.
 var typeActions = map[string][]string{
 	TypeLambdaFunction: {"s3:PutObject"},
-	TypeS3Bucket:       {"s3:ListAllMyBuckets"},
-	TypeRDSDBCluster:   {"secretsmanager:GetSecretValue"},
+	// A network's group is deleted once the interfaces Lambda left
+	// detached in it are.
+	TypeSecurityGroup: {"ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"},
+	TypeS3Bucket:      {"s3:ListAllMyBuckets"},
+	TypeRDSDBCluster:  {"secretsmanager:GetSecretValue"},
 }
 
 // PolicyActions returns, sorted and without duplicates, every IAM action a

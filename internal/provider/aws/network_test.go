@@ -3,10 +3,16 @@ package aws
 import (
 	"context"
 	"errors"
+	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -32,7 +38,7 @@ func taggedProps(name string, extra map[string]any) map[string]any {
 // networkGroup returns the network binding's one registered Resource.
 func networkGroup(t *testing.T, client ccAPI) resource.Resource {
 	t.Helper()
-	regs := registerNetwork(client)
+	regs := registerNetwork(client, nil)
 	if len(regs) != 1 || regs[0].Type != TypeNetworkSecurityGroup {
 		t.Fatalf("registerNetwork = %v, want the network's security group alone", regs)
 	}
@@ -194,5 +200,70 @@ func TestNetworkGroupDeleteWaitsForItsInterfaces(t *testing.T) {
 				t.Fatalf("%d deletes reached the client, want %d", len(fc.deleteCalls), c.deletes)
 			}
 		})
+	}
+}
+
+// fakeInterfaces is EC2's view of the network interfaces in one group.
+type fakeInterfaces struct {
+	enis    []ec2types.NetworkInterface
+	filters []ec2types.Filter
+	deleted []string
+}
+
+func (f *fakeInterfaces) DescribeNetworkInterfaces(_ context.Context, in *ec2.DescribeNetworkInterfacesInput, _ ...func(*ec2.Options)) (*ec2.DescribeNetworkInterfacesOutput, error) {
+	f.filters = in.Filters
+	return &ec2.DescribeNetworkInterfacesOutput{NetworkInterfaces: f.enis}, nil
+}
+
+func (f *fakeInterfaces) DeleteNetworkInterface(_ context.Context, in *ec2.DeleteNetworkInterfaceInput, _ ...func(*ec2.Options)) (*ec2.DeleteNetworkInterfaceOutput, error) {
+	id := aws.ToString(in.NetworkInterfaceId)
+	f.deleted = append(f.deleted, id)
+	f.enis = slices.DeleteFunc(f.enis, func(e ec2types.NetworkInterface) bool { return aws.ToString(e.NetworkInterfaceId) == id })
+	return &ec2.DeleteNetworkInterfaceOutput{}, nil
+}
+
+// lambdaHeld refuses the group's delete while a Lambda interface is left.
+type lambdaHeld struct {
+	*fakeClient
+	enis *fakeInterfaces
+}
+
+func (l *lambdaHeld) DeleteResource(ctx context.Context, typeName, identifier string) error {
+	for _, e := range l.enis.enis {
+		if strings.HasPrefix(aws.ToString(e.Description), lambdaInterfacePrefix) {
+			return &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource has a dependent object"}
+		}
+	}
+	return l.fakeClient.DeleteResource(ctx, typeName, identifier)
+}
+
+// The interfaces Lambda left detached in the group are deleted, and then the
+// group; an interface Lambda did not make is left alone, and only the
+// group's detached interfaces are asked for.
+func TestNetworkGroupDeleteClearsLambdasInterfaces(t *testing.T) {
+	enis := &fakeInterfaces{enis: []ec2types.NetworkInterface{
+		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWSLambdaVPCENI-env-svc")},
+		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWSLambdaVPCENI-env-svc")},
+		{NetworkInterfaceId: aws.String("eni-other"), Description: aws.String("an operator's own")},
+	}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+		list: []string{"sg-1"}}
+	res := registerNetwork(&lambdaHeld{fakeClient: fc, enis: enis}, enis)[0].Resource.(*networkGroupResource)
+	res.releaseWait = time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); err != nil {
+		t.Fatalf("Delete = %v", err)
+	}
+	if !slices.Equal(enis.deleted, []string{"eni-lambda-1", "eni-lambda-2"}) {
+		t.Fatalf("deleted %v, want Lambda's two interfaces and nothing else", enis.deleted)
+	}
+	if len(fc.deleteCalls) != 1 {
+		t.Fatalf("%d group deletes reached the client, want 1", len(fc.deleteCalls))
+	}
+	want := []ec2types.Filter{
+		{Name: aws.String("group-id"), Values: []string{"sg-1"}},
+		{Name: aws.String("status"), Values: []string{"available"}},
+	}
+	if !reflect.DeepEqual(enis.filters, want) {
+		t.Fatalf("asked for %v, want %v", enis.filters, want)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
@@ -96,6 +97,14 @@ type ssmAPI interface {
 	DeleteParameter(ctx context.Context, params *ssm.DeleteParameterInput, optFns ...func(*ssm.Options)) (*ssm.DeleteParameterOutput, error)
 }
 
+// ec2API is the subset of *ec2.Client this package calls: the network
+// interfaces Lambda leaves detached in a network's security group after a
+// function is deleted, which block the group's delete until removed.
+type ec2API interface {
+	DescribeNetworkInterfaces(ctx context.Context, params *ec2.DescribeNetworkInterfacesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkInterfacesOutput, error)
+	DeleteNetworkInterface(ctx context.Context, params *ec2.DeleteNetworkInterfaceInput, optFns ...func(*ec2.Options)) (*ec2.DeleteNetworkInterfaceOutput, error)
+}
+
 // Client is a thin Cloud Control and CloudFormation client whose exported
 // methods speak this package's vocabulary (a decoded properties map, an
 // identifier list) rather than the SDK's, so *Client satisfies ccAPI and
@@ -107,6 +116,7 @@ type Client struct {
 	sts stsAPI
 	sm  secretsManagerAPI
 	ssm ssmAPI
+	ec2 ec2API
 
 	tagging taggingAPI
 
@@ -186,6 +196,11 @@ func WithSSMAPI(api ssmAPI) Option {
 	return func(c *Client) { c.ssm = api }
 }
 
+// WithEC2API substitutes the EC2 client, for tests.
+func WithEC2API(api ec2API) Option {
+	return func(c *Client) { c.ec2 = api }
+}
+
 // WithPollTimings overrides the backoff and overall timeout used to poll an
 // asynchronous operation to a terminal state, so tests can exercise polling
 // in milliseconds.
@@ -225,6 +240,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		sts:              sts.NewFromConfig(cfg),
 		sm:               secretsmanager.NewFromConfig(cfg),
 		ssm:              ssm.NewFromConfig(cfg),
+		ec2:              ec2.NewFromConfig(cfg),
 		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
 		direct:           &direct.Client{HTTP: httpClient, Credentials: cfg.Credentials, Region: cfg.Region},
 		canMutate:        direct.CanMutateWith,
