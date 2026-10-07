@@ -10,10 +10,6 @@ import (
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// defaultConcurrency bounds Delete calls within one wave when the caller
-// sets no limit. Mirrors apply.defaultConcurrency.
-const defaultConcurrency = 10
-
 // Destroyer executes teardown plans against a fixed registry.
 type Destroyer struct {
 	registry    *resource.Registry
@@ -36,7 +32,7 @@ func WithConcurrency(n int) Option {
 
 // New builds a Destroyer against reg.
 func New(reg *resource.Registry, opts ...Option) *Destroyer {
-	d := &Destroyer{registry: reg, concurrency: defaultConcurrency}
+	d := &Destroyer{registry: reg, concurrency: plan.DefaultConcurrency}
 	for _, opt := range opts {
 		opt(d)
 	}
@@ -54,7 +50,7 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 	}
 
 	results := make([]ActionResult, len(p.Actions))
-	byWave := indexByWave(p.Actions)
+	byWave := p.ByWave()
 	// One locker per run, as in apply.
 	locker := resource.NewScopeLocker()
 
@@ -76,23 +72,6 @@ func (d *Destroyer) Destroy(ctx context.Context, p *plan.Plan) (*Result, error) 
 		return nil, kerrors.Wrap(err, kerrors.CodeUnexpected, "destroying was cancelled")
 	}
 	return &Result{Results: results}, nil
-}
-
-// indexByWave groups action indices by wave, preserving each action's
-// position in actions/results so per-action output stays aligned however
-// the plan was ordered. Indexed directly by wave number.
-func indexByWave(actions []plan.Action) [][]int {
-	maxWave := 0
-	for _, a := range actions {
-		if a.Wave > maxWave {
-			maxWave = a.Wave
-		}
-	}
-	out := make([][]int, maxWave+1)
-	for i, a := range actions {
-		out[a.Wave] = append(out[a.Wave], i)
-	}
-	return out
 }
 
 // runWave executes every action at idxs concurrently, bounded by
@@ -137,8 +116,7 @@ func (d *Destroyer) execute(ctx context.Context, act plan.Action, locker *resour
 		return result
 	}
 
-	// The same Spec a Create for this Ref.Key() would have used, so Scope
-	// resolves to the same value.
+	// The plan's Spec, as apply scopes it, so both serialize alike.
 	scope := reg.ScopeFor(act.Spec)
 
 	// plan.ActionFailed reaches here deliberately: Delete is idempotent, so

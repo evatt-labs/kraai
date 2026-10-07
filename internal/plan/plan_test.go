@@ -2,6 +2,7 @@ package plan
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -60,5 +61,21 @@ func TestPlan_HasFailures(t *testing.T) {
 				t.Errorf("HasFailures() = %v, want %v", got, c.want)
 			}
 		})
+	}
+}
+
+// ByWave keeps each action's index whatever order the plan lists them in,
+// and leaves a wave nothing is in empty rather than shifting later ones.
+func TestPlanByWave(t *testing.T) {
+	p := &Plan{Actions: []Action{
+		{Item: Item{Wave: 2}},
+		{Item: Item{Wave: 0}},
+		{Item: Item{Wave: 2}},
+		{Item: Item{Wave: 0}},
+	}}
+	got := p.ByWave()
+	want := [][]int{{1, 3}, nil, {0, 2}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("ByWave() = %v, want %v", got, want)
 	}
 }

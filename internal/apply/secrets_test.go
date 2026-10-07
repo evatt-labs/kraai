@@ -343,3 +343,44 @@ func TestEffectiveReadsBindings_FallsBackToOwnBinding(t *testing.T) {
 		t.Errorf("explicit ReadsBindings: effectiveReadsBindings = %v, want [CACHE DB] unchanged", got)
 	}
 }
+
+// A scope is derived from the plan's Spec, before the secrets and
+// attributes an earlier wave produced are added: destroy has neither, so a
+// scope that read them would serialize the two differently. The create
+// itself still receives them.
+func TestApply_ScopeSeesThePlanSpec(t *testing.T) {
+	branch := newFakeResource()
+	branch.createState = &resource.State{Ref: resource.Ref{Provider: "neon", Type: "branch", Name: "api-DB"}, ID: "b1",
+		Attributes: map[string]any{"project": "p1"}}
+	branchWithSecrets := &fakeSecretResource{
+		fakeResource: branch,
+		secretsFn: func(*resource.State) map[string]resource.Secret {
+			return map[string]resource.Secret{
+				"connection_uri": func(context.Context) (string, error) { return "postgres://secret", nil },
+			}
+		},
+	}
+	hyperdrive := newFakeResource()
+	hyperdrive.createState = &resource.State{Ref: resource.Ref{Provider: "cf", Type: "hyperdrive", Name: "api-DB"}}
+	var scoped []resource.Spec
+	reg := newRegistry(t,
+		resource.Registration{Provider: "neon", Type: "branch", Capability: "database",
+			Lookup: resource.LookupByName, Resource: branchWithSecrets},
+		resource.Registration{Provider: "cf", Type: "hyperdrive", Capability: "database",
+			Lookup: resource.LookupByName, Resource: hyperdrive,
+			Scope: func(spec resource.Spec) string { scoped = append(scoped, spec); return "" }},
+	)
+	p := &plan.Plan{Actions: []plan.Action{
+		action("api", "DB", "neon", "branch", 0, plan.ActionCreate),
+		action("api", "DB", "cf", "hyperdrive", 1, plan.ActionCreate),
+	}}
+	if _, err := New(reg).Apply(context.Background(), p); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if len(scoped) != 1 || len(scoped[0].Secrets) > 0 || len(scoped[0].Attributes) > 0 {
+		t.Fatalf("Scope was given %+v, want the plan's Spec alone", scoped)
+	}
+	if _, ok := hyperdrive.LastSpec().Secrets["connection_uri"]; !ok {
+		t.Fatal("the create no longer received the secret an earlier wave produced")
+	}
+}

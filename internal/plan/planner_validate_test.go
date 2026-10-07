@@ -59,12 +59,12 @@ func TestPlan_UnconfiguredCapability_EveryBindingKind(t *testing.T) {
 }
 func TestWithConcurrency_IgnoresNonPositive(t *testing.T) {
 	p := New(resource.NewRegistry(), WithConcurrency(0))
-	if p.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a non-positive override", p.concurrency, defaultConcurrency)
+	if p.concurrency != DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a non-positive override", p.concurrency, DefaultConcurrency)
 	}
 	p = New(resource.NewRegistry(), WithConcurrency(-5))
-	if p.concurrency != defaultConcurrency {
-		t.Fatalf("concurrency = %d, want default %d for a negative override", p.concurrency, defaultConcurrency)
+	if p.concurrency != DefaultConcurrency {
+		t.Fatalf("concurrency = %d, want default %d for a negative override", p.concurrency, DefaultConcurrency)
 	}
 	p = New(resource.NewRegistry(), WithConcurrency(4))
 	if p.concurrency != 4 {

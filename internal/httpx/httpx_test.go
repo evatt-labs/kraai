@@ -50,7 +50,7 @@ func (cs *countingServer) connections() int64 {
 // up to N connections regardless of pool tuning — nothing has gone idle yet
 // for a later request to reuse. That shape does not exist in production:
 // internal/apply and internal/plan bound concurrent in-flight work with
-// errgroup.SetLimit(defaultConcurrency), so a worker finishes one call
+// errgroup.SetLimit(plan.DefaultConcurrency), so a worker finishes one call
 // before starting its next. This mirrors that — workers stays at or below
 // the concurrency bound the pool is actually sized for, and each worker's
 // own connection goes idle and gets reused by its next call.
@@ -84,7 +84,7 @@ func fire(t *testing.T, client *http.Client, url string, workers, perWorker int)
 // the contrast test below).
 func TestSharedTransportReusesConnections(t *testing.T) {
 	// workers matches internal/apply's and internal/plan's own
-	// defaultConcurrency — the real bound a phase runs its calls under —
+	// plan.DefaultConcurrency — the real bound a phase runs its calls under —
 	// not an arbitrary number.
 	const workers = 10
 	const perWorker = 20
