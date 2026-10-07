@@ -135,7 +135,7 @@ type networkGroupResource struct {
 
 // lambdaInterfacePrefix begins the description Lambda gives each network
 // interface it creates for a function, followed by the function's name.
-const lambdaInterfacePrefix = "AWSLambdaVPCENI-"
+const lambdaInterfacePrefix = "AWS Lambda VPC ENI-"
 
 // Delete retries while the group is held by a network interface, up to
 // releaseTimeout, and fails on anything else at once. Each time, it first

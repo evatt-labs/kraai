@@ -242,8 +242,8 @@ func (l *lambdaHeld) DeleteResource(ctx context.Context, typeName, identifier st
 // group's interfaces are asked for.
 func TestNetworkGroupDeleteClearsLambdasInterfaces(t *testing.T) {
 	enis := &fakeInterfaces{enis: []ec2types.NetworkInterface{
-		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
-		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
 		{NetworkInterfaceId: aws.String("eni-other"), Description: aws.String("an operator's own"), Status: ec2types.NetworkInterfaceStatusAvailable},
 	}}
 	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
@@ -281,7 +281,7 @@ func TestNetworkGroupDeleteKnowsWhatHoldsIt(t *testing.T) {
 	}
 
 	attached := &fakeInterfaces{enis: []ec2types.NetworkInterface{
-		{NetworkInterfaceId: aws.String("eni-busy"), Description: aws.String("AWSLambdaVPCENI-env-svc"), Status: ec2types.NetworkInterfaceStatusInUse},
+		{NetworkInterfaceId: aws.String("eni-busy"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusInUse},
 	}}
 	res = registerNetwork(&heldClient{fakeClient: fc, held: 1000, err: held}, attached)[0].Resource.(*networkGroupResource)
 	res.releaseWait, res.releaseTimeout = time.Millisecond, 20*time.Millisecond
