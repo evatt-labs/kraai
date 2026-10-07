@@ -3,6 +3,7 @@ package manifest
 import (
 	"io/fs"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -36,6 +37,18 @@ type FS interface {
 // exits.
 type dirFS struct {
 	fsys fs.FS
+	// path is the root's absolute path, for what is read from outside the
+	// FS relative to it: a service's code.
+	path string
+}
+
+// pathOf is the absolute path of the directory fsys reads, when it reads
+// one on disk.
+func pathOf(fsys FS) string {
+	if d, ok := fsys.(dirFS); ok {
+		return d.path
+	}
+	return ""
 }
 
 // NewFS returns an FS rooted at root, a directory on the local filesystem,
@@ -46,7 +59,11 @@ func NewFS(root string) (FS, error) {
 	if err != nil {
 		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "opening manifest directory %s", root)
 	}
-	return dirFS{fsys: r.FS()}, nil
+	path, err := filepath.Abs(root)
+	if err != nil {
+		return nil, kerrors.Wrap(err, kerrors.CodeValidation, "resolving manifest directory %s", root)
+	}
+	return dirFS{fsys: r.FS(), path: path}, nil
 }
 
 func (d dirFS) ReadFile(name string) ([]byte, error) {

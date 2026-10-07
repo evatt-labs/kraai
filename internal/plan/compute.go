@@ -1,6 +1,7 @@
 package plan
 
 import (
+	"path/filepath"
 	"sort"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -52,7 +53,7 @@ func (p *Planner) expandCompute(
 	}
 
 	name := namer.Service(environmentName, svcKey)
-	config := map[string]any{"dir": svc.Dir, "settings": mergedSettings}
+	config := map[string]any{"dir": serviceDir(m.Dir, svc.Dir), "settings": mergedSettings}
 	if len(customDomains) > 0 {
 		config["customDomains"] = routeConfigs(customDomains)
 	}
@@ -225,4 +226,15 @@ func routeConfigs(routes []manifest.Route) []any {
 		out = append(out, routeConfig(route))
 	}
 	return out
+}
+
+// serviceDir is where a service's code is: its dir taken against the
+// manifest's directory, as --dir names it, rather than the directory kraai
+// runs in. An absolute dir, or a manifest not read from a directory, is
+// left as it is.
+func serviceDir(manifestDir, dir string) string {
+	if manifestDir == "" || dir == "" || filepath.IsAbs(dir) {
+		return dir
+	}
+	return filepath.Join(manifestDir, dir)
 }

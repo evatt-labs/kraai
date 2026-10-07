@@ -16,6 +16,10 @@ type Manifest struct {
 	// Values is the merged environments/<name>.values.yaml plus --set map.
 	// Free-form and exempt from schema validation, unlike every other field.
 	Values map[string]any
+	// Dir is the absolute path of the directory the manifest was read
+	// from, which a service's relative dir is taken against; empty for a
+	// manifest read from anything but a directory on disk.
+	Dir string
 }
 
 // Root is kraai.yaml at the manifest root: providers and plugins.
