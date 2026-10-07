@@ -128,7 +128,7 @@ func TestMergeEvidence(t *testing.T) {
 		rec("AWS::D::Gone", "parity", "d1"),
 		rec("AWS::E::WasEmpty", "no-instances", "d1"),
 		rec("AWS::F::Regressed", "parity", "d1"),
-		{Type: "AWS::H::Edited", Outcome: "parity", Date: "d1", Override: "old"},
+		{Type: "AWS::H::Edited", Outcome: "parity", Date: "d1", Reader: "old"},
 	}}
 	run := Evidence{Types: []TypeEvidence{
 		rec("AWS::B::Rerun", "parity", "d2"),
@@ -136,7 +136,7 @@ func TestMergeEvidence(t *testing.T) {
 		rec("AWS::E::WasEmpty", "unlisted", "d2"),
 		rec("AWS::F::Regressed", "differs", "d2"),
 		rec("AWS::G::New", "no-instances", "d2"),
-		{Type: "AWS::H::Edited", Outcome: "no-instances", Date: "d2", Override: "new"},
+		{Type: "AWS::H::Edited", Outcome: "no-instances", Date: "d2", Reader: "new"},
 	}}
 	readers := map[string]bool{}
 	for _, name := range []string{"AWS::A::Kept", "AWS::B::Rerun", "AWS::C::Empty", "AWS::E::WasEmpty", "AWS::F::Regressed", "AWS::G::New", "AWS::H::Edited"} {

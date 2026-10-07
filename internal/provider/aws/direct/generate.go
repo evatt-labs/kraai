@@ -2,6 +2,8 @@ package direct
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"go/format"
@@ -20,11 +22,15 @@ func Generate() (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	proven, err := provenTypes(files)
+	hashes := make(map[string]string, len(readers))
+	for _, r := range readers {
+		hashes[r.Type] = ReaderHash(r)
+	}
+	proven, err := provenTypes(files, hashes)
 	if err != nil {
 		return nil, err
 	}
-	lived, err := lifecycleTypes(files)
+	lived, err := lifecycleTypes(files, hashes)
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +68,18 @@ func Generate() (map[string][]byte, error) {
 func GeneratedFile(typeName string) string {
 	parts := strings.Split(typeName, "::")
 	return "readers_" + strings.ToLower(parts[1]) + ".go"
+}
+
+// ReaderHash is the SHA-256 of r's generated literal, without the
+// Production and Mutable flags evidence decides. Evidence records it to say
+// what a run read or mutated through: an edit that changes no compiled
+// field, such as a comment, leaves it, and a model or schema change that
+// changes one does not.
+func ReaderHash(r Reader) string {
+	var b bytes.Buffer
+	readerBody(&b, r, false)
+	sum := sha256.Sum256(b.Bytes())
+	return hex.EncodeToString(sum[:])
 }
 
 // readerBody writes r's fields as the body of a Reader literal.
@@ -473,7 +491,7 @@ func evidenced(evidence map[string][]string, typeName string, undeclared []strin
 // provenTypes is every type whose recorded evidence shows parity on the
 // instances read and on the identifiers probed as absent, each with the
 // codes the run observed.
-func provenTypes(files fs.FS) (map[string][]string, error) {
+func provenTypes(files fs.FS, hashes map[string]string) (map[string][]string, error) {
 	raw, err := fs.ReadFile(files, "evidence/parity.json")
 	if err != nil {
 		return nil, err
@@ -487,8 +505,8 @@ func provenTypes(files fs.FS) (map[string][]string, error) {
 		if e.Outcome != "parity" || e.Absence != "parity" {
 			continue
 		}
-		// A missing override is no reader to prove.
-		if current, err := overrideHash(files, e.Type); err == nil && current == e.Override {
+		// A type with no reader now has nothing to prove.
+		if current, ok := hashes[e.Type]; ok && current == e.Reader {
 			out[e.Type] = e.Observed
 		}
 	}

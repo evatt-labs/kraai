@@ -12,7 +12,7 @@
         "Tags",
         "Version"
       ],
-      "override": "20331a006a2d69471aa8f99fe6c218fbbd43c4036068cc28165293a17c4b91df"
+      "reader": "6628e97f905b3a9794bd76c7900ce4335eeabb1d2f43e3243c2a4f3e1b9d196e"
     },
     {
       "type": "AWS::CloudWatch::Alarm",
@@ -32,7 +32,7 @@
         "TreatMissingData",
         "Unit"
       ],
-      "override": "833223e45f893a3843fd1b936ba8ea744a2b505181eb14d0027bf5b20bf37ea7"
+      "reader": "f38bc3a3f86bdbd0befc530db4c8a0f5d0e44b6029f68fc254fff78906131ffd"
     },
     {
       "type": "AWS::DynamoDB::Table",
@@ -48,7 +48,7 @@
         "Tags",
         "TimeToLiveSpecification"
       ],
-      "override": "02ac4be1685e2c6b0a8a1a82773216b69fb85981c607b92bc4aeb05e00087371"
+      "reader": "ad6feb8d9b1f19e478a0e6a26192c966b9a0a6c747ba30a2d6bfdc4e53c83a9a"
     },
     {
       "type": "AWS::EC2::InternetGateway",
@@ -57,7 +57,7 @@
       "updated": [
         "Tags"
       ],
-      "override": "f44a420795755bd26cc68904c1582b39d762e79b1cd8963606647659d97cc53d",
+      "reader": "7dd0fa4f0503328d5f357ae5b983116ce6d27df8c58ad89c46ed5fac3a6ae337",
       "observed": [
         "InvalidInternetGatewayID.NotFound"
       ]
@@ -69,7 +69,7 @@
       "updated": [
         "GatewayId"
       ],
-      "override": "8c1e41c7cf662d4e108852f455a264ea36fe83f85e6c126183a4137f92d024d7",
+      "reader": "77004e3fb6c4490f0bd112d54ebc4a0a66942fb0b549ddd9d701ffee922c322d",
       "observed": [
         "InvalidRoute.NotFound"
       ]
@@ -81,7 +81,7 @@
       "updated": [
         "Tags"
       ],
-      "override": "c842b84d87da4643a7063b93c19539029834467bc4c10b97476ce7b419ac17f3",
+      "reader": "cd8bfcfb9973bcf13479e587d858e6a5bdef02d95e09388ee8cd618a1cf40b97",
       "observed": [
         "InvalidRouteTableID.NotFound"
       ]
@@ -95,7 +95,7 @@
         "SecurityGroupIngress",
         "Tags"
       ],
-      "override": "c9eae3a5ea2571786eb5ac8647ffef58aee668ca1cc17a58fd343b6e18d06291",
+      "reader": "3f762aa1256c0bf507e725a0d1d7fb395e55cf83263f669e55bdb8c6212b1d11",
       "observed": [
         "InvalidGroup.NotFound"
       ]
@@ -111,7 +111,7 @@
         "PrivateDnsNameOptionsOnLaunch",
         "Tags"
       ],
-      "override": "ad933ddc9dc4b82ba8f42e99f69e5ee4f57525604efa452fb68aa8efc3cad680",
+      "reader": "014eec69f092c88c2cc4f5170fcdec6d76d6d1d26edef686c59cfcd0689d6bef",
       "observed": [
         "InvalidSubnetID.NotFound"
       ]
@@ -120,7 +120,7 @@
       "type": "AWS::EC2::SubnetRouteTableAssociation",
       "date": "2026-10-05",
       "outcome": "parity",
-      "override": "824143f618c15dc9526059ae4841db18c2ff623634ff06aa30cc85ce01d2b441",
+      "reader": "381c4ad6d966f09831ca9d935cc3243c7258b42e4269d970aa852553f9f57e3b",
       "observed": [
         "InvalidAssociationID.NotFound"
       ]
@@ -134,7 +134,7 @@
         "EnableDnsSupport",
         "Tags"
       ],
-      "override": "2c34e031125a78da69aa0d9e90b853dcfbb4e3dd532bfe34cd16b469e48743dc",
+      "reader": "6a5a2f2f87bfaed753b8c96e0c86ff3844819ebbc8ebddedaa2534f4204abb7c",
       "observed": [
         "InvalidVpcID.NotFound"
       ]
@@ -146,7 +146,7 @@
       "updated": [
         "InternetGatewayId"
       ],
-      "override": "9a006fb6db1a9b6c353b2d2bbe908c55126d0e3cfbf5516a177342dd9685dd10",
+      "reader": "b2679e15aec50212e6df884ce8c1324ebc73d519bcd18ec9ef41d6969f8ac7c3",
       "observed": [
         "Gateway.NotAttached"
       ]
@@ -162,7 +162,7 @@
         "DefaultCapacityProviderStrategy",
         "Tags"
       ],
-      "override": "7c163a61172b6deee433fd4844a1ac995fd0bb7e8b1e181d8a6bba5375e5b87e"
+      "reader": "181bf8b0465b9df5059864e438e66d230980c7ced4b28fe40b8f7dfa6a10221f"
     },
     {
       "type": "AWS::ECS::TaskDefinition",
@@ -171,7 +171,7 @@
       "updated": [
         "Tags"
       ],
-      "override": "d14301cd1de10d25732218074102344ba224e3635aef2f963181a2b287403f97"
+      "reader": "ade909924c8d9cc271b7ce03e18c9c3e3d095e70e5334b8b3f88aa3349016594"
     },
     {
       "type": "AWS::ElastiCache::SubnetGroup",
@@ -182,7 +182,7 @@
         "SubnetIds",
         "Tags"
       ],
-      "override": "e56590977af954e47d4f000b5af1426306e811451250ed7b60e91f34b98c828c"
+      "reader": "8372284c7bfe9ad9905ce15e4ce04b80a1988384e53f99dcc519482725583196"
     },
     {
       "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
@@ -195,7 +195,7 @@
         "TargetGroupAttributes",
         "Targets"
       ],
-      "override": "227b3672474b9b3b24852d04b2a51f15a96499460d01719204ccbb144b0b9ce3"
+      "reader": "12e98e249d1f7c465ea465e56052589ac48496281eda0533815fbb9d90dec131"
     },
     {
       "type": "AWS::Events::EventBus",
@@ -207,7 +207,7 @@
         "Policy",
         "Tags"
       ],
-      "override": "d7c50d69723b362df8f603ea3946ed56aa9e871f09850c29597954a3f9a1062f"
+      "reader": "7b594333f530a05b3f9e23854a113f3d50787880e3d060eeb8f631395bcbd709"
     },
     {
       "type": "AWS::Events::Rule",
@@ -220,7 +220,7 @@
         "Tags",
         "Targets"
       ],
-      "override": "1bcdc157cddae219b98b88216317d77d2f573a148b91cca3b37d9c9dcf7871e3"
+      "reader": "6ab49f1677a862a264f3c4579abbfebeeaf6c154d6398c13ec9ebcae319563a6"
     },
     {
       "type": "AWS::IAM::Role",
@@ -235,7 +235,7 @@
         "Policies",
         "Tags"
       ],
-      "override": "afadbe6464f2cb3e45814dca54a4887db31fecc6cca9baefb6db9400103c2091"
+      "reader": "3a30cf1b3dbaac802cac24d64315a72997041017a96721e16e114ba60886fe74"
     },
     {
       "type": "AWS::Lambda::Function",
@@ -250,13 +250,13 @@
         "Tags",
         "Timeout"
       ],
-      "override": "495ac870db075b62e31cfea0e27bde734cf1769a93b0cdbb80c1ac1bfc9cd6bc"
+      "reader": "4f483925d681d51a83f0e0c501010f1b9b7483753f40e68672664fd5b890d103"
     },
     {
       "type": "AWS::Lambda::Permission",
       "date": "2026-10-05",
       "outcome": "parity",
-      "override": "f3ca47ce4d72f1231d42dddfd705870a027dc5cce374c044ffd1afe3d5166cb2"
+      "reader": "0260a3a0965358adfcb7513be57ce470dd93f3788690f4dd55079da24ce3d0cd"
     },
     {
       "type": "AWS::Lambda::Url",
@@ -266,7 +266,7 @@
         "Cors",
         "InvokeMode"
       ],
-      "override": "554682f60370f6320d93cc6f14740de5050b3d480c7ef12ec752745a53df13d5"
+      "reader": "914494f96ba3c354e9065976dbdc636fe5e61fddfea2b6476cee13b8904f311f"
     },
     {
       "type": "AWS::Logs::LogGroup",
@@ -282,7 +282,7 @@
         "RetentionInDays",
         "Tags"
       ],
-      "override": "da24fc3739aa297da750bffc9d88a647319764993b0196e8fa42e8cbe2afd41f"
+      "reader": "b346e03c940fdbd0fe5d8e42eb48e001198aa00e9591d2324f910dd4d5999a10"
     },
     {
       "type": "AWS::Logs::ResourcePolicy",
@@ -291,7 +291,7 @@
       "updated": [
         "PolicyDocument"
       ],
-      "override": "4496f0927f2f1daa8e309aaf80e423e07a3c496bcaf5718e651550bac4c0a50b"
+      "reader": "77df1cf844ee7f60a47aa095aa5d361792597beb85a9e05f4169a27bd7671318"
     },
     {
       "type": "AWS::RDS::DBClusterParameterGroup",
@@ -301,7 +301,7 @@
         "Parameters",
         "Tags"
       ],
-      "override": "e24ede4b84fc02a064d497de5e9aed9fc282d73c8ca1ec9ba2075b236d547125"
+      "reader": "253f0a28d176d79210c9210491878e50e8aedcaa60dfae4db648625a45c543aa"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
@@ -312,7 +312,7 @@
         "SubnetIds",
         "Tags"
       ],
-      "override": "5705128f86e8d158bc2f0d8b3f05a5fafb99f0a7a49d86fcd609e0fc713238ec"
+      "reader": "7e873d5767b9e71cc96893c1e62410c2a00adf1230532c26d59ca082717016a6"
     },
     {
       "type": "AWS::S3::Bucket",
@@ -337,7 +337,7 @@
         "VersioningConfiguration",
         "WebsiteConfiguration"
       ],
-      "override": "9a68eb63dfffa0438c2fb409af1f1162edfd246e02976c164e8c4831f2b7c479",
+      "reader": "5b1e20af1aad1a31754759fe7beab1c8aa03b8a1ab4d77db05aca291c045c62b",
       "observed": [
         "MetadataConfigurationNotFound",
         "NoSuchCORSConfiguration",
@@ -362,7 +362,7 @@
         "Tags",
         "VisibilityTimeout"
       ],
-      "override": "de4d6d10211d0ef46af202f79babd5cac230202a76d84790a1e90dedbe9a9407"
+      "reader": "1c62fea1fc217b01a2b50a51ec63c483cc10f415562269cb2c12038c23c80be0"
     },
     {
       "type": "AWS::SSM::Parameter",
@@ -376,7 +376,7 @@
         "Type",
         "Value"
       ],
-      "override": "19f6246838d49a1e7fa89cc397c9e5ee23be1d594d13f8fbf40c3374357029f2"
+      "reader": "67c960db8ae8c4151a9ebb5c6c9c6f5a442b40ce94705b3d40f97123c3e2119a"
     },
     {
       "type": "AWS::SecretsManager::Secret",
@@ -389,7 +389,7 @@
         "SecretString",
         "Tags"
       ],
-      "override": "77e86b357d79adce698b99473a8efe524e1604b993706abf8ff5bc115e4ba75c"
+      "reader": "0662fce95db9665bd47b85d7efab560427a9fc87fea4c838085fdb285977641a"
     }
   ]
 }
