@@ -31,7 +31,7 @@ func newEventsRuleResource(client *Client) *eventsRuleResource {
 	e := &eventsRuleResource{
 		resourceType: &resourceType{provider: Provider, typeName: TypeEventsRule, lookup: resource.LookupByTag, client: client,
 			match: arrayTagsMatch, matchIsTag: true, stampTag: arrayTagsStampTag},
-		client:       client,
+		client: client,
 	}
 	e.resourceType.translate = e.translate
 	return e
