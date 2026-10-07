@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"slices"
@@ -45,13 +46,21 @@ type Vocabulary interface {
 }
 
 // Loader resolves a manifest directory into one validated Manifest.
-// Both external systems it touches — the filesystem and the template
-// engine — are injected interfaces (FS, TemplateEngine), so Loader itself
-// never imports os or pongo2 directly.
+// The external systems it touches, the filesystem, the template engine
+// and Terraform, are injected (FS, TemplateEngine, TerraformRunner), so
+// Loader itself never imports os, pongo2 or os/exec directly.
 type Loader struct {
 	fs         FS
 	template   TemplateEngine
 	vocabulary Vocabulary
+	terraform  TerraformRunner
+}
+
+// WithTerraform sets how a Terraform root named by dir is read. Without
+// it, an environment naming one fails to load.
+func (l *Loader) WithTerraform(run TerraformRunner) *Loader {
+	l.terraform = run
+	return l
 }
 
 // NewLoader builds a Loader reading from fsys, rendering .j2 files with
@@ -64,12 +73,13 @@ func NewLoader(fsys FS, engine TemplateEngine, vocabulary Vocabulary) *Loader {
 	return &Loader{fs: fsys, template: engine, vocabulary: vocabulary}
 }
 
-// Load resolves the manifest for envName: kraai.yaml (+ services/*.yaml,
-// merged) rendered opt-in-by-extension against the merged values
-// (environments/<envName>.values.yaml + setArgs, Helm precedence),
-// then the environment overlay itself — every schema-validated file
-// strictly rejecting unknown keys along the way.
-func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
+// Load resolves the manifest for envName: the environment overlay, which
+// is never templated, then kraai.yaml (+ services/*.yaml, merged)
+// rendered opt-in-by-extension against the merged values
+// (environments/<envName>.values.yaml + setArgs, Helm precedence) and the
+// outputs of the Terraform roots the overlay names, every
+// schema-validated file strictly rejecting unknown keys along the way.
+func (l *Loader) Load(ctx context.Context, envName string, setArgs []string) (*Manifest, error) {
 	if l.vocabulary == nil {
 		return nil, kerrors.New("manifest: Loader was built with no capability vocabulary")
 	}
@@ -77,6 +87,22 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 	values, err := LoadValues(l.fs, envName, setArgs)
 	if err != nil {
 		return nil, err
+	}
+	if _, set := values[terraformKey]; set {
+		return nil, kerrors.Validation(
+			"%q is reserved for the environment's Terraform outputs; a values file or --set may not set it", terraformKey)
+	}
+
+	env, err := l.loadEnvironment(envName)
+	if err != nil {
+		return nil, err
+	}
+	outputs, err := l.terraformOutputs(ctx, environmentsDir+"/"+envName+".yaml", env)
+	if err != nil {
+		return nil, err
+	}
+	if len(outputs) > 0 {
+		values[terraformKey] = outputs
 	}
 
 	root, err := l.loadRoot(values, l.validateRoot)
@@ -95,10 +121,6 @@ func (l *Loader) Load(envName string, setArgs []string) (*Manifest, error) {
 		return nil, err
 	}
 
-	env, err := l.loadEnvironment(envName)
-	if err != nil {
-		return nil, err
-	}
 	if err := validateRoutes(envName, services, env); err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/redact"
 	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
@@ -92,7 +93,7 @@ func (i *instrumented) observe(ctx context.Context, verb, name string, fn func(c
 			metric.WithAttributes(append(attrs, attribute.Bool("kraai.error", err != nil))...))
 	}
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(redact.From(ctx).Error(err))
 		span.SetStatus(codes.Error, "")
 	}
 	return err

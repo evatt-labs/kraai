@@ -1,6 +1,7 @@
 package manifest_test
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"path/filepath"
@@ -124,7 +125,7 @@ func newRealLoader(t *testing.T, root string) *manifest.Loader {
 func TestLoad_BlueprintExamplesParse(t *testing.T) {
 	loader := newRealLoader(t, "testdata/blueprint")
 
-	got, err := loader.Load("prod", nil)
+	got, err := loader.Load(context.Background(), "prod", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -234,7 +235,7 @@ func requireCode(t *testing.T, err error, code kerrors.Code) *kerrors.KError {
 func TestLoad_TemplateRenderErrorFailsLoudly(t *testing.T) {
 	loader := newRealLoader(t, "testdata/render-error")
 
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "kraai.yaml.j2") {
 		t.Errorf("error %q does not name the failing template", kerr.Error())
@@ -248,7 +249,7 @@ func TestLoad_TemplateRenderErrorFailsLoudly(t *testing.T) {
 func TestLoad_RenderedButSchemaInvalidFailsValidation(t *testing.T) {
 	loader := newRealLoader(t, "testdata/schema-invalid-after-render")
 
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "services.api: unknown field \"bogus\"") {
 		t.Errorf("error %q does not contain the expected path-based message", kerr.Error())
@@ -262,7 +263,7 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 	loader := newRealLoader(t, "testdata/precedence")
 
 	t.Run("template default when neither values nor --set supply it", func(t *testing.T) {
-		got, err := loader.Load("nodev", nil)
+		got, err := loader.Load(context.Background(), "nodev", nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -272,7 +273,7 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 	})
 
 	t.Run("values file overrides the template default", func(t *testing.T) {
-		got, err := loader.Load("dev", nil)
+		got, err := loader.Load(context.Background(), "dev", nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -282,7 +283,7 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 	})
 
 	t.Run("--set overrides the values file", func(t *testing.T) {
-		got, err := loader.Load("dev", []string{"compute=from-cli"})
+		got, err := loader.Load(context.Background(), "dev", []string{"compute=from-cli"})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -298,7 +299,7 @@ func TestLoad_SetOverridesValuesOverridesTemplateDefault(t *testing.T) {
 // unknown field.
 func TestLoad_RootTemplateRendersButFailsSchema(t *testing.T) {
 	loader := newRealLoader(t, "testdata/root-template-schema-invalid")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "unknown field \"bogus\"") {
 		t.Errorf("error %q does not name the unknown field", kerr.Error())
@@ -311,7 +312,7 @@ func TestLoad_RootTemplateRendersButFailsSchema(t *testing.T) {
 // elsewhere.
 func TestLoad_TemplatedServiceRendersSuccessfully(t *testing.T) {
 	loader := newRealLoader(t, "testdata/templated-service")
-	got, err := loader.Load("dev", nil)
+	got, err := loader.Load(context.Background(), "dev", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -323,13 +324,13 @@ func TestLoad_TemplatedServiceRendersSuccessfully(t *testing.T) {
 
 func TestLoad_MissingRootIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/missing-root")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
 func TestLoad_BothRootFilesIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/both-root")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "kraai.yaml") || !strings.Contains(kerr.Error(), "kraai.yaml.j2") {
 		t.Errorf("error %q does not name both root files", kerr.Error())
@@ -338,7 +339,7 @@ func TestLoad_BothRootFilesIsValidationError(t *testing.T) {
 
 func TestLoad_UnknownTopLevelKeyRejected(t *testing.T) {
 	loader := newRealLoader(t, "testdata/unknown-key")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "unknown field \"bogus\"") {
 		t.Errorf("error %q does not name the unknown field", kerr.Error())
@@ -353,7 +354,7 @@ func TestLoad_UnknownTopLevelKeyRejected(t *testing.T) {
 // having.
 func TestLoad_UnknownNestedKeyRejectedWithPath(t *testing.T) {
 	loader := newRealLoader(t, "testdata/unknown-nested-key")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	for _, want := range []string{"services.api.database[1]", "maxage"} {
 		if !strings.Contains(kerr.Error(), want) {
@@ -364,7 +365,7 @@ func TestLoad_UnknownNestedKeyRejectedWithPath(t *testing.T) {
 
 func TestLoad_DuplicateServiceAcrossFilesIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/duplicate-service")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "api") {
 		t.Errorf("error %q does not name the duplicate service", kerr.Error())
@@ -373,7 +374,7 @@ func TestLoad_DuplicateServiceAcrossFilesIsValidationError(t *testing.T) {
 
 func TestLoad_MissingEnvironmentIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/missing-environment")
-	_, err := loader.Load("nope", nil)
+	_, err := loader.Load(context.Background(), "nope", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "nope") {
 		t.Errorf("error %q does not name the missing environment", kerr.Error())
@@ -382,7 +383,7 @@ func TestLoad_MissingEnvironmentIsValidationError(t *testing.T) {
 
 func TestLoad_BadKindIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/bad-kind")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "kind") {
 		t.Errorf("error %q does not mention kind", kerr.Error())
@@ -396,7 +397,7 @@ func TestLoad_BadKindIsValidationError(t *testing.T) {
 // via errors.Is — not just a message a caller has to substring-match.
 func TestLoad_InvalidNamingPrefixIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/bad-naming-prefix")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !errors.Is(kerr, manifest.ErrInvalidPrefix) {
 		t.Errorf("error %v does not wrap manifest.ErrInvalidPrefix", kerr)
@@ -414,7 +415,7 @@ func TestLoad_InvalidNamingPrefixIsValidationError(t *testing.T) {
 // silently accepted and truncated away later inside internal/naming.
 func TestLoad_NamingPrefixTooLongIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/naming-prefix-too-long")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !errors.Is(kerr, manifest.ErrPrefixTooLong) {
 		t.Errorf("error %v does not wrap manifest.ErrPrefixTooLong", kerr)
@@ -425,11 +426,12 @@ func TestLoad_WrongVersionIsValidationError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 2\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "version") {
 		t.Errorf("error %q does not mention version", kerr.Error())
@@ -440,11 +442,12 @@ func TestLoad_TemplateRootReadErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, fsNotExistErr("kraai.yaml"))
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, errors.New("disk on fire"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -452,19 +455,20 @@ func TestLoad_ServicesTemplateGlobErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
 	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, errors.New("glob exploded"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
 func TestLoad_BadSetArgPropagates(t *testing.T) {
 	loader := newRealLoader(t, "testdata/blueprint")
-	_, err := loader.Load("prod", []string{"nopequals"})
+	_, err := loader.Load(context.Background(), "prod", []string{"nopequals"})
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -476,12 +480,13 @@ func TestLoad_ServicesGlobErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, errors.New("glob exploded"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -489,6 +494,7 @@ func TestLoad_ServicesReadFileErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return([]string{"services/api.yaml"}, nil)
@@ -496,7 +502,7 @@ func TestLoad_ServicesReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("services/api.yaml").Return(nil, errors.New("disk on fire"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -504,6 +510,7 @@ func TestLoad_ServicesTemplateReadFileErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
@@ -511,7 +518,7 @@ func TestLoad_ServicesTemplateReadFileErrorIsWrapped(t *testing.T) {
 	fsys.EXPECT().ReadFile("services/api.yaml.j2").Return(nil, errors.New("disk on fire"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -521,6 +528,7 @@ func TestLoad_ServiceTemplateRenderErrorPropagates(t *testing.T) {
 	tpl := manifest.NewMockTemplateEngine(ctrl)
 
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
 	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
@@ -530,7 +538,7 @@ func TestLoad_ServiceTemplateRenderErrorPropagates(t *testing.T) {
 		Return(nil, kerrors.Validation("services/api.yaml.j2: boom"))
 
 	loader := newLoader(t, fsys, tpl)
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -538,14 +546,10 @@ func TestLoad_EnvironmentReadErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
-	fsys.EXPECT().ReadFile("kraai.yaml").Return([]byte("version: 1\n"), nil)
-	fsys.EXPECT().ReadFile("kraai.yaml.j2").Return(nil, fsNotExistErr("kraai.yaml.j2"))
-	fsys.EXPECT().Glob("services/*.yaml").Return(nil, nil)
-	fsys.EXPECT().Glob("services/*.yaml.j2").Return(nil, nil)
 	fsys.EXPECT().ReadFile("environments/dev.yaml").Return(nil, errors.New("disk on fire"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -553,10 +557,11 @@ func TestLoad_RootReadErrorIsWrapped(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fsys := manifest.NewMockFS(ctrl)
 	fsys.EXPECT().ReadFile("environments/dev.values.yaml").Return(nil, fsNotExistErr("environments/dev.values.yaml"))
+	fsys.EXPECT().ReadFile("environments/dev.yaml").Return([]byte("kind: ephemeral\n"), nil)
 	fsys.EXPECT().ReadFile("kraai.yaml").Return(nil, errors.New("disk on fire"))
 
 	loader := newLoader(t, fsys, manifest.NewTemplateEngine(fsys))
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	_ = requireCode(t, err, kerrors.CodeValidation)
 }
 
@@ -569,7 +574,7 @@ func TestLoad_RootReadErrorIsWrapped(t *testing.T) {
 func TestLoad_PerServiceComputeParses(t *testing.T) {
 	loader := newRealLoader(t, "testdata/per-service-compute")
 
-	got, err := loader.Load("dev", nil)
+	got, err := loader.Load(context.Background(), "dev", nil)
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -616,7 +621,7 @@ func TestLoad_PerServiceComputeParses(t *testing.T) {
 // and value the same way every other schema violation in this package does.
 func TestLoad_UnknownTriggerIsValidationError(t *testing.T) {
 	loader := newRealLoader(t, "testdata/bad-trigger")
-	_, err := loader.Load("dev", nil)
+	_, err := loader.Load(context.Background(), "dev", nil)
 	kerr := requireCode(t, err, kerrors.CodeValidation)
 	if !strings.Contains(kerr.Error(), "services.tick.compute.trigger") || !strings.Contains(kerr.Error(), `"cron"`) {
 		t.Errorf("error %q does not name the bad trigger", kerr.Error())
@@ -634,7 +639,7 @@ func fsNotExistErr(name string) error {
 // A manifest read from a directory named relative to where kraai runs
 // records the absolute path it names, which a service's code is found from.
 func TestLoadRecordsTheManifestDirectory(t *testing.T) {
-	m, err := newRealLoader(t, "testdata/blueprint").Load("prod", nil)
+	m, err := newRealLoader(t, "testdata/blueprint").Load(context.Background(), "prod", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

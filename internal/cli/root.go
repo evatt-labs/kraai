@@ -7,6 +7,8 @@ package cli
 import (
 	"context"
 	"errors"
+	"io"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -17,6 +19,7 @@ import (
 
 	"github.com/evatt-labs/kraai/internal/assemble"
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/redact"
 )
 
 // instrumentationName identifies this package's telemetry.
@@ -116,14 +119,24 @@ func ExitSignal() int {
 // so every resource and provider request it makes is one trace, and its
 // duration is recorded by command and exit code. Both are the
 // OpenTelemetry API's no-ops unless cmd/kraai installed an exporter.
+//
+// Every sensitive value the command learns, such as a sensitive Terraform
+// output, is left out of what it prints and of the error it returns.
 func Execute(args []string) error {
+	return execute(args, os.Stdout, os.Stderr)
+}
+
+func execute(args []string, stdout, stderr io.Writer) error {
+	set := &redact.Set{}
 	root := NewRootCommand()
 	root.SetArgs(args)
+	root.SetOut(set.Writer(stdout))
+	root.SetErr(set.Writer(stderr))
 
-	ctx, span := otel.Tracer(instrumentationName).Start(context.Background(), "kraai")
+	ctx, span := otel.Tracer(instrumentationName).Start(redact.With(context.Background(), set), "kraai")
 	start := time.Now()
 	cmd, err := root.ExecuteContextC(ctx)
-	err = errors.Join(err, finishProfiles())
+	err = set.Error(errors.Join(err, finishProfiles()))
 	recordCommand(ctx, cmd, err, time.Since(start))
 	if err != nil {
 		span.RecordError(err)

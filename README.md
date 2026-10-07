@@ -16,9 +16,8 @@ kraai keeps no state file. `kraai plan` answers every question with a live
 lookup, `kraai apply` makes an environment real, deploying the application
 code into it, and `kraai destroy` removes it.
 
-Reading Terraform's outputs as manifest values is not built yet
-([#480](https://github.com/evatt-labs/kraai/issues/480)); until it is, a
-manifest names what Terraform created as literal or `--set` values.
+An environment reads what Terraform owns through its outputs: see
+[Terraform outputs](#terraform-outputs).
 
 > **Status: early, and honest about it.** `plan`, `apply` and `destroy` work
 > and have deployed a real FastAPI service to AWS Lambda behind API Gateway,
@@ -474,6 +473,47 @@ kraai plan production --set reservedConcurrency=50
 Values files are deliberately free-form and not schema-validated — unlike
 every other part of a manifest.
 
+### Terraform outputs
+
+An environment names the Terraform or OpenTofu roots it sits on, and their
+root-module outputs become template values under `terraform`:
+
+```yaml
+# environments/acmeshop-pull-request-00042.yaml
+kind: ephemeral
+terraform:
+  base:
+    dir: ../infra/network     # an initialized root, beside the manifest
+    workspace: staging        # optional
+  shared:
+    file: outputs/shared.json # what `terraform output -json` printed
+```
+
+```yaml
+# services/api.yaml.j2
+services:
+  api:
+    compute:
+      settings:
+        env:
+          VPC_ID: "{{ terraform.base.vpc_id }}"
+```
+
+A `dir:` root is read by running `terraform output -json` in it, or `tofu`
+when `terraform` is not on PATH (`command:` picks one). kraai runs it with
+your environment, so the backend's own credentials apply; it never runs
+`init`, never reads state itself, and gives up after two minutes. A `file:`
+root is a file in the manifest directory holding that same JSON, for a
+pipeline that exports outputs itself. Outputs are read on every command,
+so a changed output changes the next plan.
+
+A sensitive output is a secret: wherever kraai prints, it prints
+`[sensitive terraform.base.<name>]` in its place, including in errors that
+quote it. That redaction matches the value as written, as Terraform's own
+does; a value transformed before it is printed, or one shorter than four
+characters, is not recognised. `terraform` is reserved: a values file or
+`--set` may not set it.
+
 ## Using it
 
 ```
@@ -777,7 +817,6 @@ providers above.
 
 Designed and **not** built, each with a tracking issue:
 
-- Terraform and OpenTofu outputs as manifest values ([#480](https://github.com/evatt-labs/kraai/issues/480))
 - A lock backend for manifests with no AWS provider (an R2 bucket for Cloudflare-only manifests)
 
 The `unbuilt` and `dead-field` labels track the rest, and the

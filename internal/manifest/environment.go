@@ -40,6 +40,10 @@ func validateEnvironment(path string, env *Environment) error {
 		seen[name] = true
 	}
 
+	if err := validateTerraform(path, env.Terraform); err != nil {
+		return err
+	}
+
 	// naming.prefix becomes a leading segment of every derived name, so it
 	// is validated here like any other field; see validatePrefix.
 	if env.Naming != nil {
