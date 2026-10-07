@@ -96,7 +96,7 @@ func settledIndex(status lock.Status, found bool) bool {
 // before its first change does not show, and no apply since has finished
 // cleanly while tagging, after which an untagged match is someone else's.
 func adoptsUntagged(status lock.Status, found bool) bool {
-	return found && !status.AppliedAt.IsZero() && !status.IdentityTagged
+	return found && !status.AppliedAt.IsZero() && status.TagVersion() < lock.CurrentIdentityTagVersion
 }
 
 // withAdoption marks ctx for adoption when the environment's status record
@@ -132,7 +132,7 @@ func recordStart(ctx context.Context, store lock.Store, envName string, m *manif
 	if !found {
 		// No kraai has run against this environment, so none left anything
 		// in it untagged: it never adopts.
-		status = lock.Status{Environment: envName, Kind: m.Environment.Kind, IdentityTagged: true}
+		status = lock.Status{Environment: envName, Kind: m.Environment.Kind, IdentityTagVersion: lock.CurrentIdentityTagVersion}
 	}
 	status.StartedAt = time.Now().UTC()
 	return store.WriteStatus(ctx, status)
@@ -175,11 +175,20 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		Outcome:     outcome,
 		StartedAt:   started.StartedAt,
 		// Kept once set: a later failure does not unmark what was tagged.
-		IdentityTagged: started.IdentityTagged || clean,
+		IdentityTagVersion: tagVersionAfter(started, clean),
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)
 		status.ExpiresAt = &deadline
 	}
 	return store.WriteStatus(ctx, status)
+}
+
+// tagVersionAfter is the tagging generation an apply leaves the record
+// under: the current one when it finished cleanly, else what it was.
+func tagVersionAfter(prior lock.Status, clean bool) int {
+	if clean {
+		return lock.CurrentIdentityTagVersion
+	}
+	return prior.TagVersion()
 }
