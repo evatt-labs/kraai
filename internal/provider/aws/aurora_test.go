@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"maps"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -40,7 +41,8 @@ func auroraResource(t *testing.T, fc *fakeClient, sm secretsManagerAPI, typeName
 func auroraSpec(config map[string]any, attrs map[string]map[string]any) resource.Spec {
 	base := map[string]any{"driver": DriverPostgres, "engine": engineAurora, "network": "NET"}
 	maps.Copy(base, config)
-	return resource.Spec{Binding: "SQL", Name: "env-svc-sql", Config: base, Attributes: attrs}
+	return resource.Spec{Binding: "SQL", Name: "env-svc-sql", Config: base, Attributes: attrs,
+		Referenced: map[string]map[string]any{"network": testNetwork()}}
 }
 
 type fakeSecretsManager struct {
@@ -113,36 +115,28 @@ func TestAuroraAppliesOnlyToItsEngine(t *testing.T) {
 	}
 }
 
-// The subnet group takes the network's private pair when it has one and the
-// public pair otherwise, from what the network published.
-func TestAuroraSubnetGroupPrefersThePrivatePair(t *testing.T) {
+// The subnet group takes the subnets the network binding names, and the
+// cluster's security group admits the network's own group on 5432.
+func TestAuroraSubnetGroupAndSecurityGroupFollowTheNetwork(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-sql", createProps: map[string]any{},
 		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/DBSubnetGroupName"}}}
 	res := auroraResource(t, fc, nil, TypeRDSDBSubnetGroup)
-
-	public := map[string]map[string]any{
-		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-pub-a"},
-		"NET." + key(TypePublicSubnetB): {"SubnetId": "subnet-pub-b"},
+	if _, err := res.Create(context.Background(), auroraSpec(nil, nil)); err != nil {
+		t.Fatalf("Create(subnet group): %v", err)
 	}
-	if _, err := res.Create(context.Background(), auroraSpec(nil, public)); err != nil {
-		t.Fatalf("Create(public network): %v", err)
-	}
-	if ids, _ := fc.createCalls[0]["SubnetIds"].([]any); len(ids) != 2 || ids[0] != "subnet-pub-a" || ids[1] != "subnet-pub-b" {
-		t.Fatalf("SubnetIds = %v, want the public pair", fc.createCalls[0]["SubnetIds"])
-	}
-	if fc.createCalls[0]["DBSubnetGroupName"] != "env-svc-sql" {
-		t.Fatalf("DBSubnetGroupName = %v", fc.createCalls[0]["DBSubnetGroupName"])
+	if !reflect.DeepEqual(fc.createCalls[0]["SubnetIds"], testNetwork()["subnetIds"]) || fc.createCalls[0]["DBSubnetGroupName"] != "env-svc-sql" {
+		t.Fatalf("subnet group = %v, want the network's subnets under the derived name", fc.createCalls[0])
 	}
 
-	private := maps.Clone(public)
-	private["NET."+key(TypePrivateSubnet)] = map[string]any{"SubnetId": "subnet-priv-a"}
-	private["NET."+key(TypePrivateSubnetB)] = map[string]any{"SubnetId": "subnet-priv-b"}
-	fc.createCalls = nil
-	if _, err := res.Create(context.Background(), auroraSpec(nil, private)); err != nil {
-		t.Fatalf("Create(private network): %v", err)
+	sg := &fakeClient{createID: "sg-1", createProps: map[string]any{"GroupId": "sg-1"}}
+	group := auroraResource(t, sg, nil, TypeDatabaseSecurityGroup)
+	attrs := map[string]map[string]any{"NET." + key(TypeNetworkSecurityGroup): {"GroupId": "sg-net"}}
+	if _, err := group.Create(context.Background(), auroraSpec(nil, attrs)); err != nil {
+		t.Fatalf("Create(security group): %v", err)
 	}
-	if ids, _ := fc.createCalls[0]["SubnetIds"].([]any); len(ids) != 2 || ids[0] != "subnet-priv-a" || ids[1] != "subnet-priv-b" {
-		t.Fatalf("SubnetIds = %v, want the private pair", fc.createCalls[0]["SubnetIds"])
+	want := []any{map[string]any{"IpProtocol": "tcp", "FromPort": 5432, "ToPort": 5432, "SourceSecurityGroupId": "sg-net"}}
+	if sg.createCalls[0]["VpcId"] != "vpc-0abc" || !reflect.DeepEqual(sg.createCalls[0]["SecurityGroupIngress"], want) {
+		t.Fatalf("security group = %v, want the network's VPC admitting its group", sg.createCalls[0])
 	}
 }
 

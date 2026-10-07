@@ -182,35 +182,25 @@ func serviceNetwork(spec resource.Spec) (*serviceBinding, error) {
 }
 
 // vpcConfigFor places the function inside the service's network binding,
-// when it declares one: both subnets of a tier, one per zone, and the VPC's
-// default security group, which allows every outbound connection. The
-// private tier when the network has one, since that is the tier with a NAT
-// route to the internet; the public tier otherwise, where the function
-// reaches the VPC and its gateway endpoints and nothing beyond. Read from
-// what the VPC and subnets published, which this type has because it reads
-// every binding on its service.
+// when it declares one: the subnets the binding names, and the network's
+// own security group, which the stores in the network admit. Whether the
+// function reaches the internet, or S3 and DynamoDB, is the subnets' route
+// tables' business, the VPC's owner's.
 func vpcConfigFor(spec resource.Spec) (map[string]any, error) {
 	network, err := serviceNetwork(spec)
 	if err != nil || network == nil {
 		return nil, err
 	}
-	var subnetIDs []any
-	for _, subnetKey := range tierSubnetKeys(hasPrivateSubnet(network.Config)) {
-		subnetID, err := spec.Attribute(network.Binding+"."+subnetKey, "SubnetId")
-		if network.Binding == spec.Binding {
-			subnetID, err = spec.Attribute(subnetKey, "SubnetId")
-		}
-		if err != nil {
-			return nil, err
-		}
-		subnetIDs = append(subnetIDs, subnetID)
+	declared, err := networkOf(network.Binding, network.Config)
+	if err != nil {
+		return nil, err
 	}
-	groupID, err := spec.Attribute(network.attributeKey(spec, TypeVPC), "DefaultSecurityGroup")
+	groupID, err := spec.Attribute(network.attributeKey(spec, TypeNetworkSecurityGroup), "GroupId")
 	if err != nil {
 		return nil, err
 	}
 	return map[string]any{
-		"SubnetIds":        subnetIDs,
+		"SubnetIds":        declared.subnetIDs,
 		"SecurityGroupIds": []any{groupID},
 	}, nil
 }

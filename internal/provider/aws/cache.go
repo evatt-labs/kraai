@@ -39,17 +39,6 @@ const (
 	cacheReaderPort = 6380
 )
 
-// cacheNetwork names the network binding the entry references, which is
-// where the cache's subnet and the security group's VPC come from.
-func cacheNetwork(spec resource.Spec) (string, error) {
-	network, _ := spec.Config["network"].(string)
-	if network == "" {
-		return "", kerrors.Validation(
-			"keyvalue binding %q names no network to place the cache in", spec.Binding)
-	}
-	return network, nil
-}
-
 // cacheEngine reads the binding's engine, valkey when unsaid.
 func cacheEngine(spec resource.Spec) (string, error) {
 	engine, _ := spec.Config["engine"].(string)
@@ -64,8 +53,8 @@ func cacheEngine(spec resource.Spec) (string, error) {
 }
 
 // registerKeyValue returns the registrations for one Redis-protocol cache: the
-// security group admitting the service's network to it, and the serverless
-// cache itself, placed in that network's subnet.
+// security group admitting the network's members to it, and the serverless
+// cache itself, placed in that network's subnets.
 //
 // Both apply only to a binding declaring driver redis, the one driver this
 // capability has on aws today, so a second store can register beside them
@@ -80,36 +69,27 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 			Capability: manifest.CapabilityKeyValue,
 			Applies:    redisOnly,
 			// The group lives in the referenced network's VPC and admits
-			// that VPC's whole address range: anything the service later
-			// runs inside the network reaches the cache, nothing outside
-			// it does.
-			ReadsReferences: []resource.ReferenceRead{{Key: "network", Type: key(TypeVPC)}},
+			// that network's own security group: what the service runs
+			// inside the network reaches the cache, nothing else in the
+			// VPC does.
+			ReadsReferences: []resource.ReferenceRead{{Key: "network", Type: key(TypeNetworkSecurityGroup)}},
 			Lookup:          resource.LookupByTag,
 			Resource: translated(taggedLookup(client, TypeSecurityGroup),
 				func(spec resource.Spec) (resource.Spec, error) {
-					network, err := cacheNetwork(spec)
+					name, network, err := referencedNetwork(spec, "keyvalue")
 					if err != nil {
 						return spec, err
 					}
-					vpcID, err := referencedAttribute(spec, network, TypeVPC, "VpcId")
-					if err != nil {
-						return spec, err
-					}
-					cidr, err := referencedAttribute(spec, network, TypeVPC, "CidrBlock")
+					ingress, err := admitting(spec, name, cachePort, cacheReaderPort)
 					if err != nil {
 						return spec, err
 					}
 					translated := spec
 					translated.Config = map[string]any{
-						"GroupName":        spec.Name + "-cache",
-						"GroupDescription": "kraai: admits the " + network + " network to the " + spec.Binding + " cache",
-						"VpcId":            vpcID,
-						"SecurityGroupIngress": []any{map[string]any{
-							"IpProtocol": "tcp",
-							"FromPort":   cachePort,
-							"ToPort":     cacheReaderPort,
-							"CidrIp":     cidr,
-						}},
+						"GroupName":            spec.Name + "-cache",
+						"GroupDescription":     "kraai: admits the " + name + " network's members to the " + spec.Binding + " cache",
+						"VpcId":                network.vpcID,
+						"SecurityGroupIngress": []any{ingress},
 					}
 					return translated, nil
 				},
@@ -119,14 +99,9 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 			Provider: Provider, Type: TypeElastiCacheServerlessCache,
 			Capability: manifest.CapabilityKeyValue,
 			Applies:    redisOnly,
-			// Needs its security group's id, and the subnet of the network
-			// it is placed in; the network's own ordering (subnet after
-			// VPC) is the network binding's business.
+			// Needs its security group's id; the subnets are the network
+			// binding's declared config.
 			DependsOn: []string{securityGroupKey},
-			ReadsReferences: []resource.ReferenceRead{
-				{Key: "network", Type: key(TypeSubnet)},
-				{Key: "network", Type: key(TypePublicSubnetB)},
-			},
 			// ServerlessCacheName is the primary identifier, settable at
 			// create and unique per account and region; a derived name is
 			// already the lowercase string ElastiCache stores it as.
@@ -137,23 +112,13 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 					lookup: resource.LookupByName, client: client,
 				}),
 				func(spec resource.Spec) (resource.Spec, error) {
-					network, err := cacheNetwork(spec)
+					_, network, err := referencedNetwork(spec, "keyvalue")
 					if err != nil {
 						return spec, err
 					}
 					engine, err := cacheEngine(spec)
 					if err != nil {
 						return spec, err
-					}
-					// Both public subnets, one per zone, which is what
-					// ElastiCache asks of a serverless cache's subnets.
-					var subnetIDs []any
-					for _, subnetType := range []string{TypeSubnet, TypePublicSubnetB} {
-						subnetID, err := referencedAttribute(spec, network, subnetType, "SubnetId")
-						if err != nil {
-							return spec, err
-						}
-						subnetIDs = append(subnetIDs, subnetID)
 					}
 					groupID, err := spec.Attribute(securityGroupKey, "GroupId")
 					if err != nil {
@@ -164,7 +129,7 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 						"ServerlessCacheName": spec.Name,
 						"Engine":              engine,
 						"MajorEngineVersion":  engineMajorVersion[engine],
-						"SubnetIds":           subnetIDs,
+						"SubnetIds":           network.subnetIDs,
 						"SecurityGroupIds":    []any{groupID},
 					}
 					return translated, nil

@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"maps"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -26,59 +27,52 @@ func keyValueResource(t *testing.T, client ccAPI, typeName string) resource.Reso
 func cacheSpec(config map[string]any, attrs map[string]map[string]any) resource.Spec {
 	base := map[string]any{"driver": DriverRedis, "network": "NET"}
 	maps.Copy(base, config)
-	return resource.Spec{Binding: "CACHE", Name: "env-svc-cache", Config: base, Attributes: attrs}
+	return resource.Spec{Binding: "CACHE", Name: "env-svc-cache", Config: base, Attributes: attrs,
+		Referenced: map[string]map[string]any{"network": testNetwork()}}
 }
 
-// The group lives in the referenced network's VPC and admits its whole
-// address range on the cache's two ports, both read from what the VPC
-// published under the network binding's name.
+// The group lives in the referenced network's VPC and admits the network's
+// own security group, and nothing else, on the cache's two ports.
 func TestCacheSecurityGroupAdmitsTheReferencedNetwork(t *testing.T) {
 	fc := &fakeClient{createID: "sg-1", createProps: map[string]any{"GroupId": "sg-1"}}
 	res := keyValueResource(t, fc, TypeCacheSecurityGroup)
 
 	spec := cacheSpec(nil, map[string]map[string]any{
-		"NET." + key(TypeVPC): {"VpcId": "vpc-abc", "CidrBlock": "10.90.0.0/16"},
+		"NET." + key(TypeNetworkSecurityGroup): {"GroupId": "sg-net"},
 	})
 	if _, err := res.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 	desired := fc.createCalls[0]
-	if desired["VpcId"] != "vpc-abc" {
-		t.Fatalf("VpcId = %v, want the referenced VPC's id", desired["VpcId"])
+	if desired["VpcId"] != "vpc-0abc" {
+		t.Fatalf("VpcId = %v, want the network's VPC", desired["VpcId"])
 	}
 	ingress, _ := desired["SecurityGroupIngress"].([]any)
-	if len(ingress) != 1 {
-		t.Fatalf("SecurityGroupIngress = %v, want one rule", desired["SecurityGroupIngress"])
-	}
-	rule := ingress[0].(map[string]any)
-	if rule["CidrIp"] != "10.90.0.0/16" || rule["FromPort"] != cachePort || rule["ToPort"] != cacheReaderPort || rule["IpProtocol"] != "tcp" {
-		t.Fatalf("ingress rule = %v, want tcp %d-%d from the VPC's block", rule, cachePort, cacheReaderPort)
+	want := []any{map[string]any{"IpProtocol": "tcp", "FromPort": cachePort, "ToPort": cacheReaderPort, "SourceSecurityGroupId": "sg-net"}}
+	if !reflect.DeepEqual(ingress, want) {
+		t.Fatalf("SecurityGroupIngress = %v, want %v", ingress, want)
 	}
 	if _, tagged := desired["Tags"]; !tagged {
 		t.Fatal("the group carries no identity tag, so it could never be found again")
 	}
 }
 
-func TestCacheSecurityGroupFailsLoudlyWithoutTheVPC(t *testing.T) {
+func TestCacheSecurityGroupFailsLoudlyWithoutTheNetworkGroup(t *testing.T) {
 	res := keyValueResource(t, &fakeClient{}, TypeCacheSecurityGroup)
 	_, err := res.Create(context.Background(), cacheSpec(nil, nil))
-	if err == nil || !strings.Contains(err.Error(), key(TypeVPC)) {
-		t.Fatalf("Create without the VPC's attributes: err = %v, want one naming the VPC", err)
+	if err == nil || !strings.Contains(err.Error(), key(TypeNetworkSecurityGroup)) {
+		t.Fatalf("Create without the network's group: err = %v, want one naming it", err)
 	}
 }
 
-// The cache is placed in the referenced network's subnet behind its own
+// The cache is placed in the referenced network's subnets behind its own
 // security group, on Valkey unless the binding says Redis OSS.
 func TestServerlessCacheCreateUsesItsGroupAndTheNetworkSubnet(t *testing.T) {
 	fc := &fakeClient{createID: "env-svc-cache", createProps: map[string]any{},
 		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/ServerlessCacheName"}}}
 	res := keyValueResource(t, fc, TypeElastiCacheServerlessCache)
 
-	attrs := map[string]map[string]any{
-		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-1"},
-		"NET." + key(TypePublicSubnetB): {"SubnetId": "subnet-2"},
-		key(TypeCacheSecurityGroup):     {"GroupId": "sg-1"},
-	}
+	attrs := map[string]map[string]any{key(TypeCacheSecurityGroup): {"GroupId": "sg-1"}}
 	if _, err := res.Create(context.Background(), cacheSpec(nil, attrs)); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -86,8 +80,8 @@ func TestServerlessCacheCreateUsesItsGroupAndTheNetworkSubnet(t *testing.T) {
 	if desired["ServerlessCacheName"] != "env-svc-cache" || desired["Engine"] != engineValkey || desired["MajorEngineVersion"] != "8" {
 		t.Fatalf("desired = %v, want the derived name on valkey 8", desired)
 	}
-	if subnets, _ := desired["SubnetIds"].([]any); len(subnets) != 2 || subnets[0] != "subnet-1" || subnets[1] != "subnet-2" {
-		t.Fatalf("SubnetIds = %v, want both of the network's public subnets", desired["SubnetIds"])
+	if !reflect.DeepEqual(desired["SubnetIds"], testNetwork()["subnetIds"]) {
+		t.Fatalf("SubnetIds = %v, want the network's subnets", desired["SubnetIds"])
 	}
 	if groups, _ := desired["SecurityGroupIds"].([]any); len(groups) != 1 || groups[0] != "sg-1" {
 		t.Fatalf("SecurityGroupIds = %v, want the cache's own group", desired["SecurityGroupIds"])

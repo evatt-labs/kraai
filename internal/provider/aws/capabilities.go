@@ -67,7 +67,7 @@ func Capabilities() []resource.CapabilityDef {
 			Name: manifest.CapabilityKeyValue,
 			Summary: "ElastiCache Serverless cache (driver: redis; Valkey or Redis OSS) " +
 				"inside the network binding the entry names, with a security group " +
-				"admitting that network.",
+				"admitting that network's members.",
 			Binding:          keyvalueBindingSchema,
 			ProviderSettings: regionSettingsSchema,
 			// network names the network binding whose VPC holds the cache.
@@ -81,12 +81,10 @@ func Capabilities() []resource.CapabilityDef {
 		},
 		{
 			Name: manifest.CapabilityNetwork,
-			Summary: "Private VPC with a pair of public subnets across two zones: " +
-				"internet gateway, route table, the default route making them " +
-				"reachable, gateway endpoints routing S3 and DynamoDB inside the " +
-				"VPC, and, when the entry declares a private block, a pair of " +
-				"private subnets with NAT egress.",
-			// The address plan is per binding, not per provider.
+			Summary: "A VPC and subnets the entry names, which Terraform or another tool " +
+				"owns: kraai creates one security group in it, which the service's " +
+				"function attaches and its databases and caches in the network admit.",
+			// The VPC and subnets are per binding, not per provider.
 			Binding:          networkBindingSchema,
 			ProviderSettings: regionSettingsSchema,
 		},

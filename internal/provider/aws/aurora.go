@@ -62,16 +62,6 @@ func bindingEngineIs(engines ...string) resource.Applicability {
 	}
 }
 
-// databaseNetwork names the network binding an Aurora entry references.
-func databaseNetwork(spec resource.Spec) (string, error) {
-	network, _ := spec.Config["network"].(string)
-	if network == "" {
-		return "", kerrors.Validation(
-			"database binding %q asks for engine aurora but names no network to place the cluster in", spec.Binding)
-	}
-	return network, nil
-}
-
 // validateAuroraSpec refuses a binding that carries DynamoDB's keys or
 // names no network, before plan reads anything.
 func validateAuroraSpec(spec resource.Spec) error {
@@ -82,8 +72,11 @@ func validateAuroraSpec(spec resource.Spec) error {
 				spec.Binding, field)
 		}
 	}
-	_, err := databaseNetwork(spec)
-	return err
+	if network, _ := spec.Config["network"].(string); network == "" {
+		return kerrors.Validation(
+			"database binding %q asks for engine aurora but names no network to place the cluster in", spec.Binding)
+	}
+	return nil
 }
 
 // auroraValidated wraps a translated resource with the Aurora binding
@@ -95,72 +88,32 @@ type auroraValidated struct {
 
 func (a *auroraValidated) ValidateSpec(spec resource.Spec) error { return validateAuroraSpec(spec) }
 
-// networkSubnets returns the ids of the referenced network's subnets a
-// cluster should sit in: the private pair when the network has one, the
-// public pair otherwise. Which it has is known from what was published,
-// since the entry names the binding but not what the binding declares.
-func networkSubnets(spec resource.Spec, network string) ([]any, error) {
-	private := []any{}
-	for _, subnetType := range []string{TypePrivateSubnet, TypePrivateSubnetB} {
-		id, err := referencedAttribute(spec, network, subnetType, "SubnetId")
-		if err != nil {
-			private = nil
-			break
-		}
-		private = append(private, id)
-	}
-	if len(private) == 2 {
-		return private, nil
-	}
-	public := []any{}
-	for _, subnetType := range []string{TypeSubnet, TypePublicSubnetB} {
-		id, err := referencedAttribute(spec, network, subnetType, "SubnetId")
-		if err != nil {
-			return nil, err
-		}
-		public = append(public, id)
-	}
-	return public, nil
-}
-
 // registerAurora returns the registrations for one Aurora Serverless v2
 // cluster: the subnet group naming the network's subnets, the security
-// group admitting the network, the cluster, and its one serverless writer.
+// group admitting the network's members, the cluster, and its one
+// serverless writer.
 func registerAurora(client *Client) []resource.Registration {
 	subnetGroupKey := key(TypeRDSDBSubnetGroup)
 	securityGroupKey := key(TypeDatabaseSecurityGroup)
 	clusterKey := key(TypeRDSDBCluster)
 	auroraOnly := []resource.Applicability{bindingDriverIs(DriverPostgres), bindingEngineIs(engineAurora)}
-	networkSubnetReads := []resource.ReferenceRead{
-		{Key: "network", Type: key(TypeSubnet)},
-		{Key: "network", Type: key(TypePublicSubnetB)},
-		{Key: "network", Type: key(TypePrivateSubnet)},
-		{Key: "network", Type: key(TypePrivateSubnetB)},
-	}
 
 	return []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRDSDBSubnetGroup, Capability: manifest.CapabilityDatabase,
 			Applies: auroraOnly, Lookup: resource.LookupByName,
-			// Every subnet of both tiers; the ones the network does not
-			// declare contribute no edge and publish nothing.
-			ReadsReferences: networkSubnetReads,
 			Resource: &auroraValidated{translated(
 				withIdentity(&resourceType{provider: Provider, typeName: TypeRDSDBSubnetGroup, lookup: resource.LookupByName, client: client}),
 				func(spec resource.Spec) (resource.Spec, error) {
-					network, err := databaseNetwork(spec)
-					if err != nil {
-						return spec, err
-					}
-					subnets, err := networkSubnets(spec, network)
+					name, network, err := referencedNetwork(spec, "database")
 					if err != nil {
 						return spec, err
 					}
 					translated := spec
 					translated.Config = map[string]any{
 						"DBSubnetGroupName":        spec.Name,
-						"DBSubnetGroupDescription": "kraai: the " + network + " network's subnets for the " + spec.Binding + " cluster",
-						"SubnetIds":                subnets,
+						"DBSubnetGroupDescription": "kraai: the " + name + " network's subnets for the " + spec.Binding + " cluster",
+						"SubnetIds":                network.subnetIDs,
 					}
 					return translated, nil
 				},
@@ -170,32 +123,23 @@ func registerAurora(client *Client) []resource.Registration {
 			Provider: Provider, Type: TypeDatabaseSecurityGroup, VendorType: TypeSecurityGroup,
 			Capability: manifest.CapabilityDatabase,
 			Applies:    auroraOnly, Lookup: resource.LookupByTag,
-			ReadsReferences: []resource.ReferenceRead{{Key: "network", Type: key(TypeVPC)}},
+			ReadsReferences: []resource.ReferenceRead{{Key: "network", Type: key(TypeNetworkSecurityGroup)}},
 			Resource: translated(taggedLookup(client, TypeSecurityGroup),
 				func(spec resource.Spec) (resource.Spec, error) {
-					network, err := databaseNetwork(spec)
+					name, network, err := referencedNetwork(spec, "database")
 					if err != nil {
 						return spec, err
 					}
-					vpcID, err := referencedAttribute(spec, network, TypeVPC, "VpcId")
-					if err != nil {
-						return spec, err
-					}
-					cidr, err := referencedAttribute(spec, network, TypeVPC, "CidrBlock")
+					ingress, err := admitting(spec, name, 5432, 5432)
 					if err != nil {
 						return spec, err
 					}
 					translated := spec
 					translated.Config = map[string]any{
-						"GroupName":        spec.Name + "-database",
-						"GroupDescription": "kraai: admits the " + network + " network to the " + spec.Binding + " cluster",
-						"VpcId":            vpcID,
-						"SecurityGroupIngress": []any{map[string]any{
-							"IpProtocol": "tcp",
-							"FromPort":   5432,
-							"ToPort":     5432,
-							"CidrIp":     cidr,
-						}},
+						"GroupName":            spec.Name + "-database",
+						"GroupDescription":     "kraai: admits the " + name + " network's members to the " + spec.Binding + " cluster",
+						"VpcId":                network.vpcID,
+						"SecurityGroupIngress": []any{ingress},
 					}
 					return translated, nil
 				},

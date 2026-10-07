@@ -80,7 +80,7 @@ func TestConcurrentReadsShareOneRequest(t *testing.T) {
 	maps := make([]map[string]any, 16)
 	var i atomic.Int32
 	runConcurrently(t, g, 16, g.gets.Load, func() {
-		props, found, err := c.GetResource(t.Context(), TypeSubnet, "subnet-1")
+		props, found, err := c.GetResource(t.Context(), "AWS::EC2::Subnet", "subnet-1")
 		if err != nil || !found {
 			t.Error(err)
 			return
@@ -98,7 +98,7 @@ func TestConcurrentReadsShareOneRequest(t *testing.T) {
 	g2 := &gatedCC{release: make(chan struct{})}
 	c2 := &Client{cc: g2}
 	runConcurrently(t, g2, 16, g2.lists.Load, func() {
-		ids, err := c2.ListResources(t.Context(), TypeSubnet, nil)
+		ids, err := c2.ListResources(t.Context(), "AWS::EC2::Subnet", nil)
 		if err != nil || len(ids) != 1 {
 			t.Error(ids, err)
 		}
@@ -115,12 +115,12 @@ func TestAFailedSharedReadIsNotRemembered(t *testing.T) {
 	g.fail.Store(true)
 	c := &Client{cc: g}
 	runConcurrently(t, g, 4, g.gets.Load, func() {
-		if _, _, err := c.GetResource(t.Context(), TypeSubnet, "subnet-1"); err == nil {
+		if _, _, err := c.GetResource(t.Context(), "AWS::EC2::Subnet", "subnet-1"); err == nil {
 			t.Error("a failed read reported success")
 		}
 	})
 	g.fail.Store(false)
-	if _, found, err := c.GetResource(t.Context(), TypeSubnet, "subnet-1"); err != nil || !found {
+	if _, found, err := c.GetResource(t.Context(), "AWS::EC2::Subnet", "subnet-1"); err != nil || !found {
 		t.Fatalf("the read after a failure = %v, %v", found, err)
 	}
 	if got := g.gets.Load(); got != 2 {

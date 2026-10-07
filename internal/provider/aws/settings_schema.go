@@ -125,27 +125,20 @@ var cdnBindingSchema = resource.NewSchema("aws cdn binding", map[string]any{
 })
 
 // networkBindingSchema validates one entry of a service's `network:` list:
-// the VPC and public blocks, required; optionally a private block, which
-// opts into NAT egress (billed by the hour), and the two zones for an
-// account whose region does not expose a and b. Each tier's block is halved
-// into two subnets, one per zone. CIDRs are checked for presence and type
-// only: EC2 rejects an unusable block with a precise message, and a second
-// copy of its rules here would be a worse one.
+// the VPC it names and at least two of its subnets, one per availability
+// zone, as a database subnet group needs. Usually Terraform outputs.
 var networkBindingSchema = resource.NewSchema("aws network binding", map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"binding": map[string]any{"type": "string"},
-		"cidr":    map[string]any{"type": "string"},
-		"subnet":  map[string]any{"type": "string"},
-		"private": map[string]any{"type": "string"},
-		"azs": map[string]any{
+		"vpcId":   map[string]any{"type": "string", "pattern": vpcIDPattern.String()},
+		"subnetIds": map[string]any{
 			"type":     "array",
-			"items":    map[string]any{"type": "string"},
+			"items":    map[string]any{"type": "string", "pattern": subnetIDPattern.String()},
 			"minItems": 2,
-			"maxItems": 2,
 		},
 	},
-	"required":             []any{"binding", "cidr", "subnet"},
+	"required":             []any{"binding", "vpcId", "subnetIds"},
 	"additionalProperties": false,
 })
 

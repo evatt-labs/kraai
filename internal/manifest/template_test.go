@@ -1,6 +1,7 @@
 package manifest_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -204,5 +205,24 @@ func requireEngineValidationError(t *testing.T, err error, wantSource string) {
 	}
 	if !strings.Contains(kerr.Error(), wantSource) {
 		t.Errorf("error %q does not mention source %q", kerr.Error(), wantSource)
+	}
+}
+
+// json renders a list, a map, a number kept as written and a string with
+// quotes as JSON, unescaped.
+func TestJSONFilter(t *testing.T) {
+	engine := manifest.NewTemplateEngine(nil)
+	ctx := map[string]any{
+		"ids":     []any{"subnet-1", "subnet-2"},
+		"tags":    map[string]any{"a": "b"},
+		"account": json.Number("123456789012"),
+		"quoted":  `say "hi"`,
+	}
+	out, err := engine.Render("t.j2", []byte(`{{ ids|json }} {{ tags|json }} {{ account|json }} {{ quoted|json }}`), ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := `["subnet-1","subnet-2"] {"a":"b"} 123456789012 "say \"hi\""`; string(out) != want {
+		t.Fatalf("rendered %s, want %s", out, want)
 	}
 }

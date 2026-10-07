@@ -2,10 +2,12 @@ package manifest
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/flosch/pongo2/v6"
 
@@ -38,7 +40,27 @@ type pongoEngine struct {
 // extends and ssi tags resolve only within fs, the same manifest-rooted FS
 // the loader reads from, never the process's ambient filesystem.
 func NewTemplateEngine(fs FS) TemplateEngine {
+	registerFilters.Do(func() {
+		// pongo2 keeps filters in one registry for the process, so they are
+		// registered once, by the first engine.
+		if err := pongo2.RegisterFilter("json", jsonFilter); err != nil {
+			panic(err)
+		}
+	})
 	return &pongoEngine{set: pongo2.NewSet("kraai", pongoLoader{fs: fs})}
+}
+
+var registerFilters sync.Once
+
+// jsonFilter renders a value as JSON, which YAML reads as the same value:
+// a list or map, such as a Terraform output's subnet ids, that pongo2
+// would otherwise print in Go's own syntax.
+func jsonFilter(in *pongo2.Value, _ *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	out, err := json.Marshal(in.Interface())
+	if err != nil {
+		return nil, &pongo2.Error{Sender: "filter:json", OrigError: err}
+	}
+	return pongo2.AsSafeValue(string(out)), nil
 }
 
 func (e *pongoEngine) Render(source string, template []byte, context map[string]any) ([]byte, error) {

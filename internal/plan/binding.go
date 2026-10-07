@@ -85,7 +85,7 @@ func (p *Planner) expandBinding(
 				ReadsBindings: readsBindings,
 			},
 			ref:       resource.Ref{Provider: r.Provider, Type: r.Type, Name: name, Import: adopted},
-			spec:      resource.Spec{Binding: binding, Name: name, Config: config},
+			spec:      resource.Spec{Binding: binding, Name: name, Config: config, Referenced: referencedConfig(m.Services[svcKey], binding)},
 			res:       r.Resource,
 			dependsOn: r.DependsOn,
 			reads:     reads,
@@ -160,4 +160,25 @@ func (p *Planner) expandEntries(
 		})
 	}
 	return out, nil
+}
+
+// referencedConfig is, by entry key, the declared config of each sibling
+// binding the service's binding entry references; nil when it references
+// none.
+func referencedConfig(svc manifest.Service, binding string) map[string]map[string]any {
+	refs := svc.References[binding]
+	if len(refs) == 0 {
+		return nil
+	}
+	out := make(map[string]map[string]any, len(refs))
+	for key, target := range refs {
+		for _, entries := range svc.Bindings {
+			for _, entry := range entries {
+				if entry.Name() == target {
+					out[key] = entry.Config()
+				}
+			}
+		}
+	}
+	return out
 }

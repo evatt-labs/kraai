@@ -13,18 +13,6 @@ import (
 // what the schema derives instead. Each is a per-type trick the generic
 // layer will have to carry as a declared attribute or drop.
 var constructedIdentity = map[string]cfschema.Identity{
-	// Identifier is RouteTableId|CidrBlock; kraai joins it from the table
-	// it looked up and the fixed default route. CidrBlock is read-only.
-	TypeRoute:        cfschema.IdentityByAttr,
-	TypePrivateRoute: cfschema.IdentityByAttr,
-	// Identifier is a provider-assigned Id; kraai lists every association
-	// and matches SubnetId and RouteTableId.
-	TypeSubnetRouteTableAssociation:         cfschema.IdentityByAttr,
-	TypePublicSubnetBRouteTableAssociation:  cfschema.IdentityByAttr,
-	TypePrivateSubnetRouteTableAssociation:  cfschema.IdentityByAttr,
-	TypePrivateSubnetBRouteTableAssociation: cfschema.IdentityByAttr,
-	// Identifier is AttachmentType|VpcId; kraai lists and matches VpcId.
-	TypeVPCGatewayAttachment: cfschema.IdentityByAttr,
 	// The schema's identifier is the rule's Arn, read-only; kraai passes
 	// the rule Name as the identifier and the handler accepts it.
 	TypeEventsRule: cfschema.IdentityByTag,
