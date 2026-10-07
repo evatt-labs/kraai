@@ -2,9 +2,13 @@ package aws
 
 import (
 	"context"
+	"errors"
+	"regexp"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -104,5 +108,91 @@ func TestReferencedNetworkMustBeOnTheService(t *testing.T) {
 	spec.Config = map[string]any{}
 	if _, _, err := referencedNetwork(spec, "database"); err == nil || !strings.Contains(err.Error(), "names no network") {
 		t.Fatalf("referencedNetwork = %v", err)
+	}
+}
+
+// ec2Description is the character set EC2 accepts in a security group's
+// description: anything else is refused at create.
+var ec2Description = regexp.MustCompile(`^[a-zA-Z0-9. _\-:/()#,@\[\]+=&;{}!$*]{0,255}$`)
+
+// Every security group kraai creates has a description EC2 accepts.
+func TestSecurityGroupDescriptionsAreValid(t *testing.T) {
+	attrs := map[string]map[string]any{"NET." + key(TypeNetworkSecurityGroup): {"GroupId": "sg-net"}}
+	referenced := map[string]map[string]any{"network": testNetwork()}
+	for _, c := range []struct {
+		res  resource.Resource
+		spec resource.Spec
+	}{
+		{networkGroup(t, &fakeClient{}), resource.Spec{Binding: "NET", Name: "env-svc-net", Config: testNetwork()}},
+		{keyValueResource(t, &fakeClient{}, TypeCacheSecurityGroup), resource.Spec{Binding: "CACHE", Name: "env-svc-cache",
+			Config: map[string]any{"driver": DriverRedis, "network": "NET"}, Attributes: attrs, Referenced: referenced}},
+		{auroraResource(t, &fakeClient{}, nil, TypeDatabaseSecurityGroup), resource.Spec{Binding: "SQL", Name: "env-svc-sql",
+			Config: map[string]any{"driver": DriverPostgres, "engine": engineAurora, "network": "NET"}, Attributes: attrs, Referenced: referenced}},
+	} {
+		translator, ok := c.res.(*translatedResource)
+		if group, isGroup := c.res.(*networkGroupResource); isGroup {
+			translator, ok = group.translatedResource, true
+		}
+		if !ok {
+			t.Fatalf("%T is not a translated resource", c.res)
+		}
+		translated, err := translator.translate(context.Background(), c.spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if d, _ := translated.Config["GroupDescription"].(string); !ec2Description.MatchString(d) {
+			t.Errorf("%s: description %q is not one EC2 accepts", c.spec.Binding, d)
+		}
+	}
+}
+
+// heldClient refuses the first held deletes as EC2 does while a Lambda
+// interface still uses the group.
+type heldClient struct {
+	*fakeClient
+	held int
+	err  error
+}
+
+func (h *heldClient) DeleteResource(ctx context.Context, typeName, identifier string) error {
+	if h.held > 0 {
+		h.held--
+		return h.err
+	}
+	return h.fakeClient.DeleteResource(ctx, typeName, identifier)
+}
+
+// The network's group waits out the interfaces of the functions destroyed
+// before it, and gives up on anything else at once, or once its time is up.
+func TestNetworkGroupDeleteWaitsForItsInterfaces(t *testing.T) {
+	held := &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource sg-1 has a dependent object"}
+	for name, c := range map[string]struct {
+		held    int
+		err     error
+		timeout time.Duration
+		want    string
+		deletes int
+	}{
+		"released after two tries": {held: 2, err: held, timeout: time.Minute, deletes: 1},
+		"another error":            {held: 1, err: errors.New("AccessDenied"), timeout: time.Minute, want: "AccessDenied"},
+		"never released":           {held: 1000, err: held, timeout: 20 * time.Millisecond, want: "still in use"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+				list: []string{"sg-1"}}
+			client := &heldClient{fakeClient: fc, held: c.held, err: c.err}
+			res := networkGroup(t, client).(*networkGroupResource)
+			res.releaseWait, res.releaseTimeout = time.Millisecond, c.timeout
+			err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"})
+			if c.want == "" && err != nil {
+				t.Fatalf("Delete = %v", err)
+			}
+			if c.want != "" && (err == nil || !strings.Contains(err.Error(), c.want)) {
+				t.Fatalf("Delete = %v, want %q", err, c.want)
+			}
+			if len(fc.deleteCalls) != c.deletes {
+				t.Fatalf("%d deletes reached the client, want %d", len(fc.deleteCalls), c.deletes)
+			}
+		})
 	}
 }

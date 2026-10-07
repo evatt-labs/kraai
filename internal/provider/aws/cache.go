@@ -87,7 +87,7 @@ func registerKeyValue(client ccAPI) []resource.Registration {
 					translated := spec
 					translated.Config = map[string]any{
 						"GroupName":            spec.Name + "-cache",
-						"GroupDescription":     "kraai: admits the " + name + " network's members to the " + spec.Binding + " cache",
+						"GroupDescription":     "kraai: admits members of the " + name + " network to the " + spec.Binding + " cache",
 						"VpcId":                network.vpcID,
 						"SecurityGroupIngress": []any{ingress},
 					}

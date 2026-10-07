@@ -2,10 +2,14 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"regexp"
+	"strings"
+	"time"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
@@ -85,7 +89,7 @@ func registerNetwork(client ccAPI) []resource.Registration {
 		Provider: Provider, Type: TypeNetworkSecurityGroup, VendorType: TypeSecurityGroup,
 		Capability: manifest.CapabilityNetwork,
 		Lookup:     resource.LookupByTag,
-		Resource: translated(taggedLookup(client, TypeSecurityGroup),
+		Resource: &networkGroupResource{releaseWait: networkReleaseWait, releaseTimeout: networkReleaseTimeout, translatedResource: translated(taggedLookup(client, TypeSecurityGroup),
 			func(spec resource.Spec) (resource.Spec, error) {
 				vpcID, err := networkVPC(spec)
 				if err != nil {
@@ -99,8 +103,54 @@ func registerNetwork(client ccAPI) []resource.Registration {
 				}
 				return translated, nil
 			},
-			map[string]func(resource.Spec) (string, error){"VpcId": networkVPC}),
+			map[string]func(resource.Spec) (string, error){"VpcId": networkVPC})},
 	}}
+}
+
+// How long a network's group waits for Lambda to let go of it. A function's
+// network interfaces outlive the function by up to about twenty minutes,
+// and while one holds the group EC2 refuses to delete it.
+const (
+	networkReleaseWait    = 30 * time.Second
+	networkReleaseTimeout = 45 * time.Minute
+)
+
+// networkGroupResource is the network's group, whose delete waits out the
+// interfaces of the functions destroyed before it.
+type networkGroupResource struct {
+	*translatedResource
+	releaseWait, releaseTimeout time.Duration
+}
+
+// Delete retries while the group is held by a network interface, up to
+// releaseTimeout, and fails on anything else at once.
+func (n *networkGroupResource) Delete(ctx context.Context, ref resource.Ref) error {
+	deadline := time.Now().Add(n.releaseTimeout)
+	for {
+		err := n.translatedResource.Delete(ctx, ref)
+		if err == nil || !heldByAnInterface(err) {
+			return err
+		}
+		if time.Now().After(deadline) {
+			return kerrors.Wrap(err, kerrors.CodeUnexpected,
+				"the %s network's security group is still in use after %s; the next destroy retries it", ref.Name, n.releaseTimeout)
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(n.releaseWait):
+		}
+	}
+}
+
+// heldByAnInterface reports whether a delete was refused because a network
+// interface still uses the group.
+func heldByAnInterface(err error) bool {
+	var apiErr *direct.APIError
+	if errors.As(err, &apiErr) {
+		return apiErr.Code == "DependencyViolation"
+	}
+	return strings.Contains(err.Error(), "DependencyViolation")
 }
 
 // admitting is the ingress rule letting a network's members reach a store

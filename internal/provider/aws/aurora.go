@@ -137,7 +137,7 @@ func registerAurora(client *Client) []resource.Registration {
 					translated := spec
 					translated.Config = map[string]any{
 						"GroupName":            spec.Name + "-database",
-						"GroupDescription":     "kraai: admits the " + name + " network's members to the " + spec.Binding + " cluster",
+						"GroupDescription":     "kraai: admits members of the " + name + " network to the " + spec.Binding + " cluster",
 						"VpcId":                network.vpcID,
 						"SecurityGroupIngress": []any{ingress},
 					}
