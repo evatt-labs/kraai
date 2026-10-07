@@ -1,3 +1,5 @@
+// Package db parses the Postgres connection URIs a provider hands back
+// into their parts, for the resources that carry a connection.
 package db
 
 import (
