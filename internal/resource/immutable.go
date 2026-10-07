@@ -7,9 +7,11 @@ import "errors"
 // be renamed, an R2 bucket is its name. The fields that identify them are
 // the ones that cannot change, so a difference means replace.
 //
-// A sentinel rather than a silent no-op, so the planner has to decide,
-// replace or refuse, instead of believing it reconciled a difference it
-// never touched.
+// The planner never sends such a type an update: its Differ answers
+// Immutable for any difference it sees, so the plan is a replacement, or it
+// has no Differ and plans no change. The sentinel is the backstop for a
+// caller that reaches Update anyway, refused rather than a silent no-op
+// that would believe it reconciled a difference it never touched.
 var ErrImmutable = errors.New("resource type cannot be updated in place")
 
 // SecretProducer is implemented by a Resource whose state includes values
