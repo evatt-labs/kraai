@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -66,11 +65,8 @@ func runGC(
 	cmd *cobra.Command, dir string, setArgs, policyPaths []string, dryRun bool,
 	assembler RegistryAssembler, resolve ManifestResolver, stores LockStoreAssembler,
 ) error {
-	fsys, err := manifest.NewFS(dir)
+	fsys, err := openManifestDir(dir)
 	if err != nil {
-		return err
-	}
-	if err := env.LoadDotEnv(dir); err != nil {
 		return err
 	}
 	names, err := environmentNames(fsys)
