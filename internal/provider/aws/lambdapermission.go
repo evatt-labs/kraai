@@ -128,10 +128,16 @@ func (p *lambdaPermissionResource) translate(ctx context.Context, spec resource.
 // a network call. Every property of this type is createOnly, so a
 // difference in what can be seen without I/O already means replace, and
 // SourceArn cannot change without the service name changing with it.
+// Cloud Control reads FunctionName back as the function's ARN, so one
+// naming the derived function in either form is the same function.
 func (p *lambdaPermissionResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	function := any(spec.Name)
+	if state != nil && lambdaPermissionMatch(state.Attributes, spec.Name) {
+		function = state.Attributes["FunctionName"]
+	}
 	partial := spec
 	partial.Config = map[string]any{
-		"FunctionName": spec.Name,
+		"FunctionName": function,
 		"Principal":    p.principal,
 	}
 	return p.compare(partial, state)
@@ -140,9 +146,9 @@ func (p *lambdaPermissionResource) Diff(spec resource.Spec, state *resource.Stat
 // lambdaPermissionMatch is AWS::Lambda::Permission's byAttr match. The type
 // has no Tags property, so byTag is unavailable. Matching on FunctionName
 // alone is safe because each registration walks its own scoped list and
-// creates at most one permission per principal per service. Whether Cloud
-// Control echoes the bare name or normalizes it to an ARN is unverified
-// live, so both forms are accepted.
+// creates at most one permission per principal per service. Cloud Control
+// reads FunctionName back as the function's ARN (seen live); the bare
+// name is accepted too.
 func lambdaPermissionMatch(properties map[string]any, name string) bool {
 	fn, _ := properties["FunctionName"].(string)
 	if fn == "" {
