@@ -9,9 +9,8 @@ import (
 )
 
 // Registry maps provider/type to an implementation, and capability plus
-// vendor to the types that fulfil it. Plugin-provided and compiled-in types
-// register identically and are wrapped by the same decorator, so nothing
-// downstream can tell them apart.
+// vendor to the types that fulfil it. Every type is wrapped by the same
+// decorator.
 type Registry struct {
 	mu sync.RWMutex
 	// byKey is provider/type -> registration.
@@ -52,8 +51,8 @@ func NewRegistry(opts ...Option) *Registry {
 // Register adds a resource type.
 //
 // Registering the same provider/type twice is an error rather than an
-// overwrite. A plugin shadowing a built-in has to be an explicit act where
-// the registry is assembled, not a side effect of load order.
+// overwrite: one type shadowing another has to be an explicit act where the
+// registry is assembled, not a side effect of load order.
 func (r *Registry) Register(reg Registration) error {
 	if err := validate(reg); err != nil {
 		return err

@@ -105,17 +105,10 @@ func runDestroy(
 		return err
 	}
 
-	// Resolving loads the manifest, loads the plugins it declares, and
-	// validates the one against a vocabulary the other may have extended —
-	// see internal/assemble.Resolve for why that has to happen in that order.
 	resolved, err := resolve(cmd.Context(), fsys, envName, setArgs)
 	if err != nil {
 		return err
 	}
-	// Tears down the plugin runtime on every exit from here, including the
-	// happy path: a command that returns without closing it leaks the wazero
-	// runtime and its pooled instances for the rest of the process.
-	defer func() { _ = resolved.Close(cmd.Context()) }()
 	m := resolved.Manifest
 
 	policies, err := policy.Load(fsys, policyPaths, m.Environment.Policies)

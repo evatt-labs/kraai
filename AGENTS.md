@@ -162,10 +162,9 @@ or a package `doc.go`, never in a function's doc comment.
 to a document that moves. State the reason instead.
 
 The tree was brought to this convention in September 2026: about 28% of
-non-test lines are comments, and the longest doc block is the plugin ABI
-contract, which is a compatibility surface. Do not reintroduce the old
-verbosity, and do not cite an issue, PR or workstream in a comment; state
-the reason instead.
+non-test lines are comments. Do not reintroduce the old verbosity, and do
+not cite an issue, PR or workstream in a comment; state the reason
+instead.
 
 Commits: conventional prefix, imperative, no filler, breaking changes use
 `feat!:`. **No AI attribution anywhere** — no generated-with lines, no

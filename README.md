@@ -476,7 +476,6 @@ kraai plan <environment>       # read-only; never mutates, never locks
 kraai apply <environment>      # create, or replace with --replace
 kraai destroy <environment>    # tear down, in reverse dependency order
 kraai capabilities             # what each provider offers (no credentials needed)
-kraai plugins --env <name>     # load the manifest's plugins and show what they provide
 kraai iam-policy <environment> # the least-privilege IAM policy the manifest needs
 kraai status <environment>     # last apply, by whom, and when the environment expires
 kraai gc [--dry-run]           # destroy the ephemeral environments whose ttl has elapsed

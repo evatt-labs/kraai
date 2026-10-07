@@ -11,17 +11,3 @@ providers:
       project: kraai-control-plane
       database: appdb
       role: app
-
-plugins:
-  - name: example
-    path: kraai-plugin-example.wasm
-    provides:
-      - key: example.echo
-        export: kraai_export_echo
-  - name: cost-guard
-    path: ./plugins/cost-guard.wasm
-    grants:
-      - http_fetch
-    provides:
-      - key: policy.cost
-        export: kraai_export_check_cost

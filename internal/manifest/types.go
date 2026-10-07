@@ -22,41 +22,10 @@ type Manifest struct {
 	Dir string
 }
 
-// Root is kraai.yaml at the manifest root: providers and plugins.
+// Root is kraai.yaml at the manifest root: its version and providers.
 type Root struct {
 	Version   int       `yaml:"version"`
 	Providers Providers `yaml:"providers"`
-	Plugins   []Plugin  `yaml:"plugins,omitempty"`
-}
-
-// Plugin is one entry of kraai.yaml's `plugins:` list: a WASM module to
-// load, what it may reach, and what it implements. Grants and Provides are
-// written here rather than discovered from the module, because a module
-// cannot be trusted to describe its own sandbox.
-type Plugin struct {
-	// Name identifies this plugin in errors, in `kraai plugins` output, and
-	// as the source recorded against everything it registers.
-	Name string `yaml:"name"`
-	// Path is the module's .wasm file, relative to the manifest root.
-	// Always a local file; kraai does not fetch plugins.
-	Path string `yaml:"path"`
-	// Grants names the host capabilities this plugin may call. Empty is a
-	// plugin that can reach nothing outside its own memory. Checked by
-	// internal/plugin, which owns the set, not here.
-	Grants []string `yaml:"grants,omitempty"`
-	// Provides names what this plugin implements: the key each provision is
-	// registered under, and the module export implementing it. Only the
-	// exports named here are registered.
-	Provides []PluginProvision `yaml:"provides"`
-}
-
-// PluginProvision is one capability a plugin implements.
-type PluginProvision struct {
-	// Key is what the provision is registered under. Two plugins naming the
-	// same key is an override: the later one wins with a recorded warning.
-	Key string `yaml:"key"`
-	// Export is the module's exported function implementing Key.
-	Export string `yaml:"export"`
 }
 
 // Providers names which vendor fulfils each capability kraai.yaml declares,

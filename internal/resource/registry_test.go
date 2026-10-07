@@ -35,9 +35,8 @@ func TestRegisterAndLookup(t *testing.T) {
 	}
 }
 
-// A duplicate must be an explicit act, not a side effect of load order — a
-// plugin shadowing a built-in is real, but it cannot depend on which was
-// listed first.
+// A duplicate must be an explicit act, not a side effect of load order: it
+// cannot depend on which was listed first.
 func TestRegisterRejectsDuplicates(t *testing.T) {
 	r := NewRegistry()
 	if err := r.Register(reg(t, "cloudflare", "d1_database", "database")); err != nil {
