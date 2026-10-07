@@ -1,19 +1,24 @@
 # kraai
 
-**Multi-provider infrastructure as code, driven by a manifest, with no state
-file.**
+**Application environments on top of Terraform.**
 
-One manifest declares infrastructure, and the code it runs, across AWS,
-Cloudflare and Neon. A service asks for what it needs in vendor-neutral terms
-(a database, a queue, a network) and `kraai.yaml` names the vendor that
-provides each. Where no capability fits, the manifest names the vendor's own
-resource: 1,577 of the 1,643 AWS-published resource types in kraai's schema
-index, validated against AWS's schema at plan time. `kraai plan` answers every question with a live
-lookup, `kraai apply` makes the manifest real, and `kraai destroy` removes it.
-The manifest is the only source of truth.
+Terraform or OpenTofu owns the shared base: the network, the DNS zones, the
+account. kraai creates the environments an application runs in on top of
+it, a preview per pull request, staging, production, and tears the
+ephemeral ones down when their ttl elapses. One manifest declares what each
+service needs in vendor-neutral terms (a database, a queue, a function) and
+which vendor provides each, across AWS, Cloudflare and Neon. Where no
+capability fits, the manifest names the vendor's own resource type: 1,577
+of the 1,643 AWS-published types in kraai's schema index, validated against
+AWS's schema at plan time.
 
-kraai provisions infrastructure *and* deploys application code: Terraform
-provisions but does not deploy, and tools that deploy do not provision.
+kraai keeps no state file. `kraai plan` answers every question with a live
+lookup, `kraai apply` makes an environment real, deploying the application
+code into it, and `kraai destroy` removes it.
+
+Reading Terraform's outputs as manifest values is not built yet
+([#480](https://github.com/evatt-labs/kraai/issues/480)); until it is, a
+manifest names what Terraform created as literal or `--set` values.
 
 > **Status: early, and honest about it.** `plan`, `apply` and `destroy` work
 > and have deployed a real FastAPI service to AWS Lambda behind API Gateway,
@@ -770,8 +775,9 @@ credential handoff between waves, VPC provisioning, protected-environment
 gating, schema-validated provider settings, and the AWS, Cloudflare and Neon
 providers above.
 
-Designed and **not** built — each has a tracking issue:
+Designed and **not** built, each with a tracking issue:
 
+- Terraform and OpenTofu outputs as manifest values ([#480](https://github.com/evatt-labs/kraai/issues/480))
 - A lock backend for manifests with no AWS provider (an R2 bucket for Cloudflare-only manifests)
 
 The `unbuilt` and `dead-field` labels track the rest, and the
