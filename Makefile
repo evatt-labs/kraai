@@ -23,6 +23,7 @@ build:
 
 vet:
 	go vet -p $(JOBS) ./...
+	go vet -p $(JOBS) -tags integration ./...
 
 # Matches go-ci.yml's go-race job.
 test:

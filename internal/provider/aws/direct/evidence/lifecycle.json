@@ -31,42 +31,6 @@
       "reader": "ad6feb8d9b1f19e478a0e6a26192c966b9a0a6c747ba30a2d6bfdc4e53c83a9a"
     },
     {
-      "type": "AWS::EC2::InternetGateway",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "Tags"
-      ],
-      "reader": "7dd0fa4f0503328d5f357ae5b983116ce6d27df8c58ad89c46ed5fac3a6ae337",
-      "observed": [
-        "InvalidInternetGatewayID.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::Route",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "GatewayId"
-      ],
-      "reader": "77004e3fb6c4490f0bd112d54ebc4a0a66942fb0b549ddd9d701ffee922c322d",
-      "observed": [
-        "InvalidRoute.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::RouteTable",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "Tags"
-      ],
-      "reader": "cd8bfcfb9973bcf13479e587d858e6a5bdef02d95e09388ee8cd618a1cf40b97",
-      "observed": [
-        "InvalidRouteTableID.NotFound"
-      ]
-    },
-    {
       "type": "AWS::EC2::SecurityGroup",
       "date": "2026-10-05",
       "outcome": "parity",
@@ -78,57 +42,6 @@
       "reader": "3f762aa1256c0bf507e725a0d1d7fb395e55cf83263f669e55bdb8c6212b1d11",
       "observed": [
         "InvalidGroup.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::Subnet",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "AssignIpv6AddressOnCreation",
-        "EnableDns64",
-        "MapPublicIpOnLaunch",
-        "PrivateDnsNameOptionsOnLaunch",
-        "Tags"
-      ],
-      "reader": "014eec69f092c88c2cc4f5170fcdec6d76d6d1d26edef686c59cfcd0689d6bef",
-      "observed": [
-        "InvalidSubnetID.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::SubnetRouteTableAssociation",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "reader": "381c4ad6d966f09831ca9d935cc3243c7258b42e4269d970aa852553f9f57e3b",
-      "observed": [
-        "InvalidAssociationID.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::VPC",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "EnableDnsHostnames",
-        "EnableDnsSupport",
-        "Tags"
-      ],
-      "reader": "6a5a2f2f87bfaed753b8c96e0c86ff3844819ebbc8ebddedaa2534f4204abb7c",
-      "observed": [
-        "InvalidVpcID.NotFound"
-      ]
-    },
-    {
-      "type": "AWS::EC2::VPCGatewayAttachment",
-      "date": "2026-10-05",
-      "outcome": "parity",
-      "updated": [
-        "InternetGatewayId"
-      ],
-      "reader": "b2679e15aec50212e6df884ce8c1324ebc73d519bcd18ec9ef41d6969f8ac7c3",
-      "observed": [
-        "Gateway.NotAttached"
       ]
     },
     {

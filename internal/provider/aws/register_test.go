@@ -452,22 +452,13 @@ func TestRoleKeysDeclareTheirVendorType(t *testing.T) {
 	}
 
 	want := map[string]string{
-		TypeArtifactBucket:                      TypeS3Bucket,
-		TypePermissionAPIGateway:                realTypeLambdaPermission,
-		TypePermissionEventsRule:                realTypeLambdaPermission,
-		TypeCacheSecurityGroup:                  TypeSecurityGroup,
-		TypeDatabaseSecurityGroup:               TypeSecurityGroup,
-		TypeS3Endpoint:                          TypeVPCEndpoint,
-		TypeDynamoDBEndpoint:                    TypeVPCEndpoint,
-		TypePrivateSubnet:                       TypeSubnet,
-		TypePrivateRouteTable:                   TypeRouteTable,
-		TypePrivateRoute:                        TypeRoute,
-		TypePrivateSubnetRouteTableAssociation:  TypeSubnetRouteTableAssociation,
-		TypePublicSubnetB:                       TypeSubnet,
-		TypePrivateSubnetB:                      TypeSubnet,
-		TypePublicSubnetBRouteTableAssociation:  TypeSubnetRouteTableAssociation,
-		TypePrivateSubnetBRouteTableAssociation: TypeSubnetRouteTableAssociation,
-		TypeSecretParameter:                     TypeSSMParameter,
+		TypeArtifactBucket:        TypeS3Bucket,
+		TypePermissionAPIGateway:  realTypeLambdaPermission,
+		TypePermissionEventsRule:  realTypeLambdaPermission,
+		TypeCacheSecurityGroup:    TypeSecurityGroup,
+		TypeDatabaseSecurityGroup: TypeSecurityGroup,
+		TypeNetworkSecurityGroup:  TypeSecurityGroup,
+		TypeSecretParameter:       TypeSSMParameter,
 	}
 	for key, vendorType := range want {
 		reg, ok := byType[key]

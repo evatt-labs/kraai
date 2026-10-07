@@ -23,13 +23,15 @@ services:
         entries:
           pepper_key: { generate: { bytes: 32, encoding: base64 } }
           github_client_secret: { source: external }
-    # The private network the function runs inside. The private block opts
-    # into egress: a private subnet with a NAT gateway in the public one,
-    # and the function placed in the private subnet, so it reaches the
-    # queue, the cluster and the internet. Billed by the hour while it
-    # exists (see ../README.md).
+    # The network the function runs inside: a VPC and subnets Terraform
+    # owns, from its outputs. kraai creates one security group in it, which
+    # the function attaches and the cluster and cache below admit. What the
+    # function reaches beyond the VPC (the internet, SQS, S3, DynamoDB) is
+    # the subnets' routing, the VPC owner's to set.
     network:
-      - { binding: NET, cidr: 10.90.0.0/16, subnet: 10.90.1.0/24, private: 10.90.2.0/24 }
+      - binding: NET
+        vpcId: "{{ terraform.base.vpc_id }}"
+        subnetIds: {{ terraform.base.private_subnet_ids|json }}
     # A standard SQS queue. The function receives JOBS_QUEUE_URL and
     # JOBS_QUEUE_ARN, and its execution role is granted the queue.
     queues:
@@ -57,7 +59,7 @@ services:
         engine: aurora
         network: NET
     # An ElastiCache Serverless cache (Valkey, redis protocol) inside NET,
-    # behind a security group admitting the VPC. The function receives
+    # behind a security group admitting NET's members. The function receives
     # CACHE_REDIS_URL and, running inside NET, can reach it.
     keyvalue:
       - { binding: CACHE, driver: redis, network: NET }

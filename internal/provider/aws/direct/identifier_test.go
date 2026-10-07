@@ -60,7 +60,8 @@ const routeTablesXML = `<DescribeRouteTablesResponse><routeTableSet><item>
 // addresses it; the table's main association belongs to no subnet and is
 // absent, as Cloud Control reads it.
 func TestReadSubnetRouteTableAssociation(t *testing.T) {
-	const typeName = "AWS::EC2::SubnetRouteTableAssociation"
+	const typeName = associationFixtureType
+	fixtureAssociation.register(t)
 	client, forms := xmlServer(t, 200, routeTablesXML)
 	got, err := client.ReadByID(context.Background(), typeName, "rtbassoc-1")
 	if err != nil {

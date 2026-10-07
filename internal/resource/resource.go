@@ -84,6 +84,12 @@ type Spec struct {
 	// naming the binding reads exactly Attributes["<binding>.<key>"]. Set by
 	// the planner for a registration declaring EmbeddedReferences.
 	References map[string]string
+	// Referenced is, by entry key, the declared config of the sibling
+	// binding the entry's value at that key references: what that
+	// binding's manifest entry says, for a value none of its resources
+	// publishes, such as a network's subnet ids. Set by the planner for
+	// every binding entry naming a reference.
+	Referenced map[string]map[string]any
 }
 
 // Secret resolves a named credential the applier supplied, or fails naming

@@ -125,12 +125,12 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 	cache := awsBinding("keyvalue", "CACHE", "myenv-api-cache")
 	cache["config"] = map[string]any{"driver": DriverRedis, "network": "NET"}
 	spec := baseLambdaSpec(t, dir, nil)
-	spec.Config["bindings"] = bindingsConfig(cache, awsBinding("network", "NET", "myenv-api-net"))
+	network := awsBinding("network", "NET", "myenv-api-net")
+	network["config"] = testNetwork()
+	spec.Config["bindings"] = bindingsConfig(cache, network)
 	spec.Attributes = map[string]map[string]any{
 		"CACHE." + key(TypeElastiCacheServerlessCache): {"Endpoint": map[string]any{"Address": "c.cache.amazonaws.com", "Port": "6379"}},
-		"NET." + key(TypeSubnet):                       {"SubnetId": "subnet-1"},
-		"NET." + key(TypePublicSubnetB):                {"SubnetId": "subnet-2"},
-		"NET." + key(TypeVPC):                          {"DefaultSecurityGroup": "sg-default"},
+		"NET." + key(TypeNetworkSecurityGroup):         {"GroupId": "sg-net"},
 	}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
@@ -141,9 +141,9 @@ func TestLambdaFunctionPublishesTheCacheURL(t *testing.T) {
 	}
 }
 
-// A service declaring a network runs its function inside it: the binding's
-// subnet, and the VPC's default security group, both read from what the
-// network published.
+// A service declaring a network runs its function inside it: the subnets
+// the binding names, and the network's own security group, which the
+// stores in the network admit.
 func TestLambdaFunctionJoinsItsServiceNetwork(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
@@ -154,16 +154,14 @@ func TestLambdaFunctionJoinsItsServiceNetwork(t *testing.T) {
 	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
 
 	spec := baseLambdaSpec(t, dir, nil)
-	spec.Config["bindings"] = bindingsConfig(awsBinding("network", "NET", "myenv-api-net"))
-	spec.Attributes = map[string]map[string]any{
-		"NET." + key(TypeSubnet):        {"SubnetId": "subnet-1"},
-		"NET." + key(TypePublicSubnetB): {"SubnetId": "subnet-2"},
-		"NET." + key(TypeVPC):           {"VpcId": "vpc-1", "DefaultSecurityGroup": "sg-default"},
-	}
+	network := awsBinding("network", "NET", "myenv-api-net")
+	network["config"] = testNetwork()
+	spec.Config["bindings"] = bindingsConfig(network)
+	spec.Attributes = map[string]map[string]any{"NET." + key(TypeNetworkSecurityGroup): {"GroupId": "sg-net"}}
 	if _, err := fn.Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	want := map[string]any{"SubnetIds": []any{"subnet-1", "subnet-2"}, "SecurityGroupIds": []any{"sg-default"}}
+	want := map[string]any{"SubnetIds": []any{"subnet-0a", "subnet-0b"}, "SecurityGroupIds": []any{"sg-net"}}
 	if got := fc.createCalls[0]["VpcConfig"]; !reflect.DeepEqual(got, want) {
 		t.Fatalf("VpcConfig = %v, want %v", got, want)
 	}
@@ -234,36 +232,6 @@ func TestLambdaFunctionPublishesTheDSQLDatabaseURL(t *testing.T) {
 	want := map[string]any{"PG_DATABASE_URL": "postgres://admin@abc123.dsql.us-east-1.on.aws:5432/postgres?sslmode=require"}
 	if !reflect.DeepEqual(env, want) {
 		t.Fatalf("Environment.Variables = %v, want %v", env, want)
-	}
-}
-
-// A network with a private block puts the function in the private subnet,
-// the one with a route to the internet through the NAT gateway.
-func TestLambdaFunctionJoinsThePrivateSubnetWhenTheNetworkHasOne(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "app.py"), []byte("app\n"), 0o600); err != nil {
-		t.Fatalf("WriteFile: %v", err)
-	}
-	fc := &fakeClient{createID: "myenv-api", createProps: map[string]any{},
-		schema: cfschema.Facts{PrimaryIdentifier: []string{"/properties/FunctionName"}}}
-	fn := newLambdaFunctionResourceForTest(fc, &fakeS3{}, &fakeSTS{account: "123456789012"})
-
-	network := awsBinding("network", "NET", "myenv-api-net")
-	network["config"] = map[string]any{"cidr": "10.90.0.0/16", "subnet": "10.90.1.0/24", "private": "10.90.2.0/24"}
-	spec := baseLambdaSpec(t, dir, nil)
-	spec.Config["bindings"] = bindingsConfig(network)
-	spec.Attributes = map[string]map[string]any{
-		"NET." + key(TypeSubnet):         {"SubnetId": "subnet-public"},
-		"NET." + key(TypePrivateSubnet):  {"SubnetId": "subnet-private-a"},
-		"NET." + key(TypePrivateSubnetB): {"SubnetId": "subnet-private-b"},
-		"NET." + key(TypeVPC):            {"DefaultSecurityGroup": "sg-default"},
-	}
-	if _, err := fn.Create(context.Background(), spec); err != nil {
-		t.Fatalf("Create: %v", err)
-	}
-	vpcConfig := fc.createCalls[0]["VpcConfig"].(map[string]any)
-	if subnets, _ := vpcConfig["SubnetIds"].([]any); len(subnets) != 2 || subnets[0] != "subnet-private-a" || subnets[1] != "subnet-private-b" {
-		t.Fatalf("SubnetIds = %v, want both private subnets and neither public one", vpcConfig["SubnetIds"])
 	}
 }
 

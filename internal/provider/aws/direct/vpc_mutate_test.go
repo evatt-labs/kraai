@@ -16,18 +16,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 )
 
-const vpcType = "AWS::EC2::VPC"
-
-// fakeVPC is one VPC, answered as EC2's ec2Query protocol does: a form
-// request and an XML response. Its default network ACL and security group
-// are fixed, so a mutation's read-back depends only on what changed.
+// fakeVPC is one VPC of fixtureVPC, answered as EC2's ec2Query protocol
+// does: a form request and an XML response. Its default network ACL and
+// security group are fixed, so a mutation's read-back depends only on what
+// changed.
 type fakeVPC struct {
 	mu                       sync.Mutex
 	id                       string
 	gone                     bool
-	cidr, tenancy            string
+	cidr                     string
 	dnsSupport, dnsHostnames bool
-	encryptionMode           string
 	// pending is how many reads still answer the pending state, and
 	// createPending how many a create starts it with.
 	pending, createPending int
@@ -37,10 +35,8 @@ type fakeVPC struct {
 
 func (f *fakeVPC) serve(t *testing.T) *Client {
 	t.Helper()
+	fixtureVPC.register(t)
 	f.calls = map[string][]url.Values{}
-	if f.tenancy == "" {
-		f.tenancy = "default"
-	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
 		form, _ := url.ParseQuery(string(raw))
@@ -68,10 +64,6 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 			f.id, f.gone, f.tags = "vpc-0123", false, map[string]string{}
 			f.pending = f.createPending
 			f.cidr = form.Get("CidrBlock")
-			if v := form.Get("InstanceTenancy"); v != "" {
-				f.tenancy = v
-			}
-			f.encryptionMode = form.Get("VpcEncryptionControl.Mode")
 			for i := 1; form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key") != ""; i++ {
 				f.tags[form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key")] = form.Get("TagSpecification.1.Tag." + strconv.Itoa(i) + ".Value")
 			}
@@ -91,9 +83,6 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 				f.dnsHostnames = v == "true"
 			}
 			_, _ = io.WriteString(w, `<ModifyVpcAttributeResponse><return>true</return></ModifyVpcAttributeResponse>`)
-		case "ModifyVpcTenancy":
-			f.tenancy = form.Get("InstanceTenancy")
-			_, _ = io.WriteString(w, `<ModifyVpcTenancyResponse><return>true</return></ModifyVpcTenancyResponse>`)
 		case "CreateTags":
 			for i := 1; form.Get("Tag."+strconv.Itoa(i)+".Key") != ""; i++ {
 				f.tags[form.Get("Tag."+strconv.Itoa(i)+".Key")] = form.Get("Tag." + strconv.Itoa(i) + ".Value")
@@ -109,16 +98,12 @@ func (f *fakeVPC) serve(t *testing.T) *Client {
 				notFound()
 				return
 			}
-			encryption := ""
-			if f.encryptionMode != "" {
-				encryption = `<encryptionControl><mode>` + f.encryptionMode + `</mode></encryptionControl>`
-			}
 			state := ""
 			if f.pending > 0 {
 				f.pending--
 				state = `<state>pending</state>`
 			}
-			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId>`+state+`<cidrBlock>`+f.cidr+`</cidrBlock><instanceTenancy>`+f.tenancy+`</instanceTenancy>`+encryption+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
+			_, _ = io.WriteString(w, `<DescribeVpcsResponse><vpcSet><item><vpcId>`+f.id+`</vpcId>`+state+`<cidrBlock>`+f.cidr+`</cidrBlock>`+tagXML()+`</item></vpcSet></DescribeVpcsResponse>`)
 		case "DescribeNetworkAcls":
 			_, _ = io.WriteString(w, `<DescribeNetworkAclsResponse><networkAclSet><item><networkAclId>acl-1</networkAclId></item></networkAclSet></DescribeNetworkAclsResponse>`)
 		case "DescribeSecurityGroups":
@@ -141,7 +126,7 @@ var vpcNameTag = map[string]any{"Key": "kraai:resource-name", "Value": "kraai-e-
 func TestCreateVPCSendsCidrAndTagSpecification(t *testing.T) {
 	f := &fakeVPC{}
 	client := f.serve(t)
-	id, err := client.Create(context.Background(), vpcType, map[string]any{
+	id, err := client.Create(context.Background(), vpcFixtureType, map[string]any{
 		"CidrBlock": "10.99.0.0/16",
 		"Tags":      []any{vpcNameTag},
 	})
@@ -155,30 +140,6 @@ func TestCreateVPCSendsCidrAndTagSpecification(t *testing.T) {
 	if sent.Get("TagSpecification.1.ResourceType") != "vpc" || sent.Get("TagSpecification.1.Tag.1.Key") != "kraai:resource-name" || sent.Get("TagSpecification.1.Tag.1.Value") != "kraai-e-vpc" {
 		t.Fatalf("CreateVpc tags = %v", sent)
 	}
-	if sent.Has("VpcEncryptionControl.Mode") {
-		t.Fatalf("CreateVpc sent VpcEncryptionControl unset, form = %v", sent)
-	}
-}
-
-// A create that sets the encryption control's mode sends only the member
-// set, dotted onto CreateVpc's own (flat) encryption control input.
-func TestCreateVPCSendsEncryptionControlMode(t *testing.T) {
-	f := &fakeVPC{}
-	client := f.serve(t)
-	id, err := client.Create(context.Background(), vpcType, map[string]any{
-		"CidrBlock":            "10.99.0.0/16",
-		"VpcEncryptionControl": map[string]any{"Mode": "monitor"},
-	})
-	if err != nil || id != "vpc-0123" {
-		t.Fatalf("Create = %q, %v", id, err)
-	}
-	sent := f.calls["CreateVpc"][0]
-	if sent.Get("VpcEncryptionControl.Mode") != "monitor" {
-		t.Fatalf("CreateVpc form = %v", sent)
-	}
-	if sent.Has("VpcEncryptionControl.InternetGatewayExclusion") {
-		t.Fatalf("CreateVpc sent an exclusion unset, form = %v", sent)
-	}
 }
 
 // ModifyVpcAttribute takes one attribute per call, so a change to both DNS
@@ -188,7 +149,7 @@ func TestUpdateVPCSendsOneAttributePerModifyCall(t *testing.T) {
 	client := f.serve(t)
 	current := map[string]any{"CidrBlock": "10.99.0.0/16"}
 	changes := map[string]any{"EnableDnsHostnames": true, "EnableDnsSupport": false}
-	if err := client.Update(context.Background(), vpcType, "vpc-0123", current, changes); err != nil {
+	if err := client.Update(context.Background(), vpcFixtureType, "vpc-0123", current, changes); err != nil {
 		t.Fatal(err)
 	}
 	calls := f.calls["ModifyVpcAttribute"]
@@ -220,7 +181,7 @@ func TestUpdateVPCTagsAddsAndRemoves(t *testing.T) {
 	client := f.serve(t)
 	current := map[string]any{"CidrBlock": "10.99.0.0/16", "Tags": []any{team}}
 	changes := map[string]any{"Tags": []any{vpcNameTag}}
-	if err := client.Update(context.Background(), vpcType, "vpc-0123", current, changes); err != nil {
+	if err := client.Update(context.Background(), vpcFixtureType, "vpc-0123", current, changes); err != nil {
 		t.Fatal(err)
 	}
 	added := f.calls["CreateTags"][0]
@@ -233,28 +194,12 @@ func TestUpdateVPCTagsAddsAndRemoves(t *testing.T) {
 	}
 }
 
-// ModifyVpcTenancy takes the whole instance tenancy, whose enum in the real
-// service only ever allows relaxing to default.
-func TestUpdateVPCTenancy(t *testing.T) {
-	f := &fakeVPC{id: "vpc-0123", cidr: "10.99.0.0/16", tenancy: "dedicated"}
-	client := f.serve(t)
-	current := map[string]any{"CidrBlock": "10.99.0.0/16", "InstanceTenancy": "dedicated"}
-	changes := map[string]any{"InstanceTenancy": "default"}
-	if err := client.Update(context.Background(), vpcType, "vpc-0123", current, changes); err != nil {
-		t.Fatal(err)
-	}
-	sent := f.calls["ModifyVpcTenancy"][0]
-	if sent.Get("VpcId") != "vpc-0123" || sent.Get("InstanceTenancy") != "default" {
-		t.Fatalf("ModifyVpcTenancy form = %v", sent)
-	}
-}
-
 // A delete of a VPC already gone is done, not an error, the same as
 // DescribeVpcs answering InvalidVpcID.NotFound for it.
 func TestDeleteVPC(t *testing.T) {
 	f := &fakeVPC{id: "vpc-0123", cidr: "10.99.0.0/16"}
 	client := f.serve(t)
-	if err := client.Delete(context.Background(), vpcType, "vpc-0123"); err != nil {
+	if err := client.Delete(context.Background(), vpcFixtureType, "vpc-0123"); err != nil {
 		t.Fatal(err)
 	}
 	if n := len(f.calls["DeleteVpc"]); n != 1 {
@@ -265,7 +210,7 @@ func TestDeleteVPC(t *testing.T) {
 func TestDeleteVPCAlreadyGone(t *testing.T) {
 	f := &fakeVPC{id: "vpc-0123", cidr: "10.99.0.0/16", gone: true}
 	client := f.serve(t)
-	if err := client.Delete(context.Background(), vpcType, "vpc-0123"); err != nil {
+	if err := client.Delete(context.Background(), vpcFixtureType, "vpc-0123"); err != nil {
 		t.Fatalf("Delete of an already-gone VPC = %v, want nil", err)
 	}
 }

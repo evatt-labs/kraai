@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	routeType      = "AWS::EC2::Route"
-	attachmentType = "AWS::EC2::VPCGatewayAttachment"
+	routeType      = routeFixtureType
+	attachmentType = attachmentFixtureType
 )
 
 // fakeRoute is one route of a fake table: the member naming its
@@ -47,6 +47,8 @@ func xmlLower(member string) string { return strings.ToLower(member[:1]) + membe
 
 func (f *fakeNetwork) serve(t *testing.T) *Client {
 	t.Helper()
+	fixtureRoute.register(t)
+	fixtureAttachment.register(t)
 	f.calls = map[string][]url.Values{}
 	fail := func(w http.ResponseWriter, code string) {
 		w.WriteHeader(http.StatusBadRequest)

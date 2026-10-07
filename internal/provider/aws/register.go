@@ -54,13 +54,11 @@ func Register(reg *resource.Registry, client *Client) error {
 // registered once with one DependsOn list. certificate.go sidesteps it by
 // letting ACM write the validation record itself.
 func Registrations(client *Client) []resource.Registration {
-	// Only the network's endpoint service names need the region, and those
-	// never reach a request without a client.
-	region := ""
+	var interfaces ec2API
 	if client != nil {
-		region = client.Region()
+		interfaces = client.ec2
 	}
-	return append(append(append(registerNetwork(client, region), registerKeyValue(client)...), registerAurora(client)...), []resource.Registration{
+	return append(append(append(registerNetwork(client, interfaces), registerKeyValue(client)...), registerAurora(client)...), []resource.Registration{
 		{
 			Provider: Provider, Type: TypeRoute53HostedZone,
 			Capability: manifest.CapabilityDNS,

@@ -3,22 +3,25 @@ package aws
 import (
 	"context"
 	"errors"
+	"reflect"
+	"regexp"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/resource"
 )
 
-// networkResource returns the registered Resource for one network type.
-func networkResource(t *testing.T, client ccAPI, typeName string) resource.Resource {
-	t.Helper()
-	for _, r := range registerNetwork(client, "us-east-1") {
-		if r.Type == typeName {
-			return r.Resource
-		}
-	}
-	t.Fatalf("no network registration for %s", typeName)
-	return nil
+// testNetwork is a network binding entry's declared config: a VPC and two
+// of its subnets, as Terraform outputs would give them.
+func testNetwork() map[string]any {
+	return map[string]any{"vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}
 }
 
 // taggedProps builds the properties a byTag lookup matches on.
@@ -32,309 +35,260 @@ func taggedProps(name string, extra map[string]any) map[string]any {
 	return props
 }
 
-func networkSpec(binding string, config map[string]any, attrs map[string]map[string]any) resource.Spec {
-	return resource.Spec{Binding: binding, Name: "env-svc-" + binding, Config: config, Attributes: attrs}
+// networkGroup returns the network binding's one registered Resource.
+func networkGroup(t *testing.T, client ccAPI) resource.Resource {
+	t.Helper()
+	regs := registerNetwork(client, nil)
+	if len(regs) != 1 || regs[0].Type != TypeNetworkSecurityGroup {
+		t.Fatalf("registerNetwork = %v, want the network's security group alone", regs)
+	}
+	return regs[0].Resource
 }
 
-// A subnet cannot be created without the VPC's identifier, and that
-// identifier only exists once the VPC has been created — so it has to arrive
-// through Spec.Attributes rather than from the manifest.
-func TestSubnetCreateUsesTheVPCIdentifierFromAttributes(t *testing.T) {
-	client := &fakeClient{createID: "subnet-1", createProps: map[string]any{"SubnetId": "subnet-1"}}
-	res := networkResource(t, client, TypeSubnet)
-
-	spec := networkSpec("NET",
-		map[string]any{"subnet": "10.90.1.0/24"},
-		map[string]map[string]any{key(TypeVPC): {"VpcId": "vpc-abc"}})
-
-	if _, err := res.Create(context.Background(), spec); err != nil {
+// The network creates only its security group, in the VPC the binding
+// names, tagged so it can be found again.
+func TestNetworkGroupIsCreatedInTheNamedVPC(t *testing.T) {
+	fc := &fakeClient{createID: "sg-net", createProps: map[string]any{"GroupId": "sg-net"}}
+	spec := resource.Spec{Binding: "NET", Name: "env-svc-net", Config: testNetwork()}
+	if _, err := networkGroup(t, fc).Create(context.Background(), spec); err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	if len(client.createCalls) != 1 {
-		t.Fatalf("createCalls = %d, want 1", len(client.createCalls))
+	desired := fc.createCalls[0]
+	if desired["VpcId"] != "vpc-0abc" || desired["GroupName"] != "env-svc-net-network" {
+		t.Fatalf("desired = %v, want the named VPC under the derived name", desired)
 	}
-	desired := client.createCalls[0]
-	if desired["VpcId"] != "vpc-abc" {
-		t.Fatalf("VpcId = %v, want the id published by the VPC", desired["VpcId"])
+	if _, ingress := desired["SecurityGroupIngress"]; ingress {
+		t.Fatalf("desired = %v, want no ingress: nothing reaches a function", desired)
 	}
-	if desired["CidrBlock"] != "10.90.1.0/25" || desired["AvailabilityZone"] != "us-east-1a" {
-		t.Fatalf("CidrBlock/AvailabilityZone = %v/%v, want the first half of the manifest's block in zone a", desired["CidrBlock"], desired["AvailabilityZone"])
-	}
-}
-
-// Rule 20: a dependency that never published must fail by name, not produce
-// a create with an empty VpcId that AWS rejects far from the cause.
-func TestSubnetCreateFailsLoudlyWithoutTheVPCAttribute(t *testing.T) {
-	client := &fakeClient{createID: "subnet-1"}
-	res := networkResource(t, client, TypeSubnet)
-
-	_, err := res.Create(context.Background(), networkSpec("NET", map[string]any{"subnet": "10.90.1.0/24"}, nil))
-	if err == nil {
-		t.Fatal("a subnet was created with no VPC identifier")
-	}
-	if !strings.Contains(err.Error(), key(TypeVPC)) || !strings.Contains(err.Error(), "VpcId") {
-		t.Fatalf("error = %q, want it to name the missing producer and attribute", err)
-	}
-	if len(client.createCalls) != 0 {
-		t.Fatal("a create was submitted despite the missing identifier")
+	if _, tagged := desired["Tags"]; !tagged {
+		t.Fatal("the group carries no identity tag, so it could never be found again")
 	}
 }
 
-// TestDiffNeedsNoAttributes is the regression test for a failure
-// a live plan found: plan calls Diff on every existing resource,
-// and a plan runs before anything is applied, so Spec.Attributes is empty by
-// construction. A comparison that needed a sibling identifier reported every
-// subnet and route table as unreadable on the second run.
-func TestDiffNeedsNoAttributes(t *testing.T) {
-	res := networkResource(t, &fakeClient{}, TypeSubnet)
+// A group cannot move to another VPC, so naming another VPC replaces it.
+func TestNetworkGroupReplacesOnAnotherVPC(t *testing.T) {
+	res := networkGroup(t, &fakeClient{})
 	differ, ok := res.(interface {
 		Diff(resource.Spec, *resource.State) (resource.Difference, error)
 	})
 	if !ok {
-		t.Fatal("the subnet resource no longer implements Diff, so an edited CIDR would read as no-change")
+		t.Fatal("the network group has no Diff")
 	}
-
-	spec := networkSpec("NET", map[string]any{"subnet": "10.90.1.0/24"}, nil)
-	state := &resource.State{Attributes: map[string]any{"CidrBlock": "10.90.1.0/25", "AvailabilityZone": "us-east-1a", "VpcId": "vpc-abc"}}
-
-	difference, err := differ.Diff(spec, state)
-	if err != nil {
-		t.Fatalf("Diff with no attributes: %v", err)
+	state := &resource.State{Attributes: map[string]any{"VpcId": "vpc-0abc"}}
+	spec := resource.Spec{Binding: "NET", Config: testNetwork()}
+	if got, err := differ.Diff(spec, state); err != nil || got != resource.Same {
+		t.Fatalf("Diff(same VPC) = %v, %v", got, err)
 	}
-	if difference != resource.Same {
-		t.Fatal("an unchanged subnet reported as differing")
-	}
-
-	changed := networkSpec("NET", map[string]any{"subnet": "10.90.2.0/24"}, nil)
-	difference, err = differ.Diff(changed, state)
-	if err != nil {
-		t.Fatalf("Diff: %v", err)
-	}
-	if difference != resource.Immutable {
-		t.Fatal("an edited CIDR did not report as differing, so it would never be replaced")
+	spec.Config = map[string]any{"vpcId": "vpc-0def", "subnetIds": []any{"subnet-0a", "subnet-0b"}}
+	if got, err := differ.Diff(spec, state); err != nil || got != resource.Immutable {
+		t.Fatalf("Diff(another VPC) = %v, %v; want a replace", got, err)
 	}
 }
 
-// A gateway attachment has no identifier of its own: it is the literal
-// "IGW" joined to the VPC it attaches to. Cloud Control spells the first
-// half "IGW", and the wrong spelling reads as an absent resource.
-func TestGatewayAttachmentIdentifierIsBuiltFromItsVPC(t *testing.T) {
-	client := &fakeClient{
-		list:         []string{"vpc-abc"},
-		byIdentifier: map[string]map[string]any{"vpc-abc": taggedProps("env-svc-NET", nil)},
-	}
-	client.byIdentifier["IGW|vpc-abc"] = map[string]any{"VpcId": "vpc-abc", "AttachmentType": "IGW"}
-
-	res := networkResource(t, client, TypeVPCGatewayAttachment)
-	state, err := res.Get(context.Background(), resource.Ref{
-		Provider: Provider, Type: TypeVPCGatewayAttachment, Name: "env-svc-NET"})
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if state == nil {
-		t.Fatal("the attachment was not found, so its identifier was built wrong")
-	}
-	if state.ID != "IGW|vpc-abc" {
-		t.Fatalf("ID = %q, want IGW|vpc-abc", state.ID)
-	}
-}
-
-func TestRouteIdentifierIsItsRouteTableAndDestination(t *testing.T) {
-	client := &fakeClient{
-		list:         []string{"rtb-1"},
-		byIdentifier: map[string]map[string]any{"rtb-1": taggedProps("env-svc-NET", nil)},
-	}
-	client.byIdentifier["rtb-1|0.0.0.0/0"] = map[string]any{"RouteTableId": "rtb-1"}
-
-	res := networkResource(t, client, TypeRoute)
-	state, err := res.Get(context.Background(), resource.Ref{
-		Provider: Provider, Type: TypeRoute, Name: "env-svc-NET"})
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if state == nil || state.ID != "rtb-1|0.0.0.0/0" {
-		t.Fatalf("state = %+v, want the route identified by its table and destination", state)
-	}
-}
-
-// A link whose endpoint is gone is itself gone, and a plan must report that
-// as absence rather than as an unreadable resource — absence is what lets
-// apply create it and destroy skip it.
-func TestRelationshipIsAbsentWhenItsEndpointIs(t *testing.T) {
-	client := &fakeClient{list: nil}
-	res := networkResource(t, client, TypeRoute)
-
-	state, err := res.Get(context.Background(), resource.Ref{
-		Provider: Provider, Type: TypeRoute, Name: "env-svc-NET"})
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if state != nil {
-		t.Fatalf("state = %+v, want nil when the route table does not exist", state)
-	}
-}
-
-func TestRelationshipDeleteIsSuccessWhenItsEndpointIsGone(t *testing.T) {
-	client := &fakeClient{list: nil}
-	res := networkResource(t, client, TypeRoute)
-
-	if err := res.Delete(context.Background(), resource.Ref{
-		Provider: Provider, Type: TypeRoute, Name: "env-svc-NET"}); err != nil {
-		t.Fatalf("Delete: %v", err)
-	}
-	if len(client.deleteCalls) != 0 {
-		t.Fatal("a delete was submitted for a link whose endpoint is already gone")
-	}
-}
-
-// TestFindAssociationSkipsUnreadableCandidates is the regression test for the
-// second failure a live plan found. Cloud Control lists every VPC's main
-// route table as an association with no subnet, and reading one fails
-// outright — so an unreadable candidate is the normal case to filter out,
-// not a reason to abandon the search and report the real association missing.
-func TestFindAssociationSkipsUnreadableCandidates(t *testing.T) {
-	client := &fakeClient{
-		list: []string{"rtbassoc-main", "rtbassoc-real"},
-		byIdentifier: map[string]map[string]any{
-			"rtbassoc-real": {"SubnetId": "subnet-1", "RouteTableId": "rtb-1"},
-		},
-		getErr: map[string]error{
-			"rtbassoc-main": errors.New("the RouteTableAssociation does not belong to a subnet"),
-		},
-	}
-
-	identifier, found, err := findAssociation(context.Background(), client, "subnet-1", "rtb-1")
-	if err != nil {
-		t.Fatalf("findAssociation: %v", err)
-	}
-	if !found || identifier != "rtbassoc-real" {
-		t.Fatalf("findAssociation = %q, %v — an unreadable main-table association hid the real one",
-			identifier, found)
-	}
-}
-
-func TestVPCCreateCarriesDNSSupportAndItsCIDR(t *testing.T) {
-	client := &fakeClient{createID: "vpc-1", createProps: map[string]any{"VpcId": "vpc-1"}}
-	res := networkResource(t, client, TypeVPC)
-
-	if _, err := res.Create(context.Background(), networkSpec("NET", map[string]any{"cidr": "10.90.0.0/16"}, nil)); err != nil {
-		t.Fatalf("Create: %v", err)
-	}
-	desired := client.createCalls[0]
-	if desired["CidrBlock"] != "10.90.0.0/16" {
-		t.Fatalf("CidrBlock = %v", desired["CidrBlock"])
-	}
-	// Both off is the EC2 default and the usual cause of a private hosted
-	// zone that resolves nowhere useful.
-	if desired["EnableDnsSupport"] != true || desired["EnableDnsHostnames"] != true {
-		t.Fatalf("DNS settings = %v/%v, want both enabled",
-			desired["EnableDnsSupport"], desired["EnableDnsHostnames"])
-	}
-	if desired["Tags"] == nil {
-		t.Fatal("the VPC carried no identity tag, so no later run could find it")
-	}
-}
-
-// Every network resource must be reachable from the registry under the
-// network capability, and every DependsOn must name a registration that
-// actually exists — a dependency naming nothing contributes no edge and
-// silently loses its ordering.
-func TestNetworkRegistrationsDeclareResolvableDependencies(t *testing.T) {
-	regs := registerNetwork(&fakeClient{}, "us-east-1")
-	known := make(map[string]bool, len(regs))
-	for _, r := range regs {
-		known[r.Provider+"/"+r.Type] = true
-	}
-	for _, r := range regs {
-		for _, dep := range r.DependsOn {
-			if !known[dep] {
-				t.Errorf("%s depends on %q, which no network registration provides", r.Type, dep)
-			}
-		}
-	}
-	if len(regs) != 19 {
-		t.Fatalf("registerNetwork returned %d registrations, want 19", len(regs))
-	}
-}
-
-// A gateway endpoint routes one service's traffic inside the VPC: it names
-// the service per region, the VPC, and the route table it is attached to,
-// both read from what the network's own resources published.
-func TestGatewayEndpointsAttachToTheRouteTable(t *testing.T) {
-	for _, c := range []struct{ typeKey, service string }{
-		{TypeS3Endpoint, "s3"},
-		{TypeDynamoDBEndpoint, "dynamodb"},
+func TestNetworkOfRefuses(t *testing.T) {
+	for name, c := range map[string]struct {
+		config map[string]any
+		want   string
+	}{
+		"no vpc":          {map[string]any{"subnetIds": []any{"subnet-0a", "subnet-0b"}}, "vpcId must be a VPC id"},
+		"not a vpc id":    {map[string]any{"vpcId": "10.0.0.0/16", "subnetIds": []any{"subnet-0a", "subnet-0b"}}, "vpcId must be a VPC id"},
+		"one subnet":      {map[string]any{"vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a"}}, "at least two subnets"},
+		"not a subnet id": {map[string]any{"vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "sg-0b"}}, "subnetIds[1] must be a subnet id"},
+		"a number":        {map[string]any{"vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", 7}}, "subnetIds[1] must be a subnet id"},
 	} {
-		t.Run(c.service, func(t *testing.T) {
-			client := &fakeClient{createID: "vpce-1", createProps: map[string]any{"Id": "vpce-1"}}
-			res := networkResource(t, client, c.typeKey)
-
-			spec := networkSpec("NET", nil, map[string]map[string]any{
-				key(TypeVPC):        {"VpcId": "vpc-abc"},
-				key(TypeRouteTable): {"RouteTableId": "rtb-1"},
-			})
-			if _, err := res.Create(context.Background(), spec); err != nil {
-				t.Fatalf("Create: %v", err)
-			}
-			desired := client.createCalls[0]
-			if desired["ServiceName"] != "com.amazonaws.us-east-1."+c.service || desired["VpcEndpointType"] != "Gateway" {
-				t.Fatalf("desired = %v, want a gateway endpoint for %s in us-east-1", desired, c.service)
-			}
-			if desired["VpcId"] != "vpc-abc" {
-				t.Fatalf("VpcId = %v, want the VPC's id", desired["VpcId"])
-			}
-			if tables, _ := desired["RouteTableIds"].([]any); len(tables) != 1 || tables[0] != "rtb-1" {
-				t.Fatalf("RouteTableIds = %v, want the network's route table", desired["RouteTableIds"])
-			}
-			if _, tagged := desired["Tags"]; !tagged {
-				t.Fatal("the endpoint carries no identity tag, so it could never be found again")
+		t.Run(name, func(t *testing.T) {
+			if _, err := networkOf("NET", c.config); err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("networkOf = %v, want an error containing %q", err, c.want)
 			}
 		})
 	}
 }
 
-func TestGatewayEndpointFailsLoudlyWithoutTheRouteTable(t *testing.T) {
-	res := networkResource(t, &fakeClient{}, TypeS3Endpoint)
-	spec := networkSpec("NET", nil, map[string]map[string]any{key(TypeVPC): {"VpcId": "vpc-abc"}})
-	_, err := res.Create(context.Background(), spec)
-	if err == nil || !strings.Contains(err.Error(), key(TypeRouteTable)) {
-		t.Fatalf("Create without the route table: err = %v, want one naming it", err)
+// A store naming a network the planner did not hand it, because the name
+// is not a network binding on the service, fails naming it.
+func TestReferencedNetworkMustBeOnTheService(t *testing.T) {
+	spec := resource.Spec{Binding: "SQL", Config: map[string]any{"network": "NOPE"}}
+	if _, _, err := referencedNetwork(spec, "database"); err == nil || !strings.Contains(err.Error(), `network "NOPE" is not a network binding`) {
+		t.Fatalf("referencedNetwork = %v", err)
+	}
+	spec.Config = map[string]any{}
+	if _, _, err := referencedNetwork(spec, "database"); err == nil || !strings.Contains(err.Error(), "names no network") {
+		t.Fatalf("referencedNetwork = %v", err)
 	}
 }
 
-// Two endpoints in one binding share the derived name, so the tag value
-// carries the service: a lookup for the S3 endpoint must not settle on the
-// DynamoDB endpoint listed beside it, and each stamps its own value.
-func TestGatewayEndpointsAreDistinguishedByService(t *testing.T) {
-	client := &fakeClient{
-		list: []string{"vpce-dynamodb", "vpce-s3"},
-		byIdentifier: map[string]map[string]any{
-			"vpce-dynamodb": taggedProps("env-svc-NET/dynamodb", map[string]any{"ServiceName": "com.amazonaws.us-east-1.dynamodb"}),
-			"vpce-s3":       taggedProps("env-svc-NET/s3", map[string]any{"ServiceName": "com.amazonaws.us-east-1.s3"}),
-		},
+// ec2Description is the character set EC2 accepts in a security group's
+// description: anything else is refused at create.
+var ec2Description = regexp.MustCompile(`^[a-zA-Z0-9. _\-:/()#,@\[\]+=&;{}!$*]{0,255}$`)
+
+// Every security group kraai creates has a description EC2 accepts.
+func TestSecurityGroupDescriptionsAreValid(t *testing.T) {
+	attrs := map[string]map[string]any{"NET." + key(TypeNetworkSecurityGroup): {"GroupId": "sg-net"}}
+	referenced := map[string]map[string]any{"network": testNetwork()}
+	for _, c := range []struct {
+		res  resource.Resource
+		spec resource.Spec
+	}{
+		{networkGroup(t, &fakeClient{}), resource.Spec{Binding: "NET", Name: "env-svc-net", Config: testNetwork()}},
+		{keyValueResource(t, &fakeClient{}, TypeCacheSecurityGroup), resource.Spec{Binding: "CACHE", Name: "env-svc-cache",
+			Config: map[string]any{"driver": DriverRedis, "network": "NET"}, Attributes: attrs, Referenced: referenced}},
+		{auroraResource(t, &fakeClient{}, nil, TypeDatabaseSecurityGroup), resource.Spec{Binding: "SQL", Name: "env-svc-sql",
+			Config: map[string]any{"driver": DriverPostgres, "engine": engineAurora, "network": "NET"}, Attributes: attrs, Referenced: referenced}},
+	} {
+		translator, ok := c.res.(*translatedResource)
+		if group, isGroup := c.res.(*networkGroupResource); isGroup {
+			translator, ok = group.translatedResource, true
+		}
+		if !ok {
+			t.Fatalf("%T is not a translated resource", c.res)
+		}
+		translated, err := translator.translate(context.Background(), c.spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if d, _ := translated.Config["GroupDescription"].(string); !ec2Description.MatchString(d) {
+			t.Errorf("%s: description %q is not one EC2 accepts", c.spec.Binding, d)
+		}
 	}
-	s3 := networkResource(t, client, TypeS3Endpoint)
-	state, err := s3.Get(context.Background(), resource.Ref{Name: "env-svc-NET"})
-	if err != nil || state == nil || state.ID != "vpce-s3" {
-		t.Fatalf("S3 endpoint Get = %+v, %v; want vpce-s3, not the DynamoDB endpoint listed first", state, err)
+}
+
+// heldClient refuses the first held deletes as EC2 does while a Lambda
+// interface still uses the group.
+type heldClient struct {
+	*fakeClient
+	held int
+	err  error
+}
+
+func (h *heldClient) DeleteResource(ctx context.Context, typeName, identifier string) error {
+	if h.held > 0 {
+		h.held--
+		return h.err
+	}
+	return h.fakeClient.DeleteResource(ctx, typeName, identifier)
+}
+
+// The network's group waits out the interfaces of the functions destroyed
+// before it, and gives up on anything else at once, or once its time is up.
+func TestNetworkGroupDeleteWaitsForItsInterfaces(t *testing.T) {
+	held := &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource sg-1 has a dependent object"}
+	for name, c := range map[string]struct {
+		held    int
+		err     error
+		timeout time.Duration
+		want    string
+		deletes int
+	}{
+		"released after two tries": {held: 2, err: held, timeout: time.Minute, deletes: 1},
+		"another error":            {held: 1, err: errors.New("AccessDenied"), timeout: time.Minute, want: "AccessDenied"},
+		"never released":           {held: 1000, err: held, timeout: 20 * time.Millisecond, want: "still in use"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+				list: []string{"sg-1"}}
+			client := &heldClient{fakeClient: fc, held: c.held, err: c.err}
+			res := networkGroup(t, client).(*networkGroupResource)
+			res.releaseWait, res.releaseTimeout = time.Millisecond, c.timeout
+			err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"})
+			if c.want == "" && err != nil {
+				t.Fatalf("Delete = %v", err)
+			}
+			if c.want != "" && (err == nil || !strings.Contains(err.Error(), c.want)) {
+				t.Fatalf("Delete = %v, want %q", err, c.want)
+			}
+			if len(fc.deleteCalls) != c.deletes {
+				t.Fatalf("%d deletes reached the client, want %d", len(fc.deleteCalls), c.deletes)
+			}
+		})
+	}
+}
+
+// fakeInterfaces is EC2's view of the network interfaces in one group.
+type fakeInterfaces struct {
+	enis    []ec2types.NetworkInterface
+	filters []ec2types.Filter
+	deleted []string
+}
+
+func (f *fakeInterfaces) DescribeNetworkInterfaces(_ context.Context, in *ec2.DescribeNetworkInterfacesInput, _ ...func(*ec2.Options)) (*ec2.DescribeNetworkInterfacesOutput, error) {
+	f.filters = in.Filters
+	return &ec2.DescribeNetworkInterfacesOutput{NetworkInterfaces: f.enis}, nil
+}
+
+func (f *fakeInterfaces) DeleteNetworkInterface(_ context.Context, in *ec2.DeleteNetworkInterfaceInput, _ ...func(*ec2.Options)) (*ec2.DeleteNetworkInterfaceOutput, error) {
+	id := aws.ToString(in.NetworkInterfaceId)
+	f.deleted = append(f.deleted, id)
+	f.enis = slices.DeleteFunc(f.enis, func(e ec2types.NetworkInterface) bool { return aws.ToString(e.NetworkInterfaceId) == id })
+	return &ec2.DeleteNetworkInterfaceOutput{}, nil
+}
+
+// lambdaHeld refuses the group's delete while a Lambda interface is left.
+type lambdaHeld struct {
+	*fakeClient
+	enis *fakeInterfaces
+}
+
+func (l *lambdaHeld) DeleteResource(ctx context.Context, typeName, identifier string) error {
+	for _, e := range l.enis.enis {
+		if strings.HasPrefix(aws.ToString(e.Description), lambdaInterfacePrefix) {
+			return &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource has a dependent object"}
+		}
+	}
+	return l.fakeClient.DeleteResource(ctx, typeName, identifier)
+}
+
+// The interfaces Lambda left detached in the group are deleted, and then the
+// group; an interface Lambda did not make is left alone, and only the
+// group's interfaces are asked for.
+func TestNetworkGroupDeleteClearsLambdasInterfaces(t *testing.T) {
+	enis := &fakeInterfaces{enis: []ec2types.NetworkInterface{
+		{NetworkInterfaceId: aws.String("eni-lambda-1"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-lambda-2"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusAvailable},
+		{NetworkInterfaceId: aws.String("eni-other"), Description: aws.String("an operator's own"), Status: ec2types.NetworkInterfaceStatusAvailable},
+	}}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+		list: []string{"sg-1"}}
+	res := registerNetwork(&lambdaHeld{fakeClient: fc, enis: enis}, enis)[0].Resource.(*networkGroupResource)
+	res.releaseWait = time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); err != nil {
+		t.Fatalf("Delete = %v", err)
+	}
+	if !slices.Equal(enis.deleted, []string{"eni-lambda-1", "eni-lambda-2"}) {
+		t.Fatalf("deleted %v, want Lambda's two interfaces and nothing else", enis.deleted)
+	}
+	if len(fc.deleteCalls) != 1 {
+		t.Fatalf("%d group deletes reached the client, want 1", len(fc.deleteCalls))
+	}
+	want := []ec2types.Filter{{Name: aws.String("group-id"), Values: []string{"sg-1"}}}
+	if !reflect.DeepEqual(enis.filters, want) {
+		t.Fatalf("asked for %v, want %v", enis.filters, want)
+	}
+}
+
+// A group held by no interface is held by another group's rule, and its
+// delete fails at once rather than waiting for an interface that is not
+// there; one still attached is waited for, never deleted.
+func TestNetworkGroupDeleteKnowsWhatHoldsIt(t *testing.T) {
+	held := &direct.APIError{Status: 400, Code: "DependencyViolation", Message: "resource sg-1 has a dependent object"}
+	fc := &fakeClient{byIdentifier: map[string]map[string]any{"sg-1": taggedProps("env-svc-net", map[string]any{"GroupId": "sg-1"})},
+		list: []string{"sg-1"}}
+
+	none := &fakeInterfaces{}
+	res := registerNetwork(&heldClient{fakeClient: fc, held: 1000, err: held}, none)[0].Resource.(*networkGroupResource)
+	res.releaseWait, res.releaseTimeout = time.Millisecond, 100*time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); !errors.Is(err, held) || strings.Contains(err.Error(), "still in use") {
+		t.Fatalf("Delete = %v, want the DependencyViolation itself, not a wait for an interface", err)
 	}
 
-	untagged := networkResource(t, &fakeClient{
-		list:         []string{"vpce-dynamodb"},
-		byIdentifier: map[string]map[string]any{"vpce-dynamodb": taggedProps("env-svc-NET/dynamodb", nil)},
-	}, TypeS3Endpoint)
-	if state, err := untagged.Get(context.Background(), resource.Ref{Name: "env-svc-NET"}); err != nil || state != nil {
-		t.Fatalf("S3 endpoint Get with only the DynamoDB endpoint present = %+v, %v; want absent", state, err)
+	attached := &fakeInterfaces{enis: []ec2types.NetworkInterface{
+		{NetworkInterfaceId: aws.String("eni-busy"), Description: aws.String("AWS Lambda VPC ENI-env-svc"), Status: ec2types.NetworkInterfaceStatusInUse},
+	}}
+	res = registerNetwork(&heldClient{fakeClient: fc, held: 1000, err: held}, attached)[0].Resource.(*networkGroupResource)
+	res.releaseWait, res.releaseTimeout = time.Millisecond, 20*time.Millisecond
+	if err := res.Delete(context.Background(), resource.Ref{Name: "env-svc-net"}); err == nil || !strings.Contains(err.Error(), "still in use") {
+		t.Fatalf("Delete = %v, want it to wait out the attached interface", err)
 	}
-
-	creating := &fakeClient{createID: "vpce-new", createProps: map[string]any{}}
-	spec := networkSpec("NET", nil, map[string]map[string]any{
-		key(TypeVPC): {"VpcId": "vpc-abc"}, key(TypeRouteTable): {"RouteTableId": "rtb-1"},
-	})
-	if _, err := networkResource(t, creating, TypeDynamoDBEndpoint).Create(context.Background(), spec); err != nil {
-		t.Fatalf("Create: %v", err)
-	}
-	if !arrayTagsMatch(creating.createCalls[0], "env-svc-NET/dynamodb") {
-		t.Fatalf("desired state %v does not carry the service-qualified identity tag", creating.createCalls[0])
+	if len(attached.deleted) != 0 {
+		t.Fatalf("deleted %v, an interface still attached", attached.deleted)
 	}
 }

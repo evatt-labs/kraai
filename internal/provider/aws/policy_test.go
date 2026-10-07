@@ -24,7 +24,7 @@ func TestSchemaPermissionsUnionHandlersAndTagging(t *testing.T) {
 		},
 		"tagging": {"permissions": ["ec2:CreateTags", "ec2:DeleteTags"]}
 	}`)}}
-	schema, err := (&Client{cf: cf}).describeLive(context.Background(), TypeSubnet)
+	schema, err := (&Client{cf: cf}).describeLive(context.Background(), "AWS::EC2::Subnet")
 	if err != nil {
 		t.Fatalf("DescribeType: %v", err)
 	}
