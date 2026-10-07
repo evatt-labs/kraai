@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	subnets = "AWS::EC2::Subnet"
+	subnets = subnetFixtureType
 	roles   = "AWS::IAM::Role"
 )
 
@@ -107,6 +107,7 @@ func networkACLsXML(assocs ...[2]string) string {
 // structure, and text kept exactly; then the network ACL call, filtered
 // by the subnet, with its association selected by subnet id.
 func TestReadEC2Query(t *testing.T) {
+	fixtureSubnet.register(t)
 	client, forms := xmlServerBy(t, map[string]string{
 		"DescribeSubnets":     subnetXML,
 		"DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-2", "subnet-2"}, [2]string{"aclassoc-1", "subnet-1"}),
@@ -136,15 +137,15 @@ func TestReadEC2Query(t *testing.T) {
 // An ec2Query read answered with a nextToken is incomplete, in the read and
 // in a further call alike.
 func TestReadEC2QueryPageTokenIsIncomplete(t *testing.T) {
-	emptySubnets := `<DescribeSubnetsResponse><subnetSet/><nextToken>t</nextToken></DescribeSubnetsResponse>`
-	pagedACLs := strings.Replace(networkACLsXML([2]string{"aclassoc-1", "subnet-1"}), "</networkAclSet>", "</networkAclSet><nextToken>t</nextToken>", 1)
+	const emptyGroups = `<DescribeSecurityGroupsResponse><securityGroupInfo/><nextToken>t</nextToken></DescribeSecurityGroupsResponse>`
+	const pagedRules = `<DescribeSecurityGroupRulesResponse><securityGroupRuleSet/><nextToken>t</nextToken></DescribeSecurityGroupRulesResponse>`
 	for name, byAction := range map[string]map[string]string{
-		"read":    {"DescribeSubnets": emptySubnets, "DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-1", "subnet-1"})},
-		"further": {"DescribeSubnets": subnetXML, "DescribeNetworkAcls": pagedACLs},
+		"read":    {"DescribeSecurityGroups": emptyGroups, "DescribeSecurityGroupRules": noRulesXML},
+		"further": {"DescribeSecurityGroups": groupXML, "DescribeSecurityGroupRules": pagedRules},
 	} {
 		t.Run(name, func(t *testing.T) {
 			client, _ := xmlServerBy(t, byAction)
-			_, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
+			_, err := client.Read(context.Background(), securityGroupType, map[string]string{"Id": "sg-1"})
 			if err == nil || errors.Is(err, ErrAbsent) || !strings.Contains(err.Error(), "page token") {
 				t.Fatalf("Read = %v, want an incomplete-response error", err)
 			}
@@ -155,6 +156,7 @@ func TestReadEC2QueryPageTokenIsIncomplete(t *testing.T) {
 // A selection that finds two elements is an error, never the first of
 // them: the read must not guess which one Cloud Control would report.
 func TestReadAmbiguousSelectionFails(t *testing.T) {
+	fixtureSubnet.register(t)
 	client, _ := xmlServerBy(t, map[string]string{
 		"DescribeSubnets":     subnetXML,
 		"DescribeNetworkAcls": networkACLsXML([2]string{"aclassoc-1", "subnet-1"}, [2]string{"aclassoc-9", "subnet-1"}),
@@ -242,13 +244,13 @@ func TestReadAWSQuery(t *testing.T) {
 // absent, and two would be one read standing in for another.
 func TestReadXMLWantsExactlyOne(t *testing.T) {
 	for name, body := range map[string]string{
-		"none":    `<DescribeSubnetsResponse><subnetSet/></DescribeSubnetsResponse>`,
-		"two":     `<DescribeSubnetsResponse><subnetSet><item><subnetId>a</subnetId></item><item><subnetId>b</subnetId></item></subnetSet></DescribeSubnetsResponse>`,
-		"no list": `<DescribeSubnetsResponse/>`,
+		"none":    `<DescribeSecurityGroupsResponse><securityGroupInfo/></DescribeSecurityGroupsResponse>`,
+		"two":     `<DescribeSecurityGroupsResponse><securityGroupInfo><item><groupId>a</groupId></item><item><groupId>b</groupId></item></securityGroupInfo></DescribeSecurityGroupsResponse>`,
+		"no list": `<DescribeSecurityGroupsResponse/>`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			client, _ := xmlServer(t, 200, body)
-			if got, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "a"}); err == nil {
+			if got, err := client.Read(context.Background(), securityGroupType, map[string]string{"Id": "a"}); err == nil {
 				t.Fatalf("Read = %v, want an error", got)
 			}
 		})
@@ -261,15 +263,15 @@ func TestReadXMLWantsExactlyOne(t *testing.T) {
 
 func TestReadXMLErrors(t *testing.T) {
 	cases := map[string]struct {
-		typeName, body, code string
+		typeName, identifier, body, code string
 	}{
-		"ec2Query": {subnets, `<Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "UnauthorizedOperation"},
-		"awsQuery": {roles, `<ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>gone</Message></Error></ErrorResponse>`, "AccessDenied"},
+		"ec2Query": {securityGroupType, "Id", `<Response><Errors><Error><Code>UnauthorizedOperation</Code><Message>gone</Message></Error></Errors><RequestID>r</RequestID></Response>`, "UnauthorizedOperation"},
+		"awsQuery": {roles, "RoleName", `<ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>gone</Message></Error></ErrorResponse>`, "AccessDenied"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			client, _ := xmlServer(t, 400, c.body)
-			_, err := client.Read(context.Background(), c.typeName, map[string]string{"SubnetId": "a", "RoleName": "a"})
+			_, err := client.Read(context.Background(), c.typeName, map[string]string{c.identifier: "a"})
 			var apiErr *APIError
 			if !errors.As(err, &apiErr) || apiErr.Code != c.code || apiErr.Message != "gone" || apiErr.Status != 400 {
 				t.Fatalf("error = %#v", err)
@@ -285,12 +287,12 @@ func TestReadAbsentErrorIsAbsence(t *testing.T) {
 		body string
 		want error
 	}{
-		"declared": {`<Response><Errors><Error><Code>InvalidSubnetID.NotFound</Code><Message>gone</Message></Error></Errors></Response>`, ErrAbsent},
-		"another":  {`<Response><Errors><Error><Code>InvalidSubnetID.Malformed</Code><Message>bad</Message></Error></Errors></Response>`, nil},
+		"declared": {`<Response><Errors><Error><Code>InvalidGroup.NotFound</Code><Message>gone</Message></Error></Errors></Response>`, ErrAbsent},
+		"another":  {`<Response><Errors><Error><Code>InvalidGroupId.Malformed</Code><Message>bad</Message></Error></Errors></Response>`, nil},
 	} {
 		t.Run(name, func(t *testing.T) {
 			client, _ := xmlServer(t, 400, c.body)
-			_, err := client.Read(context.Background(), subnets, map[string]string{"SubnetId": "subnet-1"})
+			_, err := client.Read(context.Background(), securityGroupType, map[string]string{"Id": "sg-1"})
 			if c.want != nil && !errors.Is(err, c.want) || c.want == nil && (err == nil || errors.Is(err, ErrAbsent)) {
 				t.Fatalf("Read = %v, want %v", err, c.want)
 			}
@@ -368,15 +370,15 @@ func TestCompileQueryKeys(t *testing.T) {
 }
 
 func TestCompileRefusesUnderXML(t *testing.T) {
-	const subnet = "AWS--EC2--Subnet.yaml"
+	const group = "AWS--EC2--SecurityGroup.yaml"
 	cases := map[string]struct {
 		old, replacement, want string
 	}{
-		"a list step on a structure": {"response: Subnets[]", "response: Subnets[].Tags[].Key[]", "is not a list"},
+		"a list step on a structure": {"response: SecurityGroups[]", "response: SecurityGroups[].Tags[].Key[]", "is not a list"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			_, err := compileAll(edit(t, subnet, c.old, c.replacement))
+			_, err := compileAll(edit(t, group, c.old, c.replacement))
 			if err == nil || !strings.Contains(err.Error(), c.want) {
 				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
 			}
@@ -577,6 +579,7 @@ func TestReadSecurityGroupSplitsRulesByDirection(t *testing.T) {
 // apart by a fixed input, alongside filtered calls for its default network
 // ACL and security group.
 func TestReadVPCAttributesByFixedInput(t *testing.T) {
+	fixtureVPC.register(t)
 	byKey := map[string]string{
 		"DescribeVpcs": `<DescribeVpcsResponse><vpcSet><item><vpcId>vpc-1</vpcId><cidrBlock>10.0.0.0/16</cidrBlock>
 <cidrBlockAssociationSet><item><associationId>assoc-4</associationId></item></cidrBlockAssociationSet>
@@ -605,7 +608,7 @@ func TestReadVPCAttributesByFixedInput(t *testing.T) {
 	client := &Client{HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
 		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }}
 
-	got, err := client.Read(context.Background(), "AWS::EC2::VPC", map[string]string{"VpcId": "vpc-1"})
+	got, err := client.Read(context.Background(), vpcFixtureType, map[string]string{"VpcId": "vpc-1"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -120,7 +120,7 @@ func TestUnnamedCreateRetriesOnlyAThrottle(t *testing.T) {
 	client := dropped.serve(t)
 	lossy := &lossyEC2{action: "CreateVpc", mode: "drop", fails: 1}
 	lossy.front(t, client)
-	if _, err := client.Create(context.Background(), vpcType, desired); err == nil {
+	if _, err := client.Create(context.Background(), vpcFixtureType, desired); err == nil {
 		t.Fatal("a create whose response was lost succeeded")
 	}
 	if n := len(lossy.attempts()); n != 1 {
@@ -131,7 +131,7 @@ func TestUnnamedCreateRetriesOnlyAThrottle(t *testing.T) {
 	client = throttled.serve(t)
 	lossy = &lossyEC2{action: "CreateVpc", mode: "throttle", fails: 1}
 	lossy.front(t, client)
-	if _, err := client.Create(context.Background(), vpcType, desired); err != nil {
+	if _, err := client.Create(context.Background(), vpcFixtureType, desired); err != nil {
 		t.Fatalf("a throttled create: %v", err)
 	}
 	if n := len(lossy.attempts()); n != 2 {
@@ -154,15 +154,20 @@ func TestIdempotentCreateRetriesADroppedConnection(t *testing.T) {
 // The token member comes from the model's trait, on every create that has
 // one, and only the members the templates do not set.
 func TestCompiledCreatesCarryTheirToken(t *testing.T) {
-	if got := readers[routeTable].Create.TokenMember; got != "ClientToken" {
+	r := fixtureRouteTable.register(t)
+	if got := r.Create.TokenMember; got != "ClientToken" {
 		t.Fatalf("CreateRouteTable TokenMember = %q, want ClientToken", got)
 	}
-	if _, ok := readers[routeTable].Create.Form["ClientToken"]; !ok {
+	if _, ok := r.Create.Form["ClientToken"]; !ok {
 		t.Fatal("CreateRouteTable has no form step for ClientToken")
 	}
+	set, errs := fixtureRouteTable.compile(t, [2]string{"    VpcId: \"{VpcId}\"\n    TagSpecifications", "    VpcId: \"{VpcId}\"\n    ClientToken: fixed\n    TagSpecifications"})
+	if len(errs) > 0 || set.Create.TokenMember != "" {
+		t.Fatalf("a template setting ClientToken compiled to token %q, %v; want none", set.Create.TokenMember, errs)
+	}
 	for name, r := range readers {
-		if r.Create != nil && r.Create.TokenMember != "" && name != routeTable {
-			t.Errorf("%s creates with token %s; the model has one on CreateRouteTable only", name, r.Create.TokenMember)
+		if r.Create != nil && r.Create.TokenMember != "" && name != tableFixtureType {
+			t.Errorf("%s creates with token %s; the checked-in model has none", name, r.Create.TokenMember)
 		}
 	}
 }

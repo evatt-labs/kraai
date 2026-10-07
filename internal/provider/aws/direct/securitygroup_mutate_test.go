@@ -127,6 +127,19 @@ func (f *fakeSecurityGroups) serve(t *testing.T) *Client {
 				}
 			}
 			_, _ = io.WriteString(w, `<Response><return>true</return></Response>`)
+		case "CreateTags":
+			for _, tag := range formTagList(form, "Tag") {
+				key := tag.(map[string]any)["Key"]
+				f.tags = slices.DeleteFunc(f.tags, func(have any) bool { return have.(map[string]any)["Key"] == key })
+				f.tags = append(f.tags, tag)
+			}
+			_, _ = io.WriteString(w, `<Response><return>true</return></Response>`)
+		case "DeleteTags":
+			for _, tag := range formTagList(form, "Tag") {
+				key := tag.(map[string]any)["Key"]
+				f.tags = slices.DeleteFunc(f.tags, func(have any) bool { return have.(map[string]any)["Key"] == key })
+			}
+			_, _ = io.WriteString(w, `<Response><return>true</return></Response>`)
 		case "DeleteSecurityGroup":
 			f.exists = false
 			_, _ = io.WriteString(w, `<Response><return>true</return></Response>`)
@@ -343,5 +356,64 @@ func TestDeleteSecurityGroup(t *testing.T) {
 		if err := client.Delete(context.Background(), securityGroupType, "sg-1"); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if n := len(f.calls["DeleteSecurityGroup"]); n != 2 {
+		t.Fatalf("DeleteSecurityGroup called %d times, want 2", n)
+	}
+	if got := f.calls["DeleteSecurityGroup"][0].Get("GroupId"); got != "sg-1" {
+		t.Fatalf("DeleteSecurityGroup GroupId = %q", got)
+	}
+}
+
+// An ec2Query create sends its tags by the form keys EC2 takes and reads
+// its identifier from the XML response; tags are added by CreateTags and
+// removed by DeleteTags, the removed ones sent as structures naming each
+// key and no value.
+func TestSecurityGroupTagsOverEC2Query(t *testing.T) {
+	f := &fakeSecurityGroups{}
+	client := f.serve(t)
+	name := map[string]any{"Key": "kraai:resource-name", "Value": "kraai-e-sg"}
+	team := map[string]any{"Key": "team", "Value": "kraai"}
+	ctx := context.Background()
+	id, err := client.Create(ctx, securityGroupType, map[string]any{"GroupDescription": "d", "VpcId": "vpc-1", "Tags": []any{name, team}})
+	if err != nil || id != "sg-1" {
+		t.Fatalf("Create = %q, %v", id, err)
+	}
+	sent := f.calls["CreateSecurityGroup"][0]
+	if sent.Get("TagSpecification.1.ResourceType") != "security-group" || sent.Get("Version") != "2016-11-15" ||
+		sent.Get("TagSpecification.1.Tag.1.Key") != "kraai:resource-name" || sent.Get("TagSpecification.1.Tag.1.Value") != "kraai-e-sg" ||
+		sent.Get("TagSpecification.1.Tag.2.Key") != "team" || sent.Get("TagSpecification.1.Tag.2.Value") != "kraai" {
+		t.Fatalf("CreateSecurityGroup form = %v", sent)
+	}
+	current := map[string]any{"Tags": []any{name, team}}
+	if err := client.Update(ctx, securityGroupType, id, current, map[string]any{"Tags": []any{name}}); err != nil {
+		t.Fatal(err)
+	}
+	del := f.calls["DeleteTags"][0]
+	if del.Get("ResourceId.1") != "sg-1" || del.Get("Tag.1.Key") != "team" || del.Has("Tag.1.Value") {
+		t.Fatalf("DeleteTags form = %v", del)
+	}
+	current = map[string]any{"Tags": []any{name}}
+	changes := map[string]any{"Tags": []any{name, map[string]any{"Key": "owner", "Value": "cloud"}}}
+	if err := client.Update(ctx, securityGroupType, id, current, changes); err != nil {
+		t.Fatal(err)
+	}
+	add := f.calls["CreateTags"][0]
+	if add.Get("ResourceId.1") != "sg-1" || add.Get("Tag.1.Key") != "owner" || add.Get("Tag.1.Value") != "cloud" || add.Has("Tag.2.Key") {
+		t.Fatalf("CreateTags form = %v", add)
+	}
+}
+
+// Every property of a security group the update has no call for is
+// create-only, so a change to one is refused, never silently dropped.
+func TestUpdateRefusesASecurityGroupVpcChange(t *testing.T) {
+	f := &fakeSecurityGroups{exists: true, name: "kraai-e-sg"}
+	client := f.serve(t)
+	err := client.Update(context.Background(), securityGroupType, "sg-1", nil, map[string]any{"VpcId": "vpc-2"})
+	if err == nil || !strings.Contains(err.Error(), "no direct update for VpcId") {
+		t.Fatalf("Update = %v", err)
+	}
+	if len(f.calls) != 0 {
+		t.Fatalf("calls = %v, want none", f.calls)
 	}
 }

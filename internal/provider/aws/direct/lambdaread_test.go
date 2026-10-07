@@ -227,7 +227,7 @@ func TestCompileRefusesMisusedReadVocabulary(t *testing.T) {
 		"an extract of a member that is no string":    {"AWS--Lambda--Url.yaml", "  Cors:\n    member: Cors\n", "  Cors:\n    member: Cors\n    extract: [\"a\"]\n", "extracts from Cors, which is not a string"},
 		"an arnPart of a member that is not a string": {"AWS--Lambda--Url.yaml", "    member: FunctionArn\n    transform: arnPart:7", "    member: Cors\n    transform: arnPart:7", "transforms Cors, which is not a string"},
 		"an arnPart that is not a number":             {"AWS--Lambda--Url.yaml", "arnPart:7", "arnPart:last", `names transform "arnPart:last"`},
-		"a document read under a query protocol":      {"AWS--EC2--VPC.yaml", "  CidrBlock: CidrBlock\n", "  CidrBlock:\n    member: CidrBlock\n    extract: [\"a\"]\n", "extracts from a document, which this client does not read under ec2Query"},
+		"a document read under a query protocol":      {"AWS--EC2--SecurityGroup.yaml", "  GroupDescription: Description\n", "  GroupDescription:\n    member: Description\n    extract: [\"a\"]\n", "extracts from a document, which this client does not read under ec2Query"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

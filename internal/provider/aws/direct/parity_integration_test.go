@@ -217,8 +217,8 @@ func readParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, clie
 
 // scopedLists names, for a type whose Cloud Control list needs a property
 // of another type, that type and the property: the type is listed within
-// each instance of it.
-var scopedLists = map[string][2]string{"AWS::EC2::Route": {"AWS::EC2::RouteTable", "RouteTableId"}}
+// each instance of it. No checked-in type needs one.
+var scopedLists = map[string][2]string{}
 
 // listWithin lists typeName within each instance of its parent type, up to
 // limit identifiers.

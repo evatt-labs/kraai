@@ -62,6 +62,7 @@ func TestTransformArnResource(t *testing.T) {
 // read found the instance, so production must fall back rather than
 // report it gone.
 func TestAFurtherCallFindingNothingIsNotAbsence(t *testing.T) {
+	fixtureSubnet.register(t)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
 		form, _ := url.ParseQuery(string(raw))
@@ -83,22 +84,31 @@ func TestAFurtherCallFindingNothingIsNotAbsence(t *testing.T) {
 }
 
 func TestCompileRefusesAStructuredInputOrSelection(t *testing.T) {
-	const file = "AWS--EC2--Subnet.yaml"
-	cases := map[string]struct {
+	const filter = "      Filters:\n        - Name: group-id\n          Values: [\"{Id}\"]"
+	for name, c := range map[string]struct {
 		old, replacement, want string
 	}{
-		"a filter member the structure lacks":                {"        - Name: association.subnet-id", "        - Key: association.subnet-id", "names Key, which"},
-		"a map where the input is a list":                    {"      Filters:\n        - Name: association.subnet-id\n          Values: [\"{SubnetId}\"]", "      Filters:\n        Name: association.subnet-id", "gives a map where Filter is list"},
-		"a placeholder that is not the identifier":           {`Values: ["{SubnetId}"]`, `Values: ["{VpcId}"]`, "names {VpcId}, which is not the primary identifier"},
-		"a call bound by nothing":                            {`Values: ["{SubnetId}"]`, `Values: ["subnet-x"]`, "identifier does not bind SubnetId"},
-		"a selection by a member that is not a string":       {"Associations[SubnetId={SubnetId}]", "Associations[Nope={SubnetId}]", "selects by Nope, which is not a string member"},
-		"a selection placeholder that is not the identifier": {"Associations[SubnetId={SubnetId}]", "Associations[SubnetId={VpcId}]", "selects by {VpcId}, which is not the primary identifier"},
-	}
-	for name, c := range cases {
+		"a filter member the structure lacks":      {"        - Name: group-id", "        - Key: group-id", "names Key, which"},
+		"a map where the input is a list":          {filter, "      Filters:\n        Name: group-id", "gives a map where Filter is list"},
+		"a placeholder that is not the identifier": {`Values: ["{Id}"]`, `Values: ["{VpcId}"]`, "names {VpcId}, which is not the primary identifier"},
+		"a call bound by nothing":                  {`Values: ["{Id}"]`, `Values: ["sg-x"]`, "identifier does not bind Id"},
+	} {
 		t.Run(name, func(t *testing.T) {
-			_, err := compileAll(edit(t, file, c.old, c.replacement))
+			_, err := compileAll(edit(t, "AWS--EC2--SecurityGroup.yaml", c.old, c.replacement))
 			if err == nil || !strings.Contains(err.Error(), c.want) {
 				t.Fatalf("compile = %v\nwant an error containing %q", err, c.want)
+			}
+		})
+	}
+	for name, c := range map[string]struct {
+		old, replacement, want string
+	}{
+		"a selection by a member that is not a string":       {"Associations[SubnetId={SubnetId}]", "Associations[Nope={SubnetId}]", "selects by Nope, which is not a string member"},
+		"a selection placeholder that is not the identifier": {"Associations[SubnetId={SubnetId}]", "Associations[SubnetId={VpcId}]", "selects by {VpcId}, which is not the primary identifier"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, errs := fixtureSubnet.compile(t, [2]string{c.old, c.replacement}); !containsErr(errs, c.want) {
+				t.Fatalf("errors = %v\nwant one containing %q", errs, c.want)
 			}
 		})
 	}

@@ -15,8 +15,8 @@ func TestOverrideCreateOnlyIsExposedAsSchemaPointers(t *testing.T) {
 			t.Errorf("CreateOnly(%s) = %v, want %v", typeName, got, want)
 		}
 	}
-	if got := CreateOnly("AWS::EC2::VPC"); got != nil {
-		t.Errorf("CreateOnly(AWS::EC2::VPC) = %v, want none", got)
+	if got := CreateOnly(securityGroupType); got != nil {
+		t.Errorf("CreateOnly(%s) = %v, want none", securityGroupType, got)
 	}
 }
 

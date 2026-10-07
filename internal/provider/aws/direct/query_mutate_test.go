@@ -1,20 +1,10 @@
 package direct
 
 import (
-	"context"
 	"encoding/json"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"reflect"
-	"strconv"
 	"strings"
-	"sync"
 	"testing"
-	"time"
-
-	"github.com/aws/aws-sdk-go-v2/credentials"
 )
 
 // queryModel is a model of one operation input covering how the query
@@ -124,79 +114,6 @@ func TestXMLOutputPath(t *testing.T) {
 		if _, ok := xmlOutputPath(model, "awsQuery", "CreateGroup", output, bad); ok {
 			t.Errorf("%s: path accepted", bad)
 		}
-	}
-}
-
-// fakeEC2 is one internet gateway, answered as EC2 does: a form request
-// and an XML response.
-type fakeEC2 struct {
-	mu    sync.Mutex
-	id    string
-	tags  map[string]string
-	calls map[string][]url.Values
-}
-
-func (f *fakeEC2) serve(t *testing.T) *Client {
-	t.Helper()
-	f.calls = map[string][]url.Values{}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		raw, _ := io.ReadAll(r.Body)
-		form, _ := url.ParseQuery(string(raw))
-		f.mu.Lock()
-		defer f.mu.Unlock()
-		op := form.Get("Action")
-		f.calls[op] = append(f.calls[op], form)
-		tagXML := func() string {
-			var b strings.Builder
-			for k, v := range f.tags {
-				b.WriteString("<item><key>" + k + "</key><value>" + v + "</value></item>")
-			}
-			return "<tagSet>" + b.String() + "</tagSet>"
-		}
-		switch op {
-		case "CreateInternetGateway":
-			f.id, f.tags = "igw-0123", map[string]string{}
-			for i := 1; form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key") != ""; i++ {
-				f.tags[form.Get("TagSpecification.1.Tag."+strconv.Itoa(i)+".Key")] = form.Get("TagSpecification.1.Tag." + strconv.Itoa(i) + ".Value")
-			}
-			_, _ = io.WriteString(w, `<CreateInternetGatewayResponse><internetGateway><internetGatewayId>igw-0123</internetGatewayId>`+tagXML()+`</internetGateway></CreateInternetGatewayResponse>`)
-		case "DeleteTags":
-			for i := 1; form.Get("Tag."+strconv.Itoa(i)+".Key") != ""; i++ {
-				delete(f.tags, form.Get("Tag."+strconv.Itoa(i)+".Key"))
-			}
-			_, _ = io.WriteString(w, `<DeleteTagsResponse><return>true</return></DeleteTagsResponse>`)
-		case "DescribeInternetGateways":
-			_, _ = io.WriteString(w, `<DescribeInternetGatewaysResponse><internetGatewaySet><item><internetGatewayId>`+f.id+`</internetGatewayId>`+tagXML()+`</item></internetGatewaySet></DescribeInternetGatewaysResponse>`)
-		}
-	}))
-	t.Cleanup(srv.Close)
-	return &Client{HTTP: srv.Client(), Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
-		Region: "us-east-1", Endpoint: func(string) string { return srv.URL }, Wait: 5 * time.Second, Poll: time.Millisecond}
-}
-
-// An ec2Query create sends its tags by the form keys EC2 takes and reads
-// its identifier from the XML response; removed tags are sent as
-// structures naming each key.
-func TestInternetGatewayOverEC2Query(t *testing.T) {
-	f := &fakeEC2{}
-	client := f.serve(t)
-	name := map[string]any{"Key": "kraai:resource-name", "Value": "kraai-e-igw"}
-	team := map[string]any{"Key": "team", "Value": "kraai"}
-	id, err := client.Create(context.Background(), "AWS::EC2::InternetGateway", map[string]any{"Tags": []any{name, team}})
-	if err != nil || id != "igw-0123" {
-		t.Fatalf("Create = %q, %v", id, err)
-	}
-	sent := f.calls["CreateInternetGateway"][0]
-	if sent.Get("TagSpecification.1.ResourceType") != "internet-gateway" || sent.Get("Version") != "2016-11-15" {
-		t.Fatalf("CreateInternetGateway form = %v", sent)
-	}
-	current := map[string]any{"Tags": []any{name, team}}
-	if err := client.Update(context.Background(), "AWS::EC2::InternetGateway", id, current, map[string]any{"Tags": []any{name}}); err != nil {
-		t.Fatal(err)
-	}
-	del := f.calls["DeleteTags"][0]
-	if del.Get("ResourceId.1") != "igw-0123" || del.Get("Tag.1.Key") != "team" || del.Has("Tag.1.Value") {
-		t.Fatalf("DeleteTags form = %v", del)
 	}
 }
 
