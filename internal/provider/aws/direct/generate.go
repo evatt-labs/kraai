@@ -193,8 +193,6 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		b.WriteString("},\n")
 	}
 	fields(b, r.Fields)
-	lister(b, "List", r.List)
-	lister(b, "Probe", r.Probe)
 	if len(r.AbsentIDs) > 0 {
 		fmt.Fprintf(b, "AbsentIDs: %#v,\n", r.AbsentIDs)
 	}
@@ -265,30 +263,6 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 		}
 		b.WriteString("},\n")
 	}
-}
-
-func lister(b *bytes.Buffer, name string, l *Lister) {
-	if l == nil {
-		return
-	}
-	fmt.Fprintf(b, "%s: &Lister{\n", name)
-	field(b, "Operation", l.Operation)
-	field(b, "Target", l.Target)
-	field(b, "Method", l.Method)
-	field(b, "URI", l.URI)
-	if len(l.Input) > 0 {
-		b.WriteString("Input: []Binding{\n")
-		for _, in := range l.Input {
-			binding(b, in)
-		}
-		b.WriteString("},\n")
-	}
-	b.WriteString("Token: ")
-	binding(b, l.Token)
-	fmt.Fprintf(b, "NextToken: %#v,\nItems: %#v,\n", l.NextToken, l.Items)
-	field(b, "Item", l.Item)
-	field(b, "Property", l.Property)
-	b.WriteString("},\n")
 }
 
 func binding(b *bytes.Buffer, in Binding) {

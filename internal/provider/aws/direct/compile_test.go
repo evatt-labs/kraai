@@ -58,13 +58,16 @@ func TestGeneratedReadersMatchCompiled(t *testing.T) {
 // The compiled readers carry what each protocol needs to address the call.
 func TestCompiledReadersAddressTheirCall(t *testing.T) {
 	cases := map[string]struct{ protocol, target, method, uri, location string }{
-		"AWS::AppConfig::DeploymentStrategy":       {"restJson1", "", "GET", "/deploymentstrategies/{DeploymentStrategyId}", "label"},
-		"AWS::XRay::Group":                         {"restJson1", "", "POST", "/GetGroup", "body"},
-		"AWS::CodeDeploy::DeploymentConfig":        {"awsJson1_1", "CodeDeploy_20141006.GetDeploymentConfig", "", "", "body"},
-		"AWS::AppRunner::AutoScalingConfiguration": {"awsJson1_0", "AppRunner.DescribeAutoScalingConfiguration", "", "", "body"},
+		"AWS::ApiGatewayV2::Api": {"restJson1", "", "GET", "/v2/apis/{ApiId}", "label"},
+		"AWS::SSM::Parameter":    {"awsJson1_1", "AmazonSSM.GetParameter", "", "", "body"},
+		"AWS::DynamoDB::Table":   {"awsJson1_0", "DynamoDB_20120810.DescribeTable", "", "", "body"},
 	}
 	for typeName, c := range cases {
-		r := readers[typeName]
+		r, ok := readers[typeName]
+		if !ok {
+			t.Errorf("no reader for %s", typeName)
+			continue
+		}
 		if r.Protocol != c.protocol || r.Target != c.target || r.Method != c.method || r.URI != c.uri ||
 			len(r.Identifier) != 1 || r.Identifier[0].Location != c.location {
 			t.Errorf("%s = %+v", typeName, r)
@@ -85,38 +88,38 @@ func edit(t *testing.T, file, old, replacement string) fstest.MapFS {
 }
 
 func TestCompileRefuses(t *testing.T) {
-	const xray, codedeploy = "AWS--XRay--Group.yaml", "AWS--CodeDeploy--DeploymentConfig.yaml"
+	const ssm, apigw = "AWS--SSM--Parameter.yaml", "AWS--ApiGatewayV2--Api.yaml"
 	cases := map[string]struct {
 		files fstest.MapFS
 		want  string
 	}{
-		"an unmapped property": {edit(t, xray, "  FilterExpression: FilterExpression\n", ""),
-			"FilterExpression is neither mapped nor skipped"},
-		"a member the response lacks": {edit(t, xray, "FilterExpression: FilterExpression", "FilterExpression: Filter"),
-			"maps to Filter, which com.amazonaws.xray#Group does not have"},
-		"a type that does not fit": {edit(t, xray, "GroupName: GroupName", "GroupName: InsightsConfiguration"),
-			"GroupName is [string] in the schema, but InsightsConfiguration is structure"},
-		"a skip nobody reviewed": {edit(t, xray, "Tags: tags are not", "Tags: TODO tags are not"),
-			"Tags is skipped without a reviewed reason"},
-		"a skip for a property the response carries": {withSkip(edit(t, xray,
-			"  FilterExpression: FilterExpression\n", ""), xray, "FilterExpression", "not needed"),
-			"FilterExpression is skipped, but member FilterExpression carries it"},
-		"a property both mapped and skipped": {withSkip(copyFS(t), xray, "GroupName", "no reason"),
-			"GroupName is both mapped and skipped"},
-		"a property the schema lacks": {edit(t, xray, "  GroupName: GroupName\n", "  GroupName: GroupName\n  Colour: GroupName\n"),
+		"an unmapped property": {edit(t, ssm, "  DataType: DataType\n", ""),
+			"DataType is neither mapped nor skipped"},
+		"a member the response lacks": {edit(t, ssm, "  DataType: DataType\n", "  DataType: Datatype\n"),
+			"maps to Datatype, which com.amazonaws.ssm#Parameter does not have"},
+		"a type that does not fit": {edit(t, ssm, "  DataType: DataType\n", "  DataType: Version\n"),
+			"DataType is [string] in the schema, but Version is long"},
+		"a skip nobody reviewed": {withSkip(edit(t, ssm, "  DataType: DataType\n", ""), ssm, "DataType", "TODO not mapped"),
+			"DataType is skipped without a reviewed reason"},
+		"a skip for a property the response carries": {withSkip(edit(t, ssm,
+			"  DataType: DataType\n", ""), ssm, "DataType", "not needed"),
+			"DataType is skipped, but member DataType carries it"},
+		"a property both mapped and skipped": {withSkip(copyFS(t), ssm, "Name", "no reason"),
+			"Name is both mapped and skipped"},
+		"a property the schema lacks": {edit(t, ssm, "  Name: Name\n  Type: Type\n", "  Name: Name\n  Colour: Name\n  Type: Type\n"),
 			"Colour is mapped, but the schema has no such readable property"},
-		"an identifier that is not the primary identifier": {edit(t, xray, "    GroupARN: GroupARN\n", "    GroupName: GroupName\n"),
-			"identifier binds GroupName, which is not the primary identifier"},
-		"a required input member left unbound": {edit(t, codedeploy, "    DeploymentConfigName: deploymentConfigName\n  response", "  response"),
-			"the input requires deploymentConfigName, which the identifier does not bind"},
-		"a response path that goes nowhere": {edit(t, xray, "response: Group", "response: Groups"),
-			"response path Groups"},
-		"a structure with no nested mapping": {edit(t, codedeploy,
-			"  MinimumHealthyHosts:\n    member: minimumHealthyHosts\n    properties:\n      Type: type\n      Value: value\n",
-			"  MinimumHealthyHosts: minimumHealthyHosts\n"),
-			"MinimumHealthyHosts.Type is neither mapped nor skipped"},
-		"a nested property left out": {edit(t, codedeploy, "      Type: type\n      Value: value\n  TrafficRoutingConfig", "      Type: type\n  TrafficRoutingConfig"),
-			"MinimumHealthyHosts.Value is neither mapped nor skipped"},
+		"an identifier that is not the primary identifier": {edit(t, ssm, "  identifier:\n    Name: Name\n", "  identifier:\n    Type: Name\n"),
+			"identifier binds Type, which is not the primary identifier"},
+		"a required input member left unbound": {edit(t, ssm, "  identifier:\n    Name: Name\n", ""),
+			"the input requires Name, which the identifier does not bind"},
+		"a response path that goes nowhere": {edit(t, ssm, "response: Parameter", "response: Parameters"),
+			"response path Parameters"},
+		"a structure with no nested mapping": {edit(t, apigw,
+			"  CorsConfiguration:\n    member: CorsConfiguration\n    properties:\n      AllowCredentials: AllowCredentials\n      AllowHeaders: AllowHeaders\n      AllowMethods: AllowMethods\n      AllowOrigins: AllowOrigins\n      ExposeHeaders: ExposeHeaders\n      MaxAge: MaxAge\n",
+			"  CorsConfiguration: CorsConfiguration\n"),
+			"CorsConfiguration.AllowCredentials is neither mapped nor skipped"},
+		"a nested property left out": {edit(t, apigw, "      MaxAge: MaxAge\n  Description", "  Description"),
+			"CorsConfiguration.MaxAge is neither mapped nor skipped"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

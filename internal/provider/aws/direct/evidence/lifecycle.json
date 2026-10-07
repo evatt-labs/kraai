@@ -15,26 +15,6 @@
       "reader": "6628e97f905b3a9794bd76c7900ce4335eeabb1d2f43e3243c2a4f3e1b9d196e"
     },
     {
-      "type": "AWS::CloudWatch::Alarm",
-      "date": "2026-09-29",
-      "outcome": "parity",
-      "updated": [
-        "ActionsEnabled",
-        "AlarmDescription",
-        "ComparisonOperator",
-        "DatapointsToAlarm",
-        "Dimensions",
-        "EvaluationPeriods",
-        "Period",
-        "Statistic",
-        "Tags",
-        "Threshold",
-        "TreatMissingData",
-        "Unit"
-      ],
-      "reader": "f38bc3a3f86bdbd0befc530db4c8a0f5d0e44b6029f68fc254fff78906131ffd"
-    },
-    {
       "type": "AWS::DynamoDB::Table",
       "date": "2026-09-30",
       "outcome": "parity",
@@ -152,64 +132,6 @@
       ]
     },
     {
-      "type": "AWS::ECS::Cluster",
-      "date": "2026-09-27",
-      "outcome": "parity",
-      "updated": [
-        "CapacityProviders",
-        "ClusterSettings",
-        "Configuration",
-        "DefaultCapacityProviderStrategy",
-        "Tags"
-      ],
-      "reader": "181bf8b0465b9df5059864e438e66d230980c7ced4b28fe40b8f7dfa6a10221f"
-    },
-    {
-      "type": "AWS::ECS::TaskDefinition",
-      "date": "2026-09-27",
-      "outcome": "parity",
-      "updated": [
-        "Tags"
-      ],
-      "reader": "ade909924c8d9cc271b7ce03e18c9c3e3d095e70e5334b8b3f88aa3349016594"
-    },
-    {
-      "type": "AWS::ElastiCache::SubnetGroup",
-      "date": "2026-09-27",
-      "outcome": "parity",
-      "updated": [
-        "Description",
-        "SubnetIds",
-        "Tags"
-      ],
-      "reader": "8372284c7bfe9ad9905ce15e4ce04b80a1988384e53f99dcc519482725583196"
-    },
-    {
-      "type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "date": "2026-09-29",
-      "outcome": "parity",
-      "updated": [
-        "HealthCheckIntervalSeconds",
-        "Matcher",
-        "Tags",
-        "TargetGroupAttributes",
-        "Targets"
-      ],
-      "reader": "12e98e249d1f7c465ea465e56052589ac48496281eda0533815fbb9d90dec131"
-    },
-    {
-      "type": "AWS::Events::EventBus",
-      "date": "2026-10-02",
-      "outcome": "parity",
-      "updated": [
-        "Description",
-        "LogConfig",
-        "Policy",
-        "Tags"
-      ],
-      "reader": "7b594333f530a05b3f9e23854a113f3d50787880e3d060eeb8f631395bcbd709"
-    },
-    {
       "type": "AWS::Events::Rule",
       "date": "2026-09-29",
       "outcome": "parity",
@@ -267,41 +189,6 @@
         "InvokeMode"
       ],
       "reader": "914494f96ba3c354e9065976dbdc636fe5e61fddfea2b6476cee13b8904f311f"
-    },
-    {
-      "type": "AWS::Logs::LogGroup",
-      "date": "2026-09-27",
-      "outcome": "parity",
-      "updated": [
-        "BearerTokenAuthenticationEnabled",
-        "DataProtectionPolicy",
-        "DeletionProtectionEnabled",
-        "FieldIndexPolicies",
-        "KmsKeyId",
-        "ResourcePolicyDocument",
-        "RetentionInDays",
-        "Tags"
-      ],
-      "reader": "b346e03c940fdbd0fe5d8e42eb48e001198aa00e9591d2324f910dd4d5999a10"
-    },
-    {
-      "type": "AWS::Logs::ResourcePolicy",
-      "date": "2026-10-02",
-      "outcome": "parity",
-      "updated": [
-        "PolicyDocument"
-      ],
-      "reader": "77df1cf844ee7f60a47aa095aa5d361792597beb85a9e05f4169a27bd7671318"
-    },
-    {
-      "type": "AWS::RDS::DBClusterParameterGroup",
-      "date": "2026-09-30",
-      "outcome": "parity",
-      "updated": [
-        "Parameters",
-        "Tags"
-      ],
-      "reader": "253f0a28d176d79210c9210491878e50e8aedcaa60dfae4db648625a45c543aa"
     },
     {
       "type": "AWS::RDS::DBSubnetGroup",
@@ -377,19 +264,6 @@
         "Value"
       ],
       "reader": "67c960db8ae8c4151a9ebb5c6c9c6f5a442b40ce94705b3d40f97123c3e2119a"
-    },
-    {
-      "type": "AWS::SecretsManager::Secret",
-      "date": "2026-10-02",
-      "outcome": "parity",
-      "updated": [
-        "Description",
-        "KmsKeyId",
-        "ReplicaRegions",
-        "SecretString",
-        "Tags"
-      ],
-      "reader": "0662fce95db9665bd47b85d7efab560427a9fc87fea4c838085fdb285977641a"
     }
   ]
 }

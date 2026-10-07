@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -21,17 +22,23 @@ type seen struct {
 	body                                       map[string]any
 }
 
-// serve answers every request with status and body, recording what it saw.
+// serve answers every request with status and body, recording the first
+// request it saw: a type with further calls makes them after its read.
 func serve(t *testing.T, status int, header http.Header, response string) (*Client, *seen) {
 	t.Helper()
 	got := &seen{}
+	var mu sync.Mutex
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		got.method, got.rawPath = r.Method, r.URL.EscapedPath()
-		got.target, got.contentType, got.auth = r.Header.Get("X-Amz-Target"), r.Header.Get("Content-Type"), r.Header.Get("Authorization")
 		raw, _ := io.ReadAll(r.Body)
-		if len(raw) > 0 {
-			_ = json.Unmarshal(raw, &got.body)
+		mu.Lock()
+		if got.method == "" {
+			got.method, got.rawPath = r.Method, r.URL.EscapedPath()
+			got.target, got.contentType, got.auth = r.Header.Get("X-Amz-Target"), r.Header.Get("Content-Type"), r.Header.Get("Authorization")
+			if len(raw) > 0 {
+				_ = json.Unmarshal(raw, &got.body)
+			}
 		}
+		mu.Unlock()
 		for k, v := range header {
 			w.Header()[k] = v
 		}
@@ -49,7 +56,13 @@ func serve(t *testing.T, status int, header http.Header, response string) (*Clie
 }
 
 func TestRequestsAreShapedPerProtocol(t *testing.T) {
-	arn := "arn:aws:bedrock:us-east-1:123456789012:default-prompt-router/anthropic.claude:1"
+	arn := "arn:aws:lambda:us-east-1:123456789012:function:team/fn:1"
+	// No kept type reads by a restJson1 body, so one is registered here.
+	readers["Test::Body::Read"] = Reader{
+		Type: "Test::Body::Read", Protocol: "restJson1", SigningName: "xray", Host: "xray.{region}.amazonaws.com",
+		Method: "POST", URI: "/GetGroup", Identifier: []Binding{{Property: "GroupARN", Member: "GroupARN", Location: "body"}},
+	}
+	t.Cleanup(func() { delete(readers, "Test::Body::Read") })
 	cases := map[string]struct {
 		typeName    string
 		identifier  map[string]string
@@ -62,31 +75,31 @@ func TestRequestsAreShapedPerProtocol(t *testing.T) {
 		scope       string
 	}{
 		"restJson1 path label": {
-			typeName: "AWS::AppConfig::DeploymentStrategy", identifier: map[string]string{"Id": "AppConfig.AllAtOnce"},
-			response: `{}`, method: "GET", rawPath: "/deploymentstrategies/AppConfig.AllAtOnce", scope: "/appconfig/",
+			typeName: "AWS::ApiGatewayV2::Api", identifier: map[string]string{"ApiId": "abcde12345"},
+			response: `{}`, method: "GET", rawPath: "/v2/apis/abcde12345", scope: "/apigateway/",
 		},
 		"restJson1 label escaping every reserved byte": {
-			typeName: "AWS::Bedrock::IntelligentPromptRouter", identifier: map[string]string{"PromptRouterArn": arn},
+			typeName: "AWS::Lambda::Url", identifier: map[string]string{"FunctionArn": arn},
 			response: `{}`, method: "GET",
-			rawPath: "/prompt-routers/arn%3Aaws%3Abedrock%3Aus-east-1%3A123456789012%3Adefault-prompt-router%2Fanthropic.claude%3A1",
-			scope:   "/bedrock/",
+			rawPath: "/2021-10-31/functions/arn%3Aaws%3Alambda%3Aus-east-1%3A123456789012%3Afunction%3Ateam%2Ffn%3A1/url",
+			scope:   "/lambda/",
 		},
 		"restJson1 body": {
-			typeName: "AWS::XRay::Group", identifier: map[string]string{"GroupARN": "arn:aws:xray:us-east-1:123456789012:group/Default"},
+			typeName: "Test::Body::Read", identifier: map[string]string{"GroupARN": "arn:aws:xray:us-east-1:123456789012:group/Default"},
 			response: `{"Group":{}}`, method: "POST", rawPath: "/GetGroup", contentType: "application/json",
 			body: map[string]any{"GroupARN": "arn:aws:xray:us-east-1:123456789012:group/Default"}, scope: "/xray/",
 		},
 		"awsJson1_1": {
-			typeName: "AWS::CodeDeploy::DeploymentConfig", identifier: map[string]string{"DeploymentConfigName": "CodeDeployDefault.OneAtATime"},
-			response: `{"deploymentConfigInfo":{}}`, method: "POST", rawPath: "/",
-			target: "CodeDeploy_20141006.GetDeploymentConfig", contentType: "application/x-amz-json-1.1",
-			body: map[string]any{"deploymentConfigName": "CodeDeployDefault.OneAtATime"}, scope: "/codedeploy/",
+			typeName: "AWS::SSM::Parameter", identifier: map[string]string{"Name": "/kraai/one"},
+			response: `{"Parameter":{}}`, method: "POST", rawPath: "/",
+			target: "AmazonSSM.GetParameter", contentType: "application/x-amz-json-1.1",
+			body: map[string]any{"Name": "/kraai/one"}, scope: "/ssm/",
 		},
 		"awsJson1_0": {
-			typeName: "AWS::AppRunner::AutoScalingConfiguration", identifier: map[string]string{"AutoScalingConfigurationArn": "arn:x"},
-			response: `{"AutoScalingConfiguration":{}}`, method: "POST", rawPath: "/",
-			target: "AppRunner.DescribeAutoScalingConfiguration", contentType: "application/x-amz-json-1.0",
-			body: map[string]any{"AutoScalingConfigurationArn": "arn:x"}, scope: "/apprunner/",
+			typeName: "AWS::DynamoDB::Table", identifier: map[string]string{"TableName": "kraai-table"},
+			response: `{"Table":{"TableArn":"arn:aws:dynamodb:us-east-1:123456789012:table/kraai-table"}}`, method: "POST", rawPath: "/",
+			target: "DynamoDB_20120810.DescribeTable", contentType: "application/x-amz-json-1.0",
+			body: map[string]any{"TableName": "kraai-table"}, scope: "/dynamodb/",
 		},
 	}
 	for name, c := range cases {
@@ -113,34 +126,40 @@ func TestRequestsAreShapedPerProtocol(t *testing.T) {
 // nested structures and lists of structures included; a member no property
 // maps to is dropped.
 func TestResponsesAreTranslated(t *testing.T) {
-	client, _ := serve(t, 200, nil, `{"deploymentConfigInfo":{
-		"computePlatform":"Server","deploymentConfigName":"CodeDeployDefault.HalfAtATime","createTime":1.7e9,
-		"minimumHealthyHosts":{"type":"FLEET_PERCENT","value":50}}}`)
-	got, err := client.Read(context.Background(), "AWS::CodeDeploy::DeploymentConfig",
-		map[string]string{"DeploymentConfigName": "CodeDeployDefault.HalfAtATime"})
+	client, _ := serve(t, 200, nil, `{"apiId":"abcde12345","name":"kraai","protocolType":"HTTP","createdDate":"2026-09-24T12:00:00Z",
+		"corsConfiguration":{"allowOrigins":["https://a.example","https://b.example"],"maxAge":600,"allowCredentials":true}}`)
+	got, err := client.Read(context.Background(), "AWS::ApiGatewayV2::Api", map[string]string{"ApiId": "abcde12345"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := map[string]any{
-		"ComputePlatform": "Server", "DeploymentConfigName": "CodeDeployDefault.HalfAtATime",
-		"MinimumHealthyHosts": map[string]any{"Type": "FLEET_PERCENT", "Value": json.Number("50")},
+		"ApiId": "abcde12345", "Name": "kraai", "ProtocolType": "HTTP",
+		"CorsConfiguration": map[string]any{"AllowOrigins": []any{"https://a.example", "https://b.example"}, "MaxAge": json.Number("600"), "AllowCredentials": true},
 	}
+	// The ARN is built from the id, the region and the account.
+	delete(got, "ExecuteApiArn")
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Read = %#v\nwant %#v", got, want)
 	}
 
-	client, _ = serve(t, 200, nil, `{"promptRouterName":"r","models":[{"modelArn":"a"},{"modelArn":"b"}],"fallbackModel":{"modelArn":"a"}}`)
-	got, err = client.Read(context.Background(), "AWS::Bedrock::IntelligentPromptRouter", map[string]string{"PromptRouterArn": "x"})
+	client, _ = serve(t, 200, nil, `{"Table":{"TableName":"t","TableArn":"arn:aws:dynamodb:us-east-1:1:table/t","ItemCount":7,
+		"AttributeDefinitions":[{"AttributeName":"pk","AttributeType":"S"},{"AttributeName":"sk","AttributeType":"N"}],
+		"KeySchema":[{"AttributeName":"pk","KeyType":"HASH"},{"AttributeName":"sk","KeyType":"RANGE"}]}}`)
+	got, err = client.Read(context.Background(), "AWS::DynamoDB::Table", map[string]string{"TableName": "t"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	want = map[string]any{
-		"PromptRouterName": "r",
-		"Models":           []any{map[string]any{"ModelArn": "a"}, map[string]any{"ModelArn": "b"}},
-		"FallbackModel":    map[string]any{"ModelArn": "a"},
+	for _, p := range []string{"AttributeDefinitions", "KeySchema"} {
+		want := map[string]any{
+			"AttributeDefinitions": []any{map[string]any{"AttributeName": "pk", "AttributeType": "S"}, map[string]any{"AttributeName": "sk", "AttributeType": "N"}},
+			"KeySchema":            []any{map[string]any{"AttributeName": "pk", "KeyType": "HASH"}, map[string]any{"AttributeName": "sk", "KeyType": "RANGE"}},
+		}[p]
+		if !reflect.DeepEqual(got[p], want) {
+			t.Fatalf("%s = %#v\nwant %#v", p, got[p], want)
+		}
 	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Read = %#v\nwant %#v", got, want)
+	if _, ok := got["ItemCount"]; ok {
+		t.Fatalf("a member no property maps to was kept: %#v", got)
 	}
 }
 
@@ -150,15 +169,15 @@ func TestErrorsNameTheirType(t *testing.T) {
 		body   string
 		code   string
 	}{
-		"from the header, sanitized": {http.Header{"X-Amzn-Errortype": {"ResourceNotFoundException:http://internal.amazon.com/"}},
-			`{"message":"gone"}`, "ResourceNotFoundException"},
-		"from __type, sanitized": {nil, `{"__type":"com.amazonaws.xray#InvalidRequestException","Message":"bad"}`, "InvalidRequestException"},
-		"from code":              {nil, `{"code":"DeploymentConfigDoesNotExistException","message":"no"}`, "DeploymentConfigDoesNotExistException"},
+		"from the header, sanitized": {http.Header{"X-Amzn-Errortype": {"ConflictException:http://internal.amazon.com/"}},
+			`{"message":"gone"}`, "ConflictException"},
+		"from __type, sanitized": {nil, `{"__type":"com.amazonaws.apigatewayv2#BadRequestException","Message":"bad"}`, "BadRequestException"},
+		"from code":              {nil, `{"code":"AccessDeniedException","message":"no"}`, "AccessDeniedException"},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			client, _ := serve(t, 400, c.header, c.body)
-			_, err := client.Read(context.Background(), "AWS::XRay::Group", map[string]string{"GroupARN": "x"})
+			_, err := client.Read(context.Background(), "AWS::ApiGatewayV2::Api", map[string]string{"ApiId": "x"})
 			var apiErr *APIError
 			if !errors.As(err, &apiErr) || apiErr.Code != c.code || apiErr.Status != 400 || apiErr.Message == "" {
 				t.Fatalf("Read = %v, want code %s", err, c.code)
@@ -169,8 +188,8 @@ func TestErrorsNameTheirType(t *testing.T) {
 
 func TestAReadNeedsItsIdentifier(t *testing.T) {
 	client, _ := serve(t, 200, nil, `{}`)
-	if _, err := client.Read(context.Background(), "AWS::XRay::Group", map[string]string{"GroupName": "x"}); err == nil ||
-		!strings.Contains(err.Error(), "GroupARN") {
+	if _, err := client.Read(context.Background(), "AWS::ApiGatewayV2::Api", map[string]string{"ApiName": "x"}); err == nil ||
+		!strings.Contains(err.Error(), "ApiId") {
 		t.Fatalf("Read = %v", err)
 	}
 	if _, err := client.Read(context.Background(), "AWS::Nope::Thing", nil); err == nil {
@@ -190,14 +209,14 @@ func TestGreedyLabelsKeepTheirSlashes(t *testing.T) {
 // A jsonName under an awsJson protocol is refused rather than guessed at.
 func TestJSONNameUnderAWSJSONIsRefused(t *testing.T) {
 	m := copyFS(t)
-	model := m["models/codedeploy-2014-10-06.json"]
+	model := m["models/ssm-2014-11-06.json"]
 	var parsed map[string]any
 	if err := json.Unmarshal(model.Data, &parsed); err != nil {
 		t.Fatal(err)
 	}
-	info := parsed["shapes"].(map[string]any)["com.amazonaws.codedeploy#DeploymentConfigInfo"].(map[string]any)
-	member := info["members"].(map[string]any)["computePlatform"].(map[string]any)
-	member["traits"] = map[string]any{"smithy.api#jsonName": "platform"}
+	info := parsed["shapes"].(map[string]any)["com.amazonaws.ssm#Parameter"].(map[string]any)
+	member := info["members"].(map[string]any)["DataType"].(map[string]any)
+	member["traits"] = map[string]any{"smithy.api#jsonName": "dataType"}
 	model.Data, _ = json.Marshal(parsed)
 
 	lock, err := loadLock(m)
@@ -209,7 +228,7 @@ func TestJSONNameUnderAWSJSONIsRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, o := range all {
-		if o.Type != "AWS::CodeDeploy::DeploymentConfig" {
+		if o.Type != "AWS::SSM::Parameter" {
 			continue
 		}
 		if _, errs := compileOne(m, lock, o); len(errs) == 0 || !strings.Contains(errors.Join(errs...).Error(), "which has a jsonName awsJson1_1 is not known to honour") {
@@ -217,7 +236,7 @@ func TestJSONNameUnderAWSJSONIsRefused(t *testing.T) {
 		}
 		return
 	}
-	t.Fatal("no CodeDeploy override")
+	t.Fatal("no SSM Parameter override")
 }
 
 // The request is sent to the reader's host in the client's region and
@@ -249,4 +268,31 @@ func TestHostAndSigningAreKeptApart(t *testing.T) {
 			}
 		})
 	}
+}
+
+// bodyPages is a client over a server answering each awsJson request with
+// respond, given the page token the request carries in its body, and
+// recording each request's target and body.
+func bodyPages(t *testing.T, respond func(token string) (int, string)) (*Client, *[]string) {
+	t.Helper()
+	var seen []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		seen = append(seen, r.Header.Get("X-Amz-Target")+" "+string(raw))
+		var in struct {
+			NextToken string `json:"nextToken"`
+		}
+		_ = json.Unmarshal(raw, &in)
+		status, body := respond(in.NextToken)
+		w.WriteHeader(status)
+		_, _ = io.WriteString(w, body)
+	}))
+	t.Cleanup(srv.Close)
+	return &Client{
+		HTTP:        srv.Client(),
+		Credentials: credentials.NewStaticCredentialsProvider("AKIDEXAMPLE", "secret", ""),
+		Region:      "us-east-1",
+		Endpoint:    func(string) string { return srv.URL },
+		Now:         func() time.Time { return time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC) },
+	}, &seen
 }

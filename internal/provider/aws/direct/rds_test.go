@@ -7,10 +7,7 @@ import (
 	"testing"
 )
 
-const (
-	dbSubnetGroups           = "AWS::RDS::DBSubnetGroup"
-	dbClusterParameterGroups = "AWS::RDS::DBClusterParameterGroup"
-)
+const dbSubnetGroups = "AWS::RDS::DBSubnetGroup"
 
 const dbSubnetGroupXML = `<DescribeDBSubnetGroupsResponse xmlns="http://rds.amazonaws.com/doc/2014-10-31/">
   <DescribeDBSubnetGroupsResult>
@@ -70,45 +67,5 @@ func TestReadRDSDBSubnetGroup(t *testing.T) {
 	}
 	if f := (*forms)[0].Get("DBSubnetGroupName"); f != "my-group" {
 		t.Fatalf("request DBSubnetGroupName = %q, want my-group", f)
-	}
-}
-
-const dbClusterParameterGroupXML = `<DescribeDBClusterParameterGroupsResponse xmlns="http://rds.amazonaws.com/doc/2014-10-31/">
-  <DescribeDBClusterParameterGroupsResult>
-    <DBClusterParameterGroups>
-      <DBClusterParameterGroup>
-        <DBClusterParameterGroupName>my-params</DBClusterParameterGroupName>
-        <DBParameterGroupFamily>aurora-postgresql16</DBParameterGroupFamily>
-        <Description>d</Description>
-        <DBClusterParameterGroupArn>arn:aws:rds:us-east-1:1:cluster-pg:my-params</DBClusterParameterGroupArn>
-      </DBClusterParameterGroup>
-    </DBClusterParameterGroups>
-  </DescribeDBClusterParameterGroupsResult>
-</DescribeDBClusterParameterGroupsResponse>`
-
-// Tags are read by the ARN the read captured, which no property carries.
-func TestReadRDSDBClusterParameterGroup(t *testing.T) {
-	client, forms := xmlServerBy(t, map[string]string{
-		"DescribeDBClusterParameterGroups": dbClusterParameterGroupXML, "ListTagsForResource": tagsXML,
-		"DescribeDBClusterParameters": `<DescribeDBClusterParametersResponse><DescribeDBClusterParametersResult/></DescribeDBClusterParametersResponse>`,
-	})
-	got, err := client.Read(context.Background(), dbClusterParameterGroups, map[string]string{"DBClusterParameterGroupName": "my-params"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := map[string]any{
-		"DBClusterParameterGroupName": "my-params",
-		"Family":                      "aurora-postgresql16",
-		"Description":                 "d",
-		"Tags":                        []any{map[string]any{"Key": "team", "Value": "cloud"}},
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Read = %#v\nwant   %#v", got, want)
-	}
-	if arn := tagForm(t, *forms).Get("ResourceName"); arn != "arn:aws:rds:us-east-1:1:cluster-pg:my-params" {
-		t.Fatalf("tags ResourceName = %q, want the captured ARN", arn)
-	}
-	if f := (*forms)[0].Get("DBClusterParameterGroupName"); f != "my-params" {
-		t.Fatalf("request DBClusterParameterGroupName = %q, want my-params", f)
 	}
 }

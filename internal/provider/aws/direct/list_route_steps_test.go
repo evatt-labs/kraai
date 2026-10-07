@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"go/parser"
 	"io"
 	"net/http"
@@ -404,6 +405,19 @@ func TestGeneratedListRouteOptions(t *testing.T) {
 	}
 }
 
+// A chunked route's literal carries the chunk.
+func TestGeneratedListRouteChunk(t *testing.T) {
+	r := mustCompileRoute(t, func(l *ListRoute) { l.Chunk = 5 })
+	var b bytes.Buffer
+	mutationLiteral(&b, r.Update[0])
+	if _, err := parser.ParseExpr(b.String()); err != nil {
+		t.Fatalf("literal does not parse: %v\n%s", err, b.String())
+	}
+	if !strings.Contains(b.String(), "Chunk: 5") {
+		t.Fatalf("literal lacks Chunk: 5:\n%s", b.String())
+	}
+}
+
 // A delete that clears a list sends the borrowed properties as read.
 func TestWithAddressForAClear(t *testing.T) {
 	u := MutationCall{With: []string{"Description"}}
@@ -445,5 +459,34 @@ func TestCompileRefusesABadListRouteOption(t *testing.T) {
 				t.Fatalf("errors = %v\nwant one containing %q", errs, c.want)
 			}
 		})
+	}
+}
+
+// A route with a chunk sends each of its calls for at most that many
+// elements, one call per chunk, for a service that caps a call's list.
+func TestListRouteChunks(t *testing.T) {
+	r := mustCompileRoute(t, func(l *ListRoute) { l.Chunk = 3 })
+	f := &recordingEvents{}
+	var current, desired []any
+	for i := range 7 {
+		current = append(current, tgt(fmt.Sprintf("z%d", i), "arn:z", ""))
+		desired = append(desired, tgt(fmt.Sprintf("a%d", i), "arn:a", ""))
+	}
+	if err := f.serve(t).apply(context.Background(), r, ruleAddress, map[string]any{"Targets": current}, map[string]any{"Targets": desired}, false); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"RemoveTargets", "RemoveTargets", "RemoveTargets", "PutTargets", "PutTargets", "PutTargets"}; !slices.Equal(f.ops(), want) {
+		t.Fatalf("calls = %v, want %v", f.ops(), want)
+	}
+	var sizes []int
+	for _, c := range f.calls {
+		if c.op == "RemoveTargets" {
+			sizes = append(sizes, len(c.body["Ids"].([]any)))
+		} else {
+			sizes = append(sizes, len(c.body["Targets"].([]any)))
+		}
+	}
+	if want := []int{3, 3, 1, 3, 3, 1}; !slices.Equal(sizes, want) {
+		t.Fatalf("elements per call = %v, want %v", sizes, want)
 	}
 }

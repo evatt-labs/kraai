@@ -19,10 +19,13 @@ import (
 	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 )
 
-const taskDefinition = "AWS::ECS::TaskDefinition"
+const (
+	functionURL    = "AWS::Lambda::Url"
+	urlFunctionARN = "arn:aws:lambda:us-east-1:123456789012:function:web"
+)
 
-// countingCC answers every GetResource with one task definition, counting
-// the calls that reach it.
+// countingCC answers every GetResource with one function URL, counting the
+// calls that reach it.
 type countingCC struct {
 	cloudControlAPI
 	gets atomic.Int32
@@ -31,7 +34,7 @@ type countingCC struct {
 func (c *countingCC) GetResource(context.Context, *cloudcontrol.GetResourceInput, ...func(*cloudcontrol.Options)) (*cloudcontrol.GetResourceOutput, error) {
 	c.gets.Add(1)
 	return &cloudcontrol.GetResourceOutput{ResourceDescription: &cctypes.ResourceDescription{
-		Identifier: aws.String("arn:td"), Properties: aws.String(`{"Family":"from-cloud-control"}`),
+		Identifier: aws.String(urlFunctionARN), Properties: aws.String(`{"FunctionUrl":"from-cloud-control"}`),
 	}}, nil
 }
 
@@ -55,15 +58,18 @@ func directClient(t *testing.T, status int, body string) (*Client, *countingCC, 
 // A type proven to agree with Cloud Control is read through its own
 // service, and decoded as a Cloud Control read is: numbers as float64.
 func TestGetResourceReadsAProvenTypeDirectly(t *testing.T) {
-	if !direct.CanRead(taskDefinition) {
-		t.Fatal("AWS::ECS::TaskDefinition is not a production direct reader; the evidence or override changed")
+	if !direct.CanRead(functionURL) {
+		t.Fatal("AWS::Lambda::Url is not a production direct reader; the evidence or override changed")
 	}
-	c, cc, directCalls := directClient(t, 200, `{"taskDefinition":{"family":"web","cpu":"256","revision":3,"status":"ACTIVE"},"tags":[{"key":"k","value":"v"}]}`)
-	props, found, err := c.GetResource(context.Background(), taskDefinition, "arn:td")
+	c, cc, directCalls := directClient(t, 200, `{"FunctionArn":"`+urlFunctionARN+`","FunctionUrl":"https://u.lambda-url.us-east-1.on.aws/","AuthType":"NONE","Cors":{"MaxAge":300}}`)
+	props, found, err := c.GetResource(context.Background(), functionURL, urlFunctionARN)
 	if err != nil || !found {
 		t.Fatalf("GetResource = %v, %v, %v", props, found, err)
 	}
-	want := map[string]any{"Family": "web", "Cpu": "256", "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}
+	want := map[string]any{
+		"FunctionArn": urlFunctionARN, "FunctionUrl": "https://u.lambda-url.us-east-1.on.aws/", "AuthType": "NONE",
+		"TargetFunctionArn": "web", "Cors": map[string]any{"MaxAge": float64(300)},
+	}
 	if !reflect.DeepEqual(props, want) {
 		t.Fatalf("props = %#v\nwant    %#v", props, want)
 	}
@@ -71,16 +77,16 @@ func TestGetResourceReadsAProvenTypeDirectly(t *testing.T) {
 		t.Fatalf("Cloud Control calls %d, direct calls %d; want 0 and 1", cc.gets.Load(), directCalls.Load())
 	}
 	// The answer is cached like one of Cloud Control's.
-	if _, _, err := c.GetResource(context.Background(), taskDefinition, "arn:td"); err != nil || directCalls.Load() != 1 {
+	if _, _, err := c.GetResource(context.Background(), functionURL, urlFunctionARN); err != nil || directCalls.Load() != 1 {
 		t.Fatalf("second read: %v, direct calls %d", err, directCalls.Load())
 	}
 }
 
-// A revision the service still describes but the override says is gone
-// is not found, as Cloud Control reports it, without asking Cloud Control.
+// An error the override says means absent is not found, as Cloud Control
+// reports it, without asking Cloud Control.
 func TestGetResourceReadsADirectAbsenceAsNotFound(t *testing.T) {
-	c, cc, _ := directClient(t, 200, `{"taskDefinition":{"family":"web","status":"INACTIVE"}}`)
-	props, found, err := c.GetResource(context.Background(), taskDefinition, "arn:td")
+	c, cc, _ := directClient(t, 404, `{"__type":"ResourceNotFoundException","Message":"The resource you requested does not exist."}`)
+	props, found, err := c.GetResource(context.Background(), functionURL, urlFunctionARN)
 	if err != nil || found || props != nil || cc.gets.Load() != 0 {
 		t.Fatalf("GetResource = %v, %v, %v with %d Cloud Control calls; want not found, none", props, found, err, cc.gets.Load())
 	}
@@ -93,17 +99,25 @@ func TestGetResourceFallsBackToCloudControl(t *testing.T) {
 		status int
 		body   string
 	}{
-		"a service error": {400, `{"__type":"ClientException","message":"Unable to describe task definition."}`},
-		"a throttle":      {429, `{"__type":"ThrottlingException"}`},
-		"no resource":     {200, `{}`},
+		"a service error": {400, `{"__type":"InvalidParameterValueException","Message":"bad function"}`},
+		"a throttle":      {429, `{"__type":"TooManyRequestsException"}`},
 	} {
 		t.Run(name, func(t *testing.T) {
 			client, cc, _ := directClient(t, c.status, c.body)
-			props, found, err := client.GetResource(context.Background(), taskDefinition, "arn:td")
-			if err != nil || !found || props["Family"] != "from-cloud-control" || cc.gets.Load() != 1 {
+			props, found, err := client.GetResource(context.Background(), functionURL, urlFunctionARN)
+			if err != nil || !found || props["FunctionUrl"] != "from-cloud-control" || cc.gets.Load() != 1 {
 				t.Fatalf("GetResource = %v, %v, %v with %d Cloud Control calls", props, found, err, cc.gets.Load())
 			}
 		})
+	}
+}
+
+// A response missing the structure the reader takes the instance from
+// falls back too, rather than reading as an instance with no properties.
+func TestGetResourceFallsBackOnAMissingWrapper(t *testing.T) {
+	client, cc, directCalls := directClient(t, 200, `{}`)
+	if _, found, err := client.GetResource(context.Background(), TypeDynamoDBTable, "web"); err != nil || !found || cc.gets.Load() != 1 || directCalls.Load() != 1 {
+		t.Fatalf("found %v, err %v, Cloud Control calls %d, direct calls %d; want one of each", found, err, cc.gets.Load(), directCalls.Load())
 	}
 }
 
@@ -125,8 +139,8 @@ func TestGetResourceRecordsAFallback(t *testing.T) {
 	spans := tracetest.NewSpanRecorder()
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(spans))
 	ctx, span := tp.Tracer("test").Start(context.Background(), "read")
-	c, _, _ := directClient(t, 429, `{"__type":"ThrottlingException"}`)
-	if _, _, err := c.GetResource(ctx, taskDefinition, "arn:td"); err != nil {
+	c, _, _ := directClient(t, 429, `{"__type":"TooManyRequestsException"}`)
+	if _, _, err := c.GetResource(ctx, functionURL, urlFunctionARN); err != nil {
 		t.Fatal(err)
 	}
 	span.End()
@@ -138,7 +152,7 @@ func TestGetResourceRecordsAFallback(t *testing.T) {
 	for _, a := range events[0].Attributes {
 		attrs[string(a.Key)] = a.Value.AsString()
 	}
-	if want := map[string]string{"kraai.type": taskDefinition, "kraai.fallback_reason": "ThrottlingException"}; !reflect.DeepEqual(attrs, want) {
+	if want := map[string]string{"kraai.type": functionURL, "kraai.fallback_reason": "TooManyRequestsException"}; !reflect.DeepEqual(attrs, want) {
 		t.Fatalf("attributes = %v, want %v", attrs, want)
 	}
 }

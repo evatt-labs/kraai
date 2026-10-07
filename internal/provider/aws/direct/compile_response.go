@@ -324,22 +324,6 @@ func (c *callCompiler) conditions(label string, spec map[string][]string) []Cond
 	return out
 }
 
-// lists compiles the type's list and probe operations.
-func (c *callCompiler) lists() {
-	if c.o.List != nil && isXML(c.r.Protocol) {
-		c.fail("a list under %s is not supported yet", c.r.Protocol)
-	} else if c.o.List != nil {
-		c.r.List = compileList(&c.model, &c.r, c.o, c.service, c.namespace, c.fail)
-	}
-	if c.o.Probe != nil && isXML(c.r.Protocol) {
-		c.fail("a probe under %s is not supported yet", c.r.Protocol)
-	} else if c.o.Probe != nil {
-		probe := c.o
-		probe.List = c.o.Probe
-		c.r.Probe = compileList(&c.model, &c.r, probe, c.service, c.namespace, func(format string, args ...any) { c.fail("probe: "+format, args...) })
-	}
-}
-
 // jsonNames refuses a member with a jsonName under an awsJson protocol.
 func (c *callCompiler) jsonNames() {
 	// The awsJson specifications say nothing of jsonName, so a member
@@ -362,12 +346,5 @@ func (c *callCompiler) jsonNames() {
 			}
 		}
 		walk(c.r.Fields)
-		if c.r.List != nil {
-			for _, b := range append(append([]Binding{}, c.r.List.Input...), c.r.List.Token) {
-				if b.JSONName != "" {
-					c.fail("list input member %s has a jsonName, which %s is not known to honour", b.Member, c.r.Protocol)
-				}
-			}
-		}
 	}
 }

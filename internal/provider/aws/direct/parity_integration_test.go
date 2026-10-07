@@ -247,24 +247,11 @@ func listWithin(ctx context.Context, cc *cloudcontrol.Client, typeName string, p
 	return ids, nil
 }
 
-// absenceParity reads up to perType identifiers r's probe lists, each of
-// which Cloud Control must read as absent, and checks the direct read does
-// not find one present. An identifier Cloud Control finds proves nothing
-// and is not counted.
+// absenceParity reads up to perType of r's absentIds, each of which Cloud
+// Control must read as absent, and checks the direct read does not find
+// one present.
 func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, client *Client, r Reader, e TypeEvidence, perType int) TypeEvidence {
 	var ids []string
-	listed := map[string]bool{}
-	if r.Probe != nil {
-		probed, err := client.Probe(ctx, r.Type)
-		if err != nil {
-			t.Errorf("probing: %v", err)
-			return e
-		}
-		ids = probed
-		for _, id := range probed {
-			listed[id] = true
-		}
-	}
 	for _, id := range r.AbsentIDs {
 		// A variable the harness environment names, as a lifecycle vector
 		// does, such as a route table the missing route is looked for in;
@@ -287,12 +274,9 @@ func absenceParity(ctx context.Context, t *testing.T, cc *cloudcontrol.Client, c
 		_, err := cc.GetResource(ctx, &cloudcontrol.GetResourceInput{TypeName: aws.String(r.Type), Identifier: aws.String(id)})
 		var notFound *cctypes.ResourceNotFoundException
 		if !errors.As(err, &notFound) {
-			// A listed identifier Cloud Control finds proves nothing; a
-			// declared absent one it does not read as absent is a probe
-			// that cannot prove anything, which the override must fix.
-			if !listed[id] {
-				t.Errorf("absentIds %s: Cloud Control answers %v, not NotFound", id, err)
-			}
+			// A declared absent identifier Cloud Control does not read as
+			// absent cannot prove anything, which the override must fix.
+			t.Errorf("absentIds %s: Cloud Control answers %v, not NotFound", id, err)
 			continue
 		}
 		e.Probed++

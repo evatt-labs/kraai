@@ -506,3 +506,18 @@ func (c *Client) ReadByID(ctx context.Context, typeName, identifier string) (map
 	}
 	return c.Read(ctx, typeName, values)
 }
+
+// at walks path through nested objects; present reports whether it got to
+// the end.
+func at(v any, path []string) (value any, present bool) {
+	for _, step := range path {
+		obj, ok := v.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		if v, ok = obj[step]; !ok {
+			return nil, false
+		}
+	}
+	return v, true
+}

@@ -50,8 +50,6 @@ type Reader struct {
 	Wait time.Duration
 	// AbsentErrors is every error code that means the instance is gone.
 	AbsentErrors []string
-	// Probe lists identifiers that must read as absent, for the harness.
-	Probe *Lister
 	// Also is the further calls whose properties are merged into a read.
 	Also []Reader
 	// Capture reads, keyed by Property, the values Also calls may name.
@@ -118,27 +116,6 @@ type Reader struct {
 	// Response is the path from the output to the resource.
 	Response []Step
 	Fields   []Field
-	// List lists every instance, when the type's override names a list.
-	List *Lister
-}
-
-// Lister is a compiled list operation.
-type Lister struct {
-	Operation string
-	// Target is the X-Amz-Target header of an awsJson protocol.
-	Target string
-	// Method and URI are the HTTP binding of a restJson1 operation.
-	Method, URI string
-	// Input is every fixed input, each with its Value.
-	Input []Binding
-	// Token places the page token in a request.
-	Token Binding
-	// NextToken and Items are wire paths in the output: the next page's
-	// token, and the list of items.
-	NextToken, Items []string
-	// Item is the wire member of each item carrying Property, the primary
-	// identifier; empty when each item is the identifier itself.
-	Item, Property string
 }
 
 // Condition is the values of one resource member that mean the instance

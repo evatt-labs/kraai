@@ -136,40 +136,6 @@ func TestReadWithAPageTokenIsIncomplete(t *testing.T) {
 	}
 }
 
-func TestProbeListsAbsentIdentifiers(t *testing.T) {
-	m := listWidget()
-	shapes := m["shapes"].(map[string]any)
-	shapes["com.example#ListWidgets"].(map[string]any)["input"] = map[string]any{"target": "com.example#ListWidgetsRequest"}
-	shapes["com.example#ListWidgets"].(map[string]any)["output"] = map[string]any{"target": "com.example#ListWidgetsResponse"}
-	shapes["com.example#ListWidgets"].(map[string]any)["traits"] = map[string]any{"smithy.api#paginated": map[string]any{"inputToken": "nextToken", "outputToken": "nextToken", "items": "ids"}}
-	shapes["com.example#ListWidgetsRequest"] = map[string]any{"type": "structure", "members": map[string]any{"nextToken": map[string]any{"target": "smithy.api#String"}}}
-	shapes["com.example#ListWidgetsResponse"] = map[string]any{"type": "structure", "members": map[string]any{
-		"nextToken": map[string]any{"target": "smithy.api#String"}, "ids": map[string]any{"target": "com.example#WidgetIds"},
-	}}
-	o := widgetOverride("Widgets[]")
-	o.Read.Identifier = map[string]string{"WidgetId": "WidgetIds"}
-	o.Probe = &List{Operation: "ListWidgets"}
-	r, errs := compileWidget(t, m, o)
-	if len(errs) > 0 {
-		t.Fatal(errs)
-	}
-	if HasList(r.Type) || r.List != nil {
-		t.Fatal("a probe made the type listable")
-	}
-	readers[r.Type] = r
-	t.Cleanup(func() { delete(readers, r.Type) })
-	client, _ := bodyPages(t, func(token string) (int, string) {
-		if token == "" {
-			return 200, `{"ids":["a"],"nextToken":"t"}`
-		}
-		return 200, `{"ids":["b"]}`
-	})
-	ids, err := client.Probe(context.Background(), r.Type)
-	if err != nil || !reflect.DeepEqual(ids, []string{"a", "b"}) {
-		t.Fatalf("Probe = %v, %v", ids, err)
-	}
-}
-
 func TestCompileRefusesTheRung(t *testing.T) {
 	cases := map[string]struct {
 		edit func(*Override)

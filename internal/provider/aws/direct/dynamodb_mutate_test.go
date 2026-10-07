@@ -470,6 +470,22 @@ func TestCreateDynamoDBTable(t *testing.T) {
 	}
 }
 
+// A call after the create that fails still returns the identifier of the
+// table that now exists, so it can be found and deleted.
+func TestCreateDynamoDBTableReturnsTheIdentifierOnALaterFailure(t *testing.T) {
+	f := newTableFake()
+	f.failOnce["UpdateTimeToLive"] = "ValidationException"
+	id, err := f.client(t).Create(context.Background(), ddbTable, map[string]any{
+		"AttributeDefinitions":    []any{map[string]any{"AttributeName": "pk", "AttributeType": "S"}},
+		"KeySchema":               []any{map[string]any{"AttributeName": "pk", "KeyType": "HASH"}},
+		"Tags":                    []any{map[string]any{"Key": "kraai:resource-name", "Value": "kraai-t"}},
+		"TimeToLiveSpecification": map[string]any{"Enabled": true, "AttributeName": "exp"},
+	})
+	if err == nil || id != "kraai-t" {
+		t.Fatalf("Create = %q, %v; want the identifier and the error", id, err)
+	}
+}
+
 // A stream is enabled only for a manifest that names one: the constant in
 // the call's template must not make a stream of a table that has none.
 func TestCreateDynamoDBTableWithoutAStream(t *testing.T) {

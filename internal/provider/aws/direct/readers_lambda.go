@@ -4,34 +4,6 @@ package direct
 
 func init() {
 	register(map[string]Reader{
-		"AWS::Lambda::CodeSigningConfig": {
-			Type:        "AWS::Lambda::CodeSigningConfig",
-			Protocol:    "restJson1",
-			SigningName: "lambda",
-			Host:        "lambda.{region}.amazonaws.com",
-			Method:      "GET",
-			URI:         "/2020-04-22/code-signing-configs/{CodeSigningConfigArn}",
-			Identifier: []Binding{
-				{Property: "CodeSigningConfigArn", Member: "CodeSigningConfigArn", Location: "label"},
-			},
-			AbsentErrors: []string{"ResourceNotFoundException"},
-			Response:     []Step{{Name: "CodeSigningConfig"}},
-			Fields: []Field{
-				{Property: "AllowedPublishers", Member: "AllowedPublishers", Kind: "structure",
-					Fields: []Field{
-						{Property: "SigningProfileVersionArns", Member: "SigningProfileVersionArns", Kind: "list"},
-					},
-				},
-				{Property: "CodeSigningConfigArn", Member: "CodeSigningConfigArn", Kind: "scalar"},
-				{Property: "CodeSigningConfigId", Member: "CodeSigningConfigId", Kind: "scalar"},
-				{Property: "CodeSigningPolicies", Member: "CodeSigningPolicies", Kind: "structure",
-					Fields: []Field{
-						{Property: "UntrustedArtifactOnDeployment", Member: "UntrustedArtifactOnDeployment", Kind: "scalar"},
-					},
-				},
-				{Property: "Description", Member: "Description", Kind: "scalar"},
-			},
-		},
 		"AWS::Lambda::Function": {
 			Type:        "AWS::Lambda::Function",
 			Protocol:    "restJson1",
@@ -304,27 +276,6 @@ func init() {
 				},
 			},
 			Mutable: true,
-		},
-		"AWS::Lambda::MicrovmImage": {
-			Type:        "AWS::Lambda::MicrovmImage",
-			Protocol:    "restJson1",
-			SigningName: "lambda",
-			Host:        "lambda.{region}.amazonaws.com",
-			Method:      "GET",
-			URI:         "/2025-09-09/microvm-images/{imageIdentifier}",
-			Identifier: []Binding{
-				{Property: "ImageArn", Member: "imageIdentifier", Location: "label"},
-			},
-			AbsentErrors: []string{"ResourceNotFoundException"},
-			Fields: []Field{
-				{Property: "CreatedAt", Member: "createdAt", Kind: "timestamp"},
-				{Property: "ImageArn", Member: "imageArn", Kind: "scalar"},
-				{Property: "LatestActiveImageVersion", Member: "latestActiveImageVersion", Kind: "scalar"},
-				{Property: "LatestFailedImageVersion", Member: "latestFailedImageVersion", Kind: "scalar"},
-				{Property: "Name", Member: "name", Kind: "scalar"},
-				{Property: "State", Member: "state", Kind: "scalar"},
-				{Property: "UpdatedAt", Member: "updatedAt", Kind: "timestamp"},
-			},
 		},
 		"AWS::Lambda::Permission": {
 			Type:        "AWS::Lambda::Permission",

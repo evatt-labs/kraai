@@ -160,12 +160,9 @@ func TestCompiledCreatesCarryTheirToken(t *testing.T) {
 	if _, ok := readers[routeTable].Create.Form["ClientToken"]; !ok {
 		t.Fatal("CreateRouteTable has no form step for ClientToken")
 	}
-	if got := readers[smType].Create.TokenMember; got != "ClientRequestToken" {
-		t.Fatalf("CreateSecret TokenMember = %q, want ClientRequestToken", got)
-	}
 	for name, r := range readers {
-		if r.Create != nil && r.Create.TokenMember != "" && name != routeTable && name != smType {
-			t.Errorf("%s creates with token %s; the model has one on CreateRouteTable and CreateSecret only", name, r.Create.TokenMember)
+		if r.Create != nil && r.Create.TokenMember != "" && name != routeTable {
+			t.Errorf("%s creates with token %s; the model has one on CreateRouteTable only", name, r.Create.TokenMember)
 		}
 	}
 }

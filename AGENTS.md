@@ -115,6 +115,10 @@ change by whether it serves that. Provider breadth and Terraform parity are
 out of scope, and WASM plugins and the Kubernetes client were removed for
 that reason; do not reintroduce them.
 
+The direct package is frozen to the AWS types kraai's capabilities create;
+a type gains a direct override only alongside the capability that creates
+it, and two tests hold that line.
+
 ## Scope and honesty
 
 **Stay inside the task.** Other agents frequently work in this repo

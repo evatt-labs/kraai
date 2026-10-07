@@ -142,12 +142,7 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 		return "", nil, false, err
 	}
 
-	var candidates []string
-	if r.lister != nil {
-		candidates, err = r.lister(ctx)
-	} else {
-		candidates, err = r.client.ListResources(ctx, r.typeName, resourceModel)
-	}
+	candidates, err := r.client.ListResources(ctx, r.typeName, resourceModel)
 	if err != nil {
 		return "", nil, false, err
 	}

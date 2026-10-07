@@ -44,7 +44,9 @@ type fakeDBSubnetGroups struct {
 	// element that carries no name, to prove the identifier is read from
 	// there rather than echoed from what was sent.
 	noIdentifier bool
-	calls        map[string][]url.Values
+	// lower stores the name lowercased, as RDS does, and answers with it.
+	lower bool
+	calls map[string][]url.Values
 }
 
 func (f *fakeDBSubnetGroups) arn() string { return "arn:aws:rds:us-east-1:1:subgrp:" + f.name }
@@ -102,6 +104,9 @@ func (f *fakeDBSubnetGroups) serve(t *testing.T) *Client {
 		case "CreateDBSubnetGroup":
 			f.exists = true
 			f.name = form.Get("DBSubnetGroupName")
+			if f.lower {
+				f.name = strings.ToLower(f.name)
+			}
 			f.description = form.Get("DBSubnetGroupDescription")
 			f.subnetIDs = formList(form, "SubnetIds.SubnetIdentifier")
 			f.tags = formTags(form, "Tags.Tag")
@@ -186,6 +191,21 @@ func TestCreateDBSubnetGroupSendsForm(t *testing.T) {
 	}
 	if !reflect.DeepEqual(sent, want) {
 		t.Fatalf("CreateDBSubnetGroup form = %v\nwant %v", sent, want)
+	}
+}
+
+// A service that lowercases the name it is sent answers with the name the
+// instance has; the create returns that, and its wait compares with it.
+func TestCreateTakesTheNameTheServiceAnswers(t *testing.T) {
+	f := &fakeDBSubnetGroups{lower: true}
+	client := f.serve(t)
+	id, err := client.Create(context.Background(), dbSubnetGroupType, map[string]any{
+		"DBSubnetGroupDescription": "d",
+		"SubnetIds":                []any{"subnet-a"},
+		"Tags":                     []any{map[string]any{"Key": "kraai:resource-name", "Value": "Kraai-E-Subnets"}},
+	})
+	if err != nil || id != "kraai-e-subnets" {
+		t.Fatalf("Create = %q, %v; want the lowercased name", id, err)
 	}
 }
 
