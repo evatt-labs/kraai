@@ -121,9 +121,12 @@ func (f *fakeCC) GetResourceRequestStatus(ctx context.Context, _ *cloudcontrol.G
 type fakeCF struct {
 	out *cloudformation.DescribeTypeOutput
 	err error
+	// calls counts DescribeType requests.
+	calls int
 }
 
 func (f *fakeCF) DescribeType(context.Context, *cloudformation.DescribeTypeInput, ...func(*cloudformation.Options)) (*cloudformation.DescribeTypeOutput, error) {
+	f.calls++
 	return f.out, f.err
 }
 

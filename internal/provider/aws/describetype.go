@@ -18,11 +18,22 @@ type cloudFormationAPI interface {
 	DescribeType(ctx context.Context, params *cloudformation.DescribeTypeInput, optFns ...func(*cloudformation.Options)) (*cloudformation.DescribeTypeOutput, error)
 }
 
-// DescribeType fetches and decodes typeName's CloudFormation resource
-// provider schema. Fetched on first use and cached per type per process by
-// resourceType.getSchema, and across runs by the on-disk schema cache when
-// one is configured.
+// DescribeType returns typeName's schema facts from the index compiled into
+// the binary, so registration, diff and the IAM policy read one pinned copy
+// and a run is reproducible; a type the index does not know, one AWS
+// published after the index was generated, is fetched live. Cached per
+// type per process by resourceType.getSchema.
 func (c *Client) DescribeType(ctx context.Context, typeName string) (cfschema.Facts, error) {
+	if facts, err := cfschema.Lookup(typeName); err == nil {
+		return facts, nil
+	}
+	return c.describeLive(ctx, typeName)
+}
+
+// describeLive fetches and decodes typeName's CloudFormation resource
+// provider schema, cached across runs by the on-disk schema cache when one
+// is configured.
+func (c *Client) describeLive(ctx context.Context, typeName string) (cfschema.Facts, error) {
 	raw, err := c.schemaDocument(ctx, typeName)
 	if err != nil {
 		return cfschema.Facts{}, err
