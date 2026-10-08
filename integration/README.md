@@ -25,3 +25,50 @@ The environment is ephemeral with a two-hour ttl, so a run that fails
 before destroying is reaped by `kraai gc`. Destroy deregisters the task
 definition revision rather than deleting it; ECS keeps inactive revisions,
 and they cost nothing.
+
+## aws-env
+
+The core of an application environment, all free at rest: an HTTP
+function, a queue, a DynamoDB table, a bucket, a generated secret, and a
+network naming a VPC that OpenTofu makes in `vpc/`, as Terraform would own
+it in a real account. `environments/policy.yaml` exists only to generate
+the live role's IAM actions; a run writes its own environment.
+
+```
+tofu -chdir=integration/aws-env/vpc init -backend-config=bucket=kraai-lock-<account>-us-east-1
+tofu -chdir=integration/aws-env/vpc apply -var name=kci-env
+go run ./cmd/kraai apply   kci-env --dir integration/aws-env
+go run ./cmd/kraai plan    kci-env --dir integration/aws-env   # 10 unchanged
+go run ./cmd/kraai destroy kci-env --dir integration/aws-env
+tofu -chdir=integration/aws-env/vpc destroy -var name=kci-env
+```
+
+The VPC's state is kept in kraai's lock bucket, which the first kraai
+apply in an account makes, under one key: a run whose destroy failed
+leaves state the next run finds.
+
+Destroying the function inside the network can take up to about twenty
+minutes, while Lambda releases its network interfaces.
+
+## The live workflow
+
+`.github/workflows/live.yml` runs both fixtures weekly and on demand: it
+applies each, asserts that a plan of what it applied changes nothing, and
+destroys it, whatever happened before. The environments are `kci-free` and
+`kci-env`, fixed so the next run converges onto and destroys whatever a
+failed run left; runs never overlap. In `aws-free`, the names a type would
+otherwise take from the service carry the environment's `prefix` value
+(`environments/<name>.values.yaml`).
+
+It assumes the role `infra/ci-role` makes, trusted only for runs from
+`main` of this repository. An account administrator sets it up once:
+
+```
+make ci-role-actions                # regenerate infra/ci-role/actions.json; review the diff
+tofu -chdir=infra/ci-role init
+tofu -chdir=infra/ci-role apply
+gh variable set KRAAI_LIVE_ROLE_ARN --body "$(tofu -chdir=infra/ci-role output -raw role_arn)"
+```
+
+Until the variable is set, the workflow skips its job. Re-run
+`make ci-role-actions` and apply again whenever a fixture gains a type.

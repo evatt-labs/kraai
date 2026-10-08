@@ -17,3 +17,9 @@ npm/.bin/
 # Agent worktrees. Created inside the repo by tooling, and each is its own
 # git checkout — committing one adds a gitlink to a directory nobody else has.
 .claude/worktrees/
+
+# OpenTofu and Terraform working state: provider plugins, and state files,
+# which hold resource attributes in plaintext.
+.terraform/
+*.tfstate
+*.tfstate.*

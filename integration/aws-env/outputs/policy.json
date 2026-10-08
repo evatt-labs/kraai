@@ -1,0 +1,4 @@
+{
+  "vpc_id": {"sensitive": false, "type": "string", "value": "vpc-0000000000000000a"},
+  "subnet_ids": {"sensitive": false, "type": ["list", "string"], "value": ["subnet-0000000000000000a", "subnet-0000000000000000b"]}
+}

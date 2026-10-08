@@ -1,0 +1,23 @@
+version: 1
+
+# Applied and destroyed by the live workflow (.github/workflows/live.yml);
+# see ../README.md. Every capability here costs nothing at rest, and the
+# network is a VPC the workflow makes with OpenTofu (vpc/).
+providers:
+  compute:
+    vendor: aws
+    settings:
+      region: us-east-1
+      runtime: python3.13
+      architecture: arm64
+      package: zip
+  network:
+    vendor: aws
+  queues:
+    vendor: aws
+  database:
+    vendor: aws
+  objects:
+    vendor: aws
+  secrets:
+    vendor: aws

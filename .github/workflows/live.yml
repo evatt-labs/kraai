@@ -1,0 +1,77 @@
+name: live
+
+# Applies the live fixtures to the Evatt Labs AWS account, asserts that a
+# plan of what was applied changes nothing, and destroys them. Weekly and on
+# demand, never on push. Only the free fixtures run here; see
+# integration/README.md. Skipped until the repository variable
+# KRAAI_LIVE_ROLE_ARN names the role infra/ci-role makes.
+#
+# The environments' names are fixed (kci-free, kci-env), and runs never
+# overlap, so what a failed run left behind is converged and destroyed by
+# the next one.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: live
+  cancel-in-progress: false
+
+jobs:
+  aws:
+    if: vars.KRAAI_LIVE_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    # A function's network interfaces can hold its group for up to about
+    # twenty minutes after it is destroyed.
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture: [aws-free, aws-env]
+    env:
+      KRAAI_ENV: ${{ matrix.fixture == 'aws-free' && 'kci-free' || 'kci-env' }}
+      FIXTURE: integration/${{ matrix.fixture }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        if: matrix.fixture == 'aws-env'
+        with:
+          tofu_wrapper: false
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.KRAAI_LIVE_ROLE_ARN }}
+          role-session-name: kraai-live-${{ github.run_id }}
+          aws-region: us-east-1
+          # The destroy can wait up to 45 minutes for a function's network
+          # interfaces; it must not run on expired credentials.
+          role-duration-seconds: 7200
+      - name: Build kraai
+        run: go build -o "$RUNNER_TEMP/kraai" ./cmd/kraai
+      - name: Make the VPC
+        if: matrix.fixture == 'aws-env'
+        run: |
+          set -euo pipefail
+          account=$(aws sts get-caller-identity --query Account --output text)
+          tofu -chdir="$FIXTURE/vpc" init -input=false -backend-config="bucket=kraai-lock-$account-us-east-1"
+          tofu -chdir="$FIXTURE/vpc" apply -auto-approve -input=false -var "name=$KRAAI_ENV"
+      - name: Apply
+        run: '"$RUNNER_TEMP/kraai" apply "$KRAAI_ENV" --dir "$FIXTURE"'
+      - name: Assert a plan changes nothing
+        run: '"$RUNNER_TEMP/kraai" plan "$KRAAI_ENV" --dir "$FIXTURE" --detailed-exitcode'
+      - name: Destroy
+        if: always()
+        run: '"$RUNNER_TEMP/kraai" destroy "$KRAAI_ENV" --dir "$FIXTURE"'
+      - name: Destroy the VPC
+        if: always() && matrix.fixture == 'aws-env'
+        run: tofu -chdir="$FIXTURE/vpc" destroy -auto-approve -input=false -var "name=$KRAAI_ENV"

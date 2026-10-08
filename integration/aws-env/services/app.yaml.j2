@@ -1,0 +1,23 @@
+services:
+  app:
+    dir: handler
+    compute:
+      trigger: http
+      handler: app.handler
+    network:
+      - binding: NET
+        vpcId: "{{ terraform.base.vpc_id }}"
+        subnetIds: {{ terraform.base.subnet_ids|json }}
+    queues:
+      - { binding: JOBS }
+    databases:
+      - binding: DB
+        driver: dynamodb
+        partitionKey: { name: pk }
+    objects:
+      - { binding: FILES }
+    secrets:
+      - binding: SECRETS
+        provider: aws-ssm
+        entries:
+          pepper: { generate: { bytes: 32, encoding: base64 } }

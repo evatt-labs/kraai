@@ -1,0 +1,3 @@
+# The live workflow's environment for this fixture; see ../README.md.
+kind: ephemeral
+ttl: 3h
