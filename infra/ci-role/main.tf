@@ -29,10 +29,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
-variable "repository" {
-  description = "The repository whose main branch may assume the role."
+variable "subject_prefix" {
+  description = <<-EOT
+    The repository whose main branch may assume the role, as its OIDC token's
+    subject names it. The repository uses immutable subjects, which carry the
+    owner's and the repository's ids, so a repository deleted and made again
+    under the same name cannot assume the role. Read it with
+    `gh api repos/<owner>/<repo>/actions/oidc/customization/sub`.
+  EOT
   type        = string
-  default     = "evatt-labs/kraai"
+  default     = "repo:evatt-labs@227429383/kraai@1329760535"
 }
 
 data "aws_caller_identity" "current" {}
@@ -79,7 +85,7 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.repository}:ref:refs/heads/main"]
+      values   = ["${var.subject_prefix}:ref:refs/heads/main"]
     }
   }
 }
