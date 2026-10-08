@@ -43,9 +43,13 @@ const (
 // generically. Property pointers keep the schema's own "/properties/X"
 // form; IdentityProperty and TagProperty are bare top-level names.
 type Facts struct {
-	TypeName          string   `json:"type"`
-	Identity          Identity `json:"identity"`
-	IdentityProperty  string   `json:"identityProperty,omitempty"`
+	TypeName         string   `json:"type"`
+	Identity         Identity `json:"identity"`
+	IdentityProperty string   `json:"identityProperty,omitempty"`
+	// IdentityMaxLength is the identity property's maxLength, when its
+	// schema states one; 0 when it does not, which many do not although
+	// the service has a limit.
+	IdentityMaxLength int      `json:"identityMaxLength,omitempty"`
 	PrimaryIdentifier []string `json:"primaryIdentifier,omitempty"`
 	TagProperty       string   `json:"tagProperty,omitempty"`
 	TagShape          TagShape `json:"tagShape,omitempty"`
@@ -86,6 +90,7 @@ func Derive(doc Document) Facts {
 	case settableIdentifier(doc) != "":
 		f.Identity = IdentityByName
 		f.IdentityProperty = settableIdentifier(doc)
+		f.IdentityMaxLength = maxLength(doc.Properties[f.IdentityProperty])
 	case f.TagShape != TagShapeNone:
 		f.Identity = IdentityByTag
 	case hasHandler(doc, "list"):
@@ -99,6 +104,15 @@ func Derive(doc Document) Facts {
 func hasHandler(doc Document, verb string) bool {
 	_, ok := doc.Handlers[verb]
 	return ok
+}
+
+// maxLength is a property schema's maxLength, 0 when it states none.
+func maxLength(property json.RawMessage) int {
+	var bound struct {
+		MaxLength int `json:"maxLength"`
+	}
+	_ = json.Unmarshal(property, &bound)
+	return bound.MaxLength
 }
 
 // settableIdentifier returns the primary identifier's property name when

@@ -369,8 +369,10 @@ Any AWS-published CloudFormation type whose instances can be found again from
 its schema alone qualifies: one whose identifier the author may set, or one
 that takes tags at create. `properties` is validated against the type's own
 schema at plan time, and kraai supplies the identity (the derived name, or
-its tag), so neither is written by hand. A native binding is not portable
-between vendors.
+its tag), so neither is written by hand. A derived name longer than the
+type's service accepts, an OpenSearch domain's 28 characters say, is cut to
+fit, with a short hash of the full name so two long names never meet. A
+native binding is not portable between vendors.
 
 A type that can be neither named nor tagged, most child resources, is found
 by the values of properties the entry declares in `match`, under its parent

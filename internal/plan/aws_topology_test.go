@@ -655,3 +655,57 @@ func TestPlan_AWSStoreIsHandedItsNetworksConfig(t *testing.T) {
 		t.Fatal("no cache was planned")
 	}
 }
+
+// A binding whose derived name is longer than its service accepts is
+// fitted to the limit, every resource of the binding carries the same
+// fitted name, and the function reads the binding by that name.
+func TestPlan_AWSNameFitsItsServicesLimit(t *testing.T) {
+	reg := awsAPITopologyFixture(t)
+	m := kraaiAPIManifest()
+	m.Root.Providers[manifest.CapabilityNetwork] = &manifest.Provider{Vendor: "aws"}
+	m.Root.Providers[manifest.CapabilityKeyValue] = &manifest.Provider{Vendor: "aws"}
+	api := m.Services["api"]
+	api.Bindings[manifest.CapabilityNetwork] = []manifest.Binding{{"binding": "NET", "vpcId": "vpc-0abc", "subnetIds": []any{"subnet-0a", "subnet-0b"}}}
+	api.Bindings[manifest.CapabilityKeyValue] = []manifest.Binding{{"binding": "SESSION_CACHE_FOR_CHECKOUT", "driver": "redis", "network": "NET"}}
+	api.References = map[string]map[string]string{"SESSION_CACHE_FOR_CHECKOUT": {"network": "NET"}}
+	m.Services["api"] = api
+
+	const env = "probe-otter-badger-10001"
+	derived := naming.ResourceName(env, "api", "SESSION_CACHE_FOR_CHECKOUT")
+	if len(derived) <= 50 {
+		t.Fatalf("the fixture's derived name %q fits already", derived)
+	}
+	items, err := New(reg).expand(m, env, naming.NewNamer(""))
+	if err != nil {
+		t.Fatalf("expand: %v", err)
+	}
+	names := map[string]bool{}
+	var bindings []any
+	for _, it := range items {
+		if it.Binding == "SESSION_CACHE_FOR_CHECKOUT" {
+			names[it.ref.Name] = true
+		}
+		if it.Type == awsprovider.TypeLambdaFunction && it.ServiceKey == "api" {
+			bindings, _ = it.spec.Config["bindings"].([]any)
+		}
+	}
+	if len(names) != 1 {
+		t.Fatalf("the cache's resources carry %v, want one name", names)
+	}
+	var fitted string
+	for name := range names {
+		fitted = name
+	}
+	if len(fitted) > 50 || fitted != naming.Fit(derived, 50) {
+		t.Fatalf("name %q, want %q", fitted, naming.Fit(derived, 50))
+	}
+	read := ""
+	for _, b := range bindings {
+		if desc, _ := b.(map[string]any); desc["binding"] == "SESSION_CACHE_FOR_CHECKOUT" {
+			read, _ = desc["name"].(string)
+		}
+	}
+	if read != fitted {
+		t.Fatalf("the function reads the cache as %q, want %q", read, fitted)
+	}
+}

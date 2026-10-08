@@ -1,6 +1,8 @@
 package naming
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"regexp"
 	"strings"
 )
@@ -32,6 +34,24 @@ func truncate(name string) string {
 		return name
 	}
 	return strings.TrimRight(name[:63], "-")
+}
+
+// Fit returns name when it is at most limit bytes, or limit is 0; otherwise a
+// prefix of it, a hyphen and the first 8 hex digits of the full name's
+// SHA-256, at most limit bytes in all. The hash keeps two long names sharing a prefix
+// from fitting to the same name, and is stable, so a name fits the same way
+// on every run.
+func Fit(name string, limit int) string {
+	if limit <= 0 || len(name) <= limit {
+		return name
+	}
+	sum := sha256.Sum256([]byte(name))
+	suffix := hex.EncodeToString(sum[:])[:8]
+	keep := limit - len(suffix) - 1
+	if keep < 1 {
+		return suffix[:limit]
+	}
+	return strings.TrimRight(name[:keep], "-") + "-" + suffix
 }
 
 // Namer derives every name the planner assigns within one environment,
