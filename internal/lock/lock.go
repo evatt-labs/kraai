@@ -72,6 +72,11 @@ type Status struct {
 	// value. A name here that the manifest no longer declares is one kraai
 	// set and the author removed, which the next plan resets.
 	Applied map[string][]string `json:"applied,omitempty"`
+	// Fingerprints is, by resource, a SHA-256 of each write-only property
+	// the last create or update kraai made of it sent, a value a read never
+	// returns: a declared value hashing otherwise is a change. Only for the
+	// properties vetted as configuration rather than secrets.
+	Fingerprints map[string]map[string]string `json:"fingerprints,omitempty"`
 }
 
 // CurrentIdentityTagVersion is this kraai's generation of identity

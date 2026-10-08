@@ -70,7 +70,12 @@ That has consequences worth knowing:
   their values, which is how kraai tells a property the author removed from
   one it never set; a property it never set is still left alone. A
   create-only property is left as it is, since only a replace could reset
-  it.
+  it. For a short, vetted list of write-only properties, ones a read never
+  returns and that hold configuration rather than secrets (an SSM
+  parameter's `Description`, a Lambda's `SnapStart`), the record also keeps
+  a SHA-256 of the value kraai sent, so a change to one alone is planned.
+  A change to any other write-only property alone still lands only with
+  another change.
 - Some resources are found again only by a tag kraai writes when it creates
   them — `kraai:resource-name` on an ACM certificate, an API Gateway API, a
   CloudFront distribution, a Route 53 hosted zone. That tag is the resource's

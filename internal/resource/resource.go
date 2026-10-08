@@ -93,6 +93,9 @@ type Spec struct {
 	// name here that Config no longer declares is one the author removed.
 	// Nil when nothing was recorded.
 	Applied []string
+	// Fingerprints is, from the same record, a hash of each write-only
+	// property the last create or update sent, by name.
+	Fingerprints map[string]string
 	// Referenced is, by entry key, the declared config of the sibling
 	// binding the entry's value at that key references: what that
 	// binding's manifest entry says, for a value none of its resources
@@ -159,6 +162,9 @@ type State struct {
 	// that call set, for the status record; nil from a type that records
 	// none.
 	Applied []string
+	// Fingerprints is, after a create or update, a hash of each write-only
+	// property that call sent, by name, for the status record.
+	Fingerprints map[string]string
 	// Notes is what the instance as found tells the author beyond the
 	// action, such as that it will be adopted; the plan prints them.
 	Notes []string

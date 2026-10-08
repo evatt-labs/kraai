@@ -41,16 +41,22 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 		r.stampTag(desired, spec.Name)
 	}
 
+	// Read before the create, so a failure leaves nothing made.
+	schema, err := r.getSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
 	identifier, properties, err := r.client.CreateResource(ctx, r.typeName, desired)
 	if err != nil {
 		return nil, err
 	}
 	properties = r.readBackIfEmpty(ctx, identifier, properties)
 	return &resource.State{
-		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: spec.Name},
-		ID:         identifier,
-		Attributes: properties,
-		Applied:    declaredNames(spec),
+		Ref:          resource.Ref{Provider: r.provider, Type: r.typeName, Name: spec.Name},
+		ID:           identifier,
+		Attributes:   properties,
+		Applied:      declaredNames(spec),
+		Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 	}, nil
 }
 
@@ -168,10 +174,11 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 	if len(patch) == 0 || string(patch) == "[]" {
 		// Nothing differs; skip the round trip.
 		return &resource.State{
-			Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
-			ID:         identifier,
-			Attributes: properties,
-			Applied:    declaredNames(spec),
+			Ref:          resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
+			ID:           identifier,
+			Attributes:   properties,
+			Applied:      declaredNames(spec),
+			Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 		}, nil
 	}
 
@@ -180,10 +187,11 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		return nil, err
 	}
 	return &resource.State{
-		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
-		ID:         identifier,
-		Attributes: updated,
-		Applied:    declaredNames(spec),
+		Ref:          resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
+		ID:           identifier,
+		Attributes:   updated,
+		Applied:      declaredNames(spec),
+		Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 	}, nil
 }
 

@@ -179,6 +179,7 @@ func (a *Applier) execute(
 	result.Outcome = outcome
 	if state != nil && outcome != OutcomeUnchanged {
 		result.Applied = state.Applied
+		result.Fingerprints = state.Fingerprints
 	}
 
 	// Every successful action records its state and harvests its secrets,

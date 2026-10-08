@@ -48,6 +48,21 @@ func AppliedFrom(ctx context.Context) map[string][]string {
 	return applied
 }
 
+type fingerprintsKey struct{}
+
+// WithFingerprints marks ctx with the environment's record of the hashes
+// of the write-only properties kraai last sent (lock.Status.Fingerprints),
+// keyed by Ref.InstanceKey().
+func WithFingerprints(ctx context.Context, fingerprints map[string]map[string]string) context.Context {
+	return context.WithValue(ctx, fingerprintsKey{}, fingerprints)
+}
+
+// FingerprintsFrom returns the record WithFingerprints put on ctx.
+func FingerprintsFrom(ctx context.Context) map[string]map[string]string {
+	fingerprints, _ := ctx.Value(fingerprintsKey{}).(map[string]map[string]string)
+	return fingerprints
+}
+
 type tagVersionKey struct{}
 
 // WithTagVersion marks ctx as a run against an environment kraai last

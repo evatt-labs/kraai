@@ -100,3 +100,25 @@ func TestWithAdoptionCarriesTheAppliedRecord(t *testing.T) {
 		t.Fatalf("under the lock, AppliedFrom = %v, want %v", got, applied)
 	}
 }
+
+// Fingerprints follow what a create, update or replace sent: replaced when
+// it sent some, dropped when it sent none, kept otherwise.
+func TestFingerprintsAfter(t *testing.T) {
+	prior := map[string]map[string]string{
+		appliedRef("kept").InstanceKey():    {"Body": "sha256:a"},
+		appliedRef("updated").InstanceKey(): {"Body": "sha256:a"},
+		appliedRef("cleared").InstanceKey(): {"Body": "sha256:a"},
+	}
+	result := &apply.Result{Results: []apply.ActionResult{
+		{Ref: appliedRef("kept"), Outcome: apply.OutcomeUnchanged},
+		{Ref: appliedRef("updated"), Outcome: apply.OutcomeUpdated, Applied: []string{"Body"}, Fingerprints: map[string]string{"Body": "sha256:b"}},
+		{Ref: appliedRef("cleared"), Outcome: apply.OutcomeUpdated, Applied: []string{"Name"}},
+	}}
+	want := map[string]map[string]string{
+		appliedRef("kept").InstanceKey():    {"Body": "sha256:a"},
+		appliedRef("updated").InstanceKey(): {"Body": "sha256:b"},
+	}
+	if got := fingerprintsAfter(prior, result); !reflect.DeepEqual(got, want) {
+		t.Fatalf("fingerprintsAfter = %v\nwant %v", got, want)
+	}
+}

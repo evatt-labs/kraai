@@ -105,7 +105,7 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 	if err != nil {
 		return nil, err
 	}
-	stampApplied(items, resource.AppliedFrom(ctx))
+	stampApplied(items, resource.AppliedFrom(ctx), resource.FingerprintsFrom(ctx))
 
 	waves, err := computeWaves(items, serviceDependsOn(m))
 	if err != nil {
@@ -208,9 +208,12 @@ func serviceDependsOn(m *manifest.Manifest) map[string][]string {
 }
 
 // stampApplied hands each item the names of the properties kraai last set
-// on its resource, from the environment's status record.
-func stampApplied(items []plannedItem, applied map[string][]string) {
+// on its resource, and the hashes of the write-only ones it sent, from the
+// environment's status record.
+func stampApplied(items []plannedItem, applied map[string][]string, fingerprints map[string]map[string]string) {
 	for i := range items {
-		items[i].spec.Applied = applied[items[i].ref.InstanceKey()]
+		key := items[i].ref.InstanceKey()
+		items[i].spec.Applied = applied[key]
+		items[i].spec.Fingerprints = fingerprints[key]
 	}
 }

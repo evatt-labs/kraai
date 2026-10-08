@@ -80,6 +80,7 @@ func guard(
 	}
 	if found {
 		ctx = resource.WithApplied(ctx, status.Applied)
+		ctx = resource.WithFingerprints(ctx, status.Fingerprints)
 	}
 	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
 	return guarded, store, func() {
@@ -121,6 +122,7 @@ func withAdoption(ctx context.Context, store lock.Store, envName string) (contex
 	}
 	if found {
 		ctx = resource.WithApplied(ctx, status.Applied)
+		ctx = resource.WithFingerprints(ctx, status.Fingerprints)
 	}
 	return ctx, nil
 }
@@ -189,6 +191,7 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		// For a kraai that reads only the first generation's field.
 		IdentityTagged: tagVersionAfter(started, clean) >= 1,
 		Applied:        appliedAfter(started.Applied, result),
+		Fingerprints:   fingerprintsAfter(started.Fingerprints, result),
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)
@@ -231,6 +234,34 @@ func appliedAfter(prior map[string][]string, result *apply.Result) map[string][]
 	return out
 }
 
+// fingerprintsAfter is appliedAfter for the write-only hashes: a resource
+// a create, update or replace wrote records what that call sent, every
+// other keeps what it had.
+func fingerprintsAfter(prior map[string]map[string]string, result *apply.Result) map[string]map[string]string {
+	out := maps.Clone(prior)
+	if result == nil {
+		return out
+	}
+	for _, r := range result.Results {
+		switch r.Outcome {
+		case apply.OutcomeCreated, apply.OutcomeUpdated, apply.OutcomeReplaced:
+			if r.Applied == nil {
+				continue
+			}
+			if out == nil {
+				out = map[string]map[string]string{}
+			}
+			if len(r.Fingerprints) == 0 {
+				delete(out, r.Ref.InstanceKey())
+				continue
+			}
+			out[r.Ref.InstanceKey()] = r.Fingerprints
+		case apply.OutcomeUnchanged, apply.OutcomeFailed, apply.OutcomeSkipped:
+		}
+	}
+	return out
+}
+
 // forgetDeleted drops from the environment's record what a destroy that
 // did not finish deleted, so a resource made again later under the same
 // name starts with nothing recorded.
@@ -239,7 +270,7 @@ func forgetDeleted(ctx context.Context, store lock.Store, envName string, result
 		return nil
 	}
 	status, found, err := store.ReadStatus(ctx, envName)
-	if err != nil || !found || len(status.Applied) == 0 {
+	if err != nil || !found || (len(status.Applied) == 0 && len(status.Fingerprints) == 0) {
 		return err
 	}
 	changed := false
@@ -247,8 +278,13 @@ func forgetDeleted(ctx context.Context, store lock.Store, envName string, result
 		if r.Outcome != destroy.OutcomeDeleted {
 			continue
 		}
-		if _, ok := status.Applied[r.Ref.InstanceKey()]; ok {
-			delete(status.Applied, r.Ref.InstanceKey())
+		key := r.Ref.InstanceKey()
+		if _, ok := status.Applied[key]; ok {
+			delete(status.Applied, key)
+			changed = true
+		}
+		if _, ok := status.Fingerprints[key]; ok {
+			delete(status.Fingerprints, key)
 			changed = true
 		}
 	}
