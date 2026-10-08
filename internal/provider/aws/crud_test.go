@@ -228,7 +228,7 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		}
 	})
 
-	t.Run("byTag never fetches a schema for identity: stampTag already covers it", func(t *testing.T) {
+	t.Run("byTag takes no identity from the schema: stampTag already covers it", func(t *testing.T) {
 		fc := &fakeClient{createID: "arn:aws:acm:...", createProps: map[string]any{}}
 		r := &resourceType{
 			provider: Provider, typeName: TypeCertificateManagerCertificate, lookup: resource.LookupByTag,
@@ -242,12 +242,17 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Create: %v", err)
 		}
-		if fc.schemaCalls != 0 {
-			t.Fatalf("schemaCalls = %d, want 0: a byTag type has no reason to consult the schema for identity", fc.schemaCalls)
+		// The schema is read, for the write-only properties the record
+		// fingerprints, but nothing is injected from it: a byTag type's
+		// identity is its tag.
+		for property := range fc.createCalls[0] {
+			if property != "DomainName" && property != "Tags" {
+				t.Fatalf("desired = %v: %s was injected, though a byTag type's identity is its tag", fc.createCalls[0], property)
+			}
 		}
 	})
 
-	t.Run("byAttr never fetches a schema for identity: the provider assigns the identifier", func(t *testing.T) {
+	t.Run("byAttr takes no identity from the schema: the provider assigns the identifier", func(t *testing.T) {
 		fc := &fakeClient{createID: "E123", createProps: map[string]any{}}
 		r := &resourceType{
 			provider: Provider, typeName: TypeCloudFrontDistribution, lookup: resource.LookupByAttr,
@@ -261,8 +266,10 @@ func TestResourceTypeCreateInjectsDerivedName(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Create: %v", err)
 		}
-		if fc.schemaCalls != 0 {
-			t.Fatalf("schemaCalls = %d, want 0", fc.schemaCalls)
+		for property := range fc.createCalls[0] {
+			if property != "DistributionConfig" {
+				t.Fatalf("desired = %v: %s was injected, though the provider assigns the identifier", fc.createCalls[0], property)
+			}
 		}
 	})
 }

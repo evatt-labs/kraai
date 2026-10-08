@@ -153,6 +153,17 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	if schema.HasUpdate && len(r.removed(schema, spec, state.Attributes)) > 0 {
 		return resource.Mutable, nil
 	}
+	if changed := writeOnlyChanged(r.typeName, schema, spec); len(changed) > 0 {
+		for _, name := range changed {
+			if createOnly["/properties/"+name] {
+				return resource.Immutable, nil
+			}
+		}
+		if schema.HasUpdate {
+			return resource.Mutable, nil
+		}
+		return resource.Immutable, nil
+	}
 	return resource.Same, nil
 }
 

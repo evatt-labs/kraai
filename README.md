@@ -70,7 +70,10 @@ That has consequences worth knowing:
   their values, which is how kraai tells a property the author removed from
   one it never set; a property it never set is still left alone. A
   create-only property is left as it is, since only a replace could reset
-  it.
+  it. The record also keeps a SHA-256 of each write-only property kraai sent,
+  one a read never returns, so a change to it alone is planned; a property
+  whose name suggests a secret (a password, a token, a key) is never hashed,
+  and a change to it alone still lands only with another change.
 - Some resources are found again only by a tag kraai writes when it creates
   them — `kraai:resource-name` on an ACM certificate, an API Gateway API, a
   CloudFront distribution, a Route 53 hosted zone. That tag is the resource's

@@ -66,6 +66,9 @@ type ActionResult struct {
 	// Applied is, for a create, update or replace, the names of the
 	// properties the call set (resource.State.Applied).
 	Applied []string
+	// Fingerprints is, for a create, update or replace, a hash of each
+	// write-only property the call sent (resource.State.Fingerprints).
+	Fingerprints map[string]string
 }
 
 // Result is the ordered outcome of applying every action in a plan.Plan,

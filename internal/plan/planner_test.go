@@ -611,10 +611,11 @@ func TestPlan_MutableDiffPlansAsUpdate(t *testing.T) {
 // Diff as Spec.Applied, by instance.
 func TestPlan_HandsEachResourceWhatWasApplied(t *testing.T) {
 	var seen []string
+	var seenPrints map[string]string
 	differ := &fakeDiffer{
 		fakeResource: newFakeResource(),
 		diff: func(spec resource.Spec, _ *resource.State) (resource.Difference, error) {
-			seen = spec.Applied
+			seen, seenPrints = spec.Applied, spec.Fingerprints
 			return resource.Same, nil
 		},
 	}
@@ -637,10 +638,15 @@ func TestPlan_HandsEachResourceWhatWasApplied(t *testing.T) {
 		ref.InstanceKey(): {"Cors"},
 		resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: "another"}.InstanceKey(): {"Other"},
 	}
-	if _, err := New(reg).Plan(resource.WithApplied(context.Background(), applied), m, envName); err != nil {
+	fingerprints := map[string]map[string]string{ref.InstanceKey(): {"Body": "sha256:a"}}
+	ctx := resource.WithFingerprints(resource.WithApplied(context.Background(), applied), fingerprints)
+	if _, err := New(reg).Plan(ctx, m, envName); err != nil {
 		t.Fatalf("Plan: %v", err)
 	}
 	if !reflect.DeepEqual(seen, []string{"Cors"}) {
 		t.Fatalf("Diff saw Applied %v, want this instance's record", seen)
+	}
+	if !reflect.DeepEqual(seenPrints, map[string]string{"Body": "sha256:a"}) {
+		t.Fatalf("Diff saw Fingerprints %v, want this instance's record", seenPrints)
 	}
 }
