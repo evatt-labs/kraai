@@ -238,7 +238,7 @@ func TestPolicyInputLeavesValuesOut(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	input, err := policyInput(testEnvName, m, p)
+	input, err := policyInput(context.Background(), testEnvName, m, p)
 	if err != nil {
 		t.Fatal(err)
 	}

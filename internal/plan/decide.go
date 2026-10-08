@@ -139,9 +139,11 @@ func decide(ctx context.Context, it plannedItem, attrs *resource.AttributeIndex,
 		switch difference {
 		case resource.Immutable:
 			action.Kind = ActionReplace
+			explain(&action, it.res, evaluated, state)
 			return action
 		case resource.Mutable:
 			action.Kind = ActionUpdate
+			explain(&action, it.res, evaluated, state)
 			return action
 		case resource.Same:
 			// Spelled out so a new resource.Difference value cannot take
@@ -195,4 +197,20 @@ func (f failedProducers) blocking(it plannedItem) (producer, bool) {
 		}
 	}
 	return producer{}, false
+}
+
+// explain records which properties action changes, when its type can say.
+// A type that cannot list them leaves a note, never a failed action: the
+// change itself was decided.
+func explain(action *Action, res any, spec resource.Spec, state *resource.State) {
+	explainer, ok := res.(Explainer)
+	if !ok {
+		return
+	}
+	changes, err := explainer.Changes(spec, state)
+	if err != nil {
+		action.Notes = append(action.Notes, "the changing properties could not be listed: "+err.Error())
+		return
+	}
+	action.Changes = changes
 }

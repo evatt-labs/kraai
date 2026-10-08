@@ -650,3 +650,69 @@ func TestPlan_HandsEachResourceWhatWasApplied(t *testing.T) {
 		t.Fatalf("Diff saw Fingerprints %v, want this instance's record", seenPrints)
 	}
 }
+
+// fakeExplainer is a Differ that also lists its changes.
+type fakeExplainer struct {
+	*fakeDiffer
+	changes []resource.Change
+	err     error
+}
+
+func (f *fakeExplainer) Changes(resource.Spec, *resource.State) ([]resource.Change, error) {
+	return f.changes, f.err
+}
+
+// An update or replace carries the changes its type lists, through the
+// decorated registry the real one is, since the decorator wraps every
+// resource and has dropped optional interfaces before; a type that cannot
+// list them leaves a note, and a create lists none.
+func TestPlan_ActionsCarryTheirChanges(t *testing.T) {
+	want := []resource.Change{{Property: "RetentionInDays", Kind: resource.ChangeUpdate, Before: 14.0, After: 30.0}}
+	for name, c := range map[string]struct {
+		difference resource.Difference
+		exists     bool
+		err        error
+		changes    []resource.Change
+		note       bool
+	}{
+		"an update":     {difference: resource.Mutable, exists: true, changes: want},
+		"a replace":     {difference: resource.Immutable, exists: true, changes: want},
+		"unchanged":     {difference: resource.Same, exists: true},
+		"a create":      {difference: resource.Mutable},
+		"unexplainable": {difference: resource.Mutable, exists: true, err: errors.New("boom"), note: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			res := &fakeExplainer{
+				fakeDiffer: &fakeDiffer{fakeResource: newFakeResource(),
+					diff: func(resource.Spec, *resource.State) (resource.Difference, error) { return c.difference, nil }},
+				changes: want, err: c.err,
+			}
+			reg := resource.NewRegistry(resource.WithDecorator(resource.Instrument(nil, nil)))
+			must(t, reg.Register(resource.Registration{
+				Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+				Lookup: resource.LookupByName, Resource: res,
+			}))
+			m := &manifest.Manifest{
+				Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+				Services: map[string]manifest.Service{
+					"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+				},
+			}
+			name := naming.ResourceName(envName, "api", "UPLOADS")
+			if c.exists {
+				res.states[name] = &resource.State{Ref: resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: name}, ID: "b"}
+			}
+			p, err := New(reg).Plan(context.Background(), m, envName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := findAction(t, p, "cloudflare", "r2_bucket")
+			if !reflect.DeepEqual(got.Changes, c.changes) {
+				t.Fatalf("Changes = %+v, want %+v", got.Changes, c.changes)
+			}
+			if hasNote := len(got.Notes) > 0; hasNote != c.note {
+				t.Fatalf("Notes = %v, want a note %v", got.Notes, c.note)
+			}
+		})
+	}
+}

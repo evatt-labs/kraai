@@ -440,3 +440,65 @@ func accountAsRoot(desired, current any) bool {
 	}
 	return strings.HasPrefix(arn, "arn:") && strings.HasSuffix(arn, ":iam::"+account+":root")
 }
+
+// changes lists what compare finds differing, property by property: a
+// declared property the instance lacks is added, one it carries that is
+// not covered changes, one kraai set and the manifest dropped is removed,
+// and a fingerprinted write-only one that changed is shown without its
+// earlier value, which a read never returns.
+func (r *resourceType) changes(spec resource.Spec, state *resource.State) ([]resource.Change, error) {
+	schema, err := r.getSchema(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	rules := listRules{unordered: map[string]bool{}, subset: map[string]bool{}, equivalent: equivalentForms[r.typeName]}
+	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
+		rules.unordered[pointer] = true
+	}
+	for _, pointer := range returnedWithDefaults[r.typeName] {
+		rules.subset[pointer] = true
+	}
+	writeOnly := map[string]bool{}
+	for _, pointer := range schema.WriteOnly {
+		writeOnly[pointer] = true
+	}
+	var out []resource.Change
+	for property, desiredVal := range spec.Config {
+		pointer := "/properties/" + property
+		if writeOnly[pointer] {
+			continue
+		}
+		desired, err := normalizeForCompare(desiredVal)
+		if err != nil {
+			return nil, err
+		}
+		currentVal, has := state.Attributes[property]
+		if !has {
+			out = append(out, resource.Change{Property: property, Kind: resource.ChangeAdd, After: desired})
+			continue
+		}
+		current, err := normalizeForCompare(currentVal)
+		if err != nil {
+			return nil, err
+		}
+		if !covers(desired, current, pointer, rules) {
+			out = append(out, resource.Change{Property: property, Kind: resource.ChangeUpdate, Before: current, After: desired})
+		}
+	}
+	if schema.HasUpdate {
+		for _, property := range r.removed(schema, spec, state.Attributes) {
+			out = append(out, resource.Change{Property: property, Kind: resource.ChangeRemove, Before: state.Attributes[property]})
+		}
+	}
+	for _, property := range writeOnlyChanged(r.typeName, schema, spec) {
+		out = append(out, resource.Change{Property: property, Kind: resource.ChangeUpdate, Before: "(write-only)", After: spec.Config[property]})
+	}
+	sortChanges(out)
+	return out, nil
+}
+
+// sortChanges orders changes by property, so a plan prints them alike on
+// every run.
+func sortChanges(changes []resource.Change) {
+	sort.Slice(changes, func(i, j int) bool { return changes[i].Property < changes[j].Property })
+}

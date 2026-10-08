@@ -330,11 +330,11 @@ func nativeProperties(spec resource.Spec) (map[string]any, error) {
 // is not known, and a dependent must not keep pointing at a resource being
 // replaced. Replace when the property is create-only, update otherwise.
 func (n *nativeResource) Diff(spec resource.Spec, state *resource.State) (resource.Difference, error) {
-	spec, res, err := n.translateWith(spec, false)
+	spec, state, unknown, err := n.prepared(spec, state)
 	if err != nil {
 		return resource.Same, err
 	}
-	if unknown := res.unknownProperties(); len(unknown) > 0 {
+	if len(unknown) > 0 {
 		schema, err := n.getSchema(context.Background())
 		if err != nil {
 			return resource.Same, err
@@ -346,21 +346,53 @@ func (n *nativeResource) Diff(spec resource.Spec, state *resource.State) (resour
 		}
 		return resource.Mutable, nil
 	}
-	tagProperty := n.facts.TagProperty
-	if _, authored := spec.Config[tagProperty]; !authored || n.stampTag == nil {
-		return n.compare(spec, state)
-	}
-	if n.facts.TagShape == cfschema.TagShapeArray {
-		spec.Config[tagProperty] = sortedTags(spec.Config[tagProperty])
-		current := *state
-		current.Attributes = make(map[string]any, len(state.Attributes))
-		for k, v := range state.Attributes {
-			current.Attributes[k] = v
-		}
-		current.Attributes[tagProperty] = sortedTags(state.Attributes[tagProperty])
-		return n.compare(spec, &current)
-	}
 	return n.compare(spec, state)
+}
+
+// Changes lists the properties Diff found differing, prepared as Diff
+// prepares them; one whose value references a resource not yet published
+// is a change to a value known only after apply.
+func (n *nativeResource) Changes(spec resource.Spec, state *resource.State) ([]resource.Change, error) {
+	spec, state, unknown, err := n.prepared(spec, state)
+	if err != nil {
+		return nil, err
+	}
+	changes, err := n.changes(spec, state)
+	if err != nil {
+		return nil, err
+	}
+	for _, property := range unknown {
+		changes = append(changes, resource.Change{Property: property, Kind: resource.ChangeUpdate,
+			Before: state.Attributes[property], After: "(known after apply)"})
+	}
+	sortChanges(changes)
+	return changes, nil
+}
+
+// prepared is spec translated and, when the entry authors tags, both
+// sides' tags sorted by key, since Cloud Control does not return a tag
+// list in the order it was written; and the properties whose value
+// references a resource not yet published.
+func (n *nativeResource) prepared(spec resource.Spec, state *resource.State) (resource.Spec, *resource.State, []string, error) {
+	spec, res, err := n.translateWith(spec, false)
+	if err != nil {
+		return spec, state, nil, err
+	}
+	if unknown := res.unknownProperties(); len(unknown) > 0 {
+		return spec, state, unknown, nil
+	}
+	tagProperty := n.facts.TagProperty
+	if _, authored := spec.Config[tagProperty]; !authored || n.stampTag == nil || n.facts.TagShape != cfschema.TagShapeArray {
+		return spec, state, nil, nil
+	}
+	spec.Config[tagProperty] = sortedTags(spec.Config[tagProperty])
+	current := *state
+	current.Attributes = make(map[string]any, len(state.Attributes))
+	for k, v := range state.Attributes {
+		current.Attributes[k] = v
+	}
+	current.Attributes[tagProperty] = sortedTags(state.Attributes[tagProperty])
+	return spec, &current, nil, nil
 }
 
 // sortedTags returns an array-of-{Key,Value} tag list ordered by key, or the

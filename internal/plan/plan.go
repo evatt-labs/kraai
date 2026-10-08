@@ -100,6 +100,9 @@ type Action struct {
 	// Notes are what the resource has to tell the author about this action
 	// beyond its outcome (Noter).
 	Notes []string
+	// Changes is, for an update or replace, which properties change and
+	// how (Explainer); empty when the type does not say.
+	Changes []resource.Change
 }
 
 // Plan is the ordered result of walking a manifest: what would happen to
