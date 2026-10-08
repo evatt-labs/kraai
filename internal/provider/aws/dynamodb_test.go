@@ -142,3 +142,25 @@ func TestDynamoTableAppliesOnlyToItsDriver(t *testing.T) {
 		t.Fatal("Resolve(driver mysql) succeeded, want an error: no aws type speaks it yet")
 	}
 }
+
+// A table's Diff narrows the config to what it compares, so the names its
+// create recorded are no removal: the plan right after an apply is Same.
+func TestDynamoTableRecordedNamesAreNoRemoval(t *testing.T) {
+	fc := &fakeClient{schema: cfschema.Facts{
+		PrimaryIdentifier: []string{"/properties/TableName"},
+		CreateOnly:        []string{"/properties/TableName"},
+		HasUpdate:         true,
+	}}
+	table := newDynamoTableResource(fc)
+	spec := tableSpec(map[string]any{"driver": DriverDynamoDB, "partitionKey": map[string]any{"name": "pk"}})
+	spec.Applied = []string{"AttributeDefinitions", "BillingMode", "KeySchema", "TableName"}
+	state := &resource.State{Attributes: map[string]any{
+		"TableName":            "env-svc-db",
+		"BillingMode":          "PAY_PER_REQUEST",
+		"KeySchema":            []any{map[string]any{"AttributeName": "pk", "KeyType": "HASH"}},
+		"AttributeDefinitions": []any{map[string]any{"AttributeName": "pk", "AttributeType": "S"}},
+	}}
+	if d, err := table.Diff(spec, state); err != nil || d != resource.Same {
+		t.Fatalf("Diff = %v, %v; want Same", d, err)
+	}
+}

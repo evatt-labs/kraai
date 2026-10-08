@@ -51,7 +51,7 @@ func TestDiffPlansARemovedProperty(t *testing.T) {
 			}
 			spec := specWith(c.config)
 			spec.Applied = c.applied
-			got, err := r.compare(spec, stateWith(c.current))
+			got, err := r.compareDeclared(spec, stateWith(c.current))
 			if err != nil || got != c.want {
 				t.Fatalf("compare = %v, %v; want %v", got, err, c.want)
 			}
@@ -68,7 +68,7 @@ func TestDiffLeavesARemovalAnUpdateCannotMake(t *testing.T) {
 	}
 	spec := specWith(map[string]any{})
 	spec.Applied = []string{"SourceAccount"}
-	if got, err := r.compare(spec, stateWith(map[string]any{"SourceAccount": "123456789012"})); err != nil || got != resource.Same {
+	if got, err := r.compareDeclared(spec, stateWith(map[string]any{"SourceAccount": "123456789012"})); err != nil || got != resource.Same {
 		t.Fatalf("compare = %v, %v; want Same", got, err)
 	}
 }
