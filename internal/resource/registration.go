@@ -37,6 +37,11 @@ type Registration struct {
 	DependsOn []string
 	// Lookup is how instances are found.
 	Lookup LookupStrategy
+	// MaxNameLength is the longest derived name an instance may carry,
+	// when its service caps one below naming's own 63 bytes; 0 is no
+	// further limit. A binding's registrations share one name, so the
+	// planner fits it to the smallest limit among them (naming.Fit).
+	MaxNameLength int
 	// NameFrom is where an instance's derived name comes from. The zero
 	// value, NameFromBinding, is the common case.
 	NameFrom NameStrategy

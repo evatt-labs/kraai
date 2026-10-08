@@ -69,7 +69,10 @@ func (p *Planner) expandCompute(
 	if len(include) > 0 {
 		config["include"] = include
 	}
-	if bindings := serviceBindings(m, environmentName, svcKey, svc, namer); len(bindings) > 0 {
+	nameOf := func(capability, binding string, config map[string]any) string {
+		return p.bindingName(m, environmentName, svcKey, capability, binding, config, namer)
+	}
+	if bindings := serviceBindings(m, environmentName, svcKey, svc, namer, nameOf); len(bindings) > 0 {
 		config["bindings"] = bindings
 	}
 
@@ -149,6 +152,7 @@ func (p *Planner) expandCompute(
 // compared the role; this is how compute knows at plan time.
 func serviceBindings(
 	m *manifest.Manifest, environmentName, svcKey string, svc manifest.Service, namer naming.Namer,
+	nameOf func(capability, binding string, config map[string]any) string,
 ) []any {
 	var out []any
 	for _, capability := range sortedCapabilities(svc.Bindings) {
@@ -163,7 +167,7 @@ func serviceBindings(
 				"capability": capability,
 				"binding":    entry.Name(),
 				"vendor":     vendor,
-				"name":       namer.Resource(environmentName, svcKey, entry.Name()),
+				"name":       nameOf(capability, entry.Name(), entry.Config()),
 				"config":     entry.Config(),
 			}
 			// A secrets binding expands to one resource per entry, each with

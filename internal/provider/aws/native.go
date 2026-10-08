@@ -103,6 +103,7 @@ func nativeFamily(client *Client) resource.Family {
 				Provider: Provider, Type: resource.RoleType(vendorType, nativeRole), VendorType: vendorType,
 				Capability:         manifest.CapabilityAWS,
 				Lookup:             lookup,
+				MaxNameLength:      nameLimit(lookup, facts),
 				EmbeddedReferences: nativeReferences,
 				Resource:           res,
 			}, nil

@@ -402,3 +402,30 @@ func TestRapid_Namer_BoundedAndStable(t *testing.T) {
 		}
 	})
 }
+
+// A name within the limit is kept; a longer one fits it exactly, keeps a
+// readable prefix, and differs from another long name with the same
+// prefix.
+func TestFit(t *testing.T) {
+	if got := Fit("short", 28); got != "short" {
+		t.Fatalf("Fit(short) = %q", got)
+	}
+	if got := Fit("anything-at-all", 0); got != "anything-at-all" {
+		t.Fatalf("Fit with no limit = %q", got)
+	}
+	a := Fit("probe-otter-badger-10001-probe-t7", 28)
+	b := Fit("probe-otter-badger-10001-probe-t8", 28)
+	if len(a) > 28 || !strings.HasPrefix(a, "probe-otter-badger-") || a == b {
+		t.Fatalf("Fit = %q and %q, want two distinct names of at most 28 bytes keeping the prefix", a, b)
+	}
+	if a != Fit("probe-otter-badger-10001-probe-t7", 28) {
+		t.Fatal("Fit is not stable")
+	}
+	// The prefix cut never leaves a hyphen before the hash's own.
+	if got := Fit("aaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb", 28); strings.Contains(got, "--") {
+		t.Fatalf("Fit = %q, a doubled hyphen", got)
+	}
+	if got := Fit("abcdefghijkl", 5); len(got) > 5 || got == "" {
+		t.Fatalf("Fit to a tiny limit = %q", got)
+	}
+}

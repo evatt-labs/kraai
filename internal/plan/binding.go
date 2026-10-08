@@ -33,7 +33,7 @@ func (p *Planner) expandBinding(
 		return nil, err
 	}
 
-	derived := namer.Resource(environmentName, svcKey, binding)
+	derived := fitName(namer.Resource(environmentName, svcKey, binding), regs)
 
 	// An adopted resource has no identity kraai can derive, so the
 	// manifest's reference travels on the Ref for the provider's lookup.
@@ -181,4 +181,35 @@ func referencedConfig(svc manifest.Service, binding string) map[string]map[strin
 		}
 	}
 	return out
+}
+
+// fitName fits a binding's derived name to the smallest name limit among
+// the registrations it expands to; they share the name, and some find
+// each other by it.
+func fitName(derived string, regs []resource.Registration) string {
+	limit := 0
+	for _, r := range regs {
+		if r.NameFrom != resource.NameFromBinding || r.MaxNameLength <= 0 {
+			continue
+		}
+		if limit == 0 || r.MaxNameLength < limit {
+			limit = r.MaxNameLength
+		}
+	}
+	return naming.Fit(derived, limit)
+}
+
+// bindingName is the name a binding's resources carry, fitted as
+// expandBinding fits it, for a function that reads the binding by name.
+func (p *Planner) bindingName(m *manifest.Manifest, environmentName, svcKey, capability, binding string, config map[string]any, namer naming.Namer) string {
+	derived := namer.Resource(environmentName, svcKey, binding)
+	regs, err := p.registry.Resolve(capability, resource.ApplicabilityContext{
+		Vendors: m.Root.Providers.Vendors(),
+		Binding: config,
+	})
+	if err != nil {
+		// expandBinding reports the same error for the binding itself.
+		return derived
+	}
+	return fitName(derived, regs)
 }
