@@ -58,6 +58,10 @@ locals {
   ]
   account    = data.aws_caller_identity.current.account_id
   live_roles = "arn:aws:iam::${local.account}:role/kci-*"
+  # A role holds at most 10,240 bytes of inline policy, which the actions
+  # exceed, so they are split across managed policies, each well under the
+  # 6,144 characters one may hold.
+  action_chunks = chunklist(sort(distinct(concat(local.rest_actions, local.tofu_actions))), 120)
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -80,12 +84,7 @@ data "aws_iam_policy_document" "trust" {
   }
 }
 
-data "aws_iam_policy_document" "live" {
-  statement {
-    sid       = "Kraai"
-    actions   = concat(local.rest_actions, local.tofu_actions)
-    resources = ["*"]
-  }
+data "aws_iam_policy_document" "scoped" {
   statement {
     sid       = "ListRoles"
     actions   = ["iam:ListRoles"]
@@ -168,10 +167,37 @@ resource "aws_iam_role" "live" {
   max_session_duration = 7200
 }
 
-resource "aws_iam_role_policy" "live" {
-  name   = "kraai-live-ci"
-  role   = aws_iam_role.live.id
-  policy = data.aws_iam_policy_document.live.json
+data "aws_iam_policy_document" "actions" {
+  count = length(local.action_chunks)
+  statement {
+    sid       = "Kraai${count.index}"
+    actions   = local.action_chunks[count.index]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "actions" {
+  count       = length(local.action_chunks)
+  name        = "kraai-live-ci-actions-${count.index}"
+  description = "Part ${count.index} of the actions kraai's live fixtures need."
+  policy      = data.aws_iam_policy_document.actions[count.index].json
+}
+
+resource "aws_iam_policy" "scoped" {
+  name        = "kraai-live-ci-scoped"
+  description = "IAM confined to the live environments' roles, and deletes confined to their kci-* names."
+  policy      = data.aws_iam_policy_document.scoped.json
+}
+
+resource "aws_iam_role_policy_attachment" "actions" {
+  count      = length(aws_iam_policy.actions)
+  role       = aws_iam_role.live.name
+  policy_arn = aws_iam_policy.actions[count.index].arn
+}
+
+resource "aws_iam_role_policy_attachment" "scoped" {
+  role       = aws_iam_role.live.name
+  policy_arn = aws_iam_policy.scoped.arn
 }
 
 output "role_arn" {
