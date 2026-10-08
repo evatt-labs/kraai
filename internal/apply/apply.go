@@ -177,6 +177,9 @@ func (a *Applier) execute(
 		return result
 	}
 	result.Outcome = outcome
+	if state != nil && outcome != OutcomeUnchanged {
+		result.Applied = state.Applied
+	}
 
 	// Every successful action records its state and harvests its secrets,
 	// ActionNoChange included: a second apply must be able to wire a

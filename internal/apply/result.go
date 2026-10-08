@@ -63,6 +63,9 @@ type ActionResult struct {
 	Outcome Outcome
 	// Err is set if and only if Outcome is OutcomeFailed.
 	Err error
+	// Applied is, for a create, update or replace, the names of the
+	// properties the call set (resource.State.Applied).
+	Applied []string
 }
 
 // Result is the ordered outcome of applying every action in a plan.Plan,

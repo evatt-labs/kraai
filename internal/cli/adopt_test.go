@@ -64,7 +64,7 @@ func TestRecordStatusMarksTheEnvironmentTagged(t *testing.T) {
 		clean, want bool
 	}{{false, false}, {true, true}, {false, true}}
 	for i, s := range steps {
-		if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied", s.clean); err != nil {
+		if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied", s.clean, nil); err != nil {
 			t.Fatal(err)
 		}
 		status, _, _ := store.ReadStatus(t.Context(), "env")
@@ -87,7 +87,7 @@ func TestANewEnvironmentNeverAdopts(t *testing.T) {
 	if err := recordStart(t.Context(), store, "env", &manifest.Manifest{}); err != nil {
 		t.Fatal(err)
 	}
-	if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied with failures", false); err != nil {
+	if err := recordStatus(t.Context(), store, "env", &manifest.Manifest{}, "applied with failures", false, nil); err != nil {
 		t.Fatal(err)
 	}
 	status, found, err := store.ReadStatus(t.Context(), "env")

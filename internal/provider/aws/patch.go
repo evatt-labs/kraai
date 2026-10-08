@@ -19,14 +19,15 @@ type patchOp struct {
 // buildPatch emits a JSON Patch transforming current (the live properties)
 // into desired (the translated Spec.Config), at top-level property
 // granularity: one add or replace per differing property, carrying its
-// whole desired value. Cloud Control needs a correct end state, not a
-// minimal patch, and a generic recursive differ would need type-specific
-// knowledge of which nested paths, arrays especially, are meaningful to
-// patch on their own.
+// whole desired value, and one remove per property in removed. Cloud
+// Control needs a correct end state, not a minimal patch, and a generic
+// recursive differ would need type-specific knowledge of which nested
+// paths, arrays especially, are meaningful to patch on their own.
 //
-// Never "remove": only keys present in desired participate. A property the
-// manifest never declares is not kraai's to touch.
-func buildPatch(current, desired map[string]any) ([]byte, error) {
+// A property the manifest never declared is not kraai's to touch; removed
+// is only what kraai set and the manifest stopped declaring (see
+// resourceType.removed).
+func buildPatch(current, desired map[string]any, removed []string) ([]byte, error) {
 	keys := make([]string, 0, len(desired))
 	for k := range desired {
 		keys = append(keys, k)
@@ -54,6 +55,10 @@ func buildPatch(current, desired map[string]any) ([]byte, error) {
 			continue
 		}
 		ops = append(ops, patchOp{Op: "replace", Path: "/" + key, Value: desiredVal})
+	}
+
+	for _, key := range removed {
+		ops = append(ops, patchOp{Op: "remove", Path: "/" + key})
 	}
 
 	body, err := json.Marshal(ops)

@@ -3,6 +3,7 @@ package plan
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
@@ -603,5 +604,43 @@ func TestPlan_MutableDiffPlansAsUpdate(t *testing.T) {
 	// live state to patch against.
 	if a.Current == nil {
 		t.Error("an update action carries no Current state")
+	}
+}
+
+// The environment's record of what kraai last set reaches each resource's
+// Diff as Spec.Applied, by instance.
+func TestPlan_HandsEachResourceWhatWasApplied(t *testing.T) {
+	var seen []string
+	differ := &fakeDiffer{
+		fakeResource: newFakeResource(),
+		diff: func(spec resource.Spec, _ *resource.State) (resource.Difference, error) {
+			seen = spec.Applied
+			return resource.Same, nil
+		},
+	}
+	reg := resource.NewRegistry()
+	must(t, reg.Register(resource.Registration{
+		Provider: "cloudflare", Type: "r2_bucket", Capability: manifest.CapabilityObjects,
+		Lookup: resource.LookupByName, Resource: differ,
+	}))
+	m := &manifest.Manifest{
+		Root: manifest.Root{Providers: manifest.Providers{manifest.CapabilityObjects: {Vendor: "cloudflare"}}},
+		Services: map[string]manifest.Service{
+			"api": {Bindings: manifest.Bindings{manifest.CapabilityObjects: {{"binding": "UPLOADS"}}}},
+		},
+	}
+	name := naming.ResourceName(envName, "api", "UPLOADS")
+	ref := resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: name}
+	differ.states[name] = &resource.State{Ref: ref, ID: "bucket-1"}
+
+	applied := map[string][]string{
+		ref.InstanceKey(): {"Cors"},
+		resource.Ref{Provider: "cloudflare", Type: "r2_bucket", Name: "another"}.InstanceKey(): {"Other"},
+	}
+	if _, err := New(reg).Plan(resource.WithApplied(context.Background(), applied), m, envName); err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+	if !reflect.DeepEqual(seen, []string{"Cors"}) {
+		t.Fatalf("Diff saw Applied %v, want this instance's record", seen)
 	}
 }

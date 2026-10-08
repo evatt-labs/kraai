@@ -144,6 +144,8 @@ func runDestroy(
 		if err := store.DeleteStatus(ctx, envName); err != nil {
 			return err
 		}
+	} else if err := forgetDeleted(ctx, store, envName, result); err != nil {
+		return err
 	}
 
 	var writeErr error

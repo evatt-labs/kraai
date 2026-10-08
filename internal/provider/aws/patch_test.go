@@ -19,6 +19,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{"Comment": "old"},
 			map[string]any{"Comment": "new"},
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -33,6 +34,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{},
 			map[string]any{"Comment": "new"},
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -47,6 +49,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{"Comment": "same"},
 			map[string]any{"Comment": "same"},
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -62,6 +65,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{"Comment": "current", "LegacyField": "leftover"},
 			map[string]any{"Comment": "current"},
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -81,6 +85,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{"Count": float64(3)}, // as encoding/json would decode a GetResource response
 			map[string]any{"Count": 3},          // as a manifest decoder might produce
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -92,7 +97,7 @@ func TestBuildPatch(t *testing.T) {
 
 	t.Run("output is deterministic regardless of map iteration order", func(t *testing.T) {
 		desired := map[string]any{"Zebra": "z", "Apple": "a", "Mango": "m"}
-		body, err := buildPatch(map[string]any{}, desired)
+		body, err := buildPatch(map[string]any{}, desired, nil)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
 		}
@@ -112,6 +117,7 @@ func TestBuildPatch(t *testing.T) {
 		body, err := buildPatch(
 			map[string]any{"Config": map[string]any{"A": 1, "B": 2}},
 			map[string]any{"Config": map[string]any{"A": 1, "B": 3}},
+			nil,
 		)
 		if err != nil {
 			t.Fatalf("buildPatch: %v", err)
@@ -147,4 +153,20 @@ func TestNormalizeForCompare(t *testing.T) {
 			t.Fatal("expected an error for a value json.Marshal cannot encode")
 		}
 	})
+}
+
+// A property kraai set and the manifest stopped declaring is removed, after
+// every add and replace, carrying no value.
+func TestBuildPatchRemoves(t *testing.T) {
+	body, err := buildPatch(
+		map[string]any{"Comment": "old", "Cors": []any{"x"}},
+		map[string]any{"Comment": "new"},
+		[]string{"Cors"},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != `[{"op":"replace","path":"/Comment","value":"new"},{"op":"remove","path":"/Cors"}]` {
+		t.Fatalf("patch = %s", body)
+	}
 }

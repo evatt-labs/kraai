@@ -50,6 +50,7 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: spec.Name},
 		ID:         identifier,
 		Attributes: properties,
+		Applied:    declaredNames(spec),
 	}, nil
 }
 
@@ -157,7 +158,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 	// A copy: the tag is written into it, never into the caller's Config.
 	desired := maps.Clone(withoutSeeds(r.typeName, spec.Config))
 	r.keepIdentityTag(desired, properties, ref.Name)
-	patch, err := buildPatch(properties, desired)
+	patch, err := buildPatch(properties, desired, r.removed(schema, spec, properties))
 	if err != nil {
 		return nil, err
 	}
@@ -167,6 +168,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 			Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
 			ID:         identifier,
 			Attributes: properties,
+			Applied:    declaredNames(spec),
 		}, nil
 	}
 
@@ -178,6 +180,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		Ref:        resource.Ref{Provider: r.provider, Type: r.typeName, Name: ref.Name},
 		ID:         identifier,
 		Attributes: updated,
+		Applied:    declaredNames(spec),
 	}, nil
 }
 

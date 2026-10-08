@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"slices"
+	"sort"
 	"strconv"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -146,7 +147,51 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Immutable, nil
 		}
 	}
+	if schema.HasUpdate && len(r.removed(schema, spec, state.Attributes)) > 0 {
+		return resource.Mutable, nil
+	}
 	return resource.Same, nil
+}
+
+// removed is the properties kraai last set (spec.Applied) that spec no
+// longer declares and the instance still carries: each is reset to the
+// service's default by the next update. Not one only a replace could reset,
+// create-only, nor one a read cannot see, write-only, nor the property
+// carrying kraai's own identity tag.
+func (r *resourceType) removed(schema cfschema.Facts, spec resource.Spec, current map[string]any) []string {
+	if len(spec.Applied) == 0 {
+		return nil
+	}
+	keep := map[string]bool{}
+	for _, pointer := range append(r.createOnly(schema), schema.WriteOnly...) {
+		if path := schemaPropertyPath(pointer); len(path) == 1 {
+			keep[path[0]] = true
+		}
+	}
+	if r.tags != nil {
+		keep[r.tags.property] = true
+	}
+	var out []string
+	for _, name := range spec.Applied {
+		if _, declared := spec.Config[name]; declared || keep[name] {
+			continue
+		}
+		if _, present := current[name]; present {
+			out = append(out, name)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// declaredNames is the properties spec sets, for the status record.
+func declaredNames(spec resource.Spec) []string {
+	names := make([]string, 0, len(spec.Config))
+	for name := range spec.Config {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 // returnedSorted is, by type, the arrays a service returns in an order of

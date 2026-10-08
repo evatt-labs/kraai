@@ -47,6 +47,10 @@ type Ref struct {
 // Key is the registry key for this Ref's type: "provider/type".
 func (r Ref) Key() string { return r.Provider + "/" + r.Type }
 
+// InstanceKey identifies one instance: its type's Key and its name, which
+// the planner keeps unique per type.
+func (r Ref) InstanceKey() string { return r.Key() + "/" + r.Name }
+
 // Import is an explicit reference to a resource kraai did not create.
 // Exactly one of ID or Name is set. The manifest is where the reference
 // belongs, rather than a state file.
@@ -84,6 +88,11 @@ type Spec struct {
 	// naming the binding reads exactly Attributes["<binding>.<key>"]. Set by
 	// the planner for a registration declaring EmbeddedReferences.
 	References map[string]string
+	// Applied is the names of the properties the last create or update kraai
+	// made of this instance set, from the environment's status record: a
+	// name here that Config no longer declares is one the author removed.
+	// Nil when nothing was recorded.
+	Applied []string
 	// Referenced is, by entry key, the declared config of the sibling
 	// binding the entry's value at that key references: what that
 	// binding's manifest entry says, for a value none of its resources
@@ -146,6 +155,10 @@ type State struct {
 	// Attributes are the type-specific fields a later wave may need: a
 	// connection host, a bucket name, a namespace id.
 	Attributes map[string]any
+	// Applied is, after a create or update, the names of the properties
+	// that call set, for the status record; nil from a type that records
+	// none.
+	Applied []string
 	// Notes is what the instance as found tells the author beyond the
 	// action, such as that it will be adopted; the plan prints them.
 	Notes []string
