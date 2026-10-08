@@ -2,10 +2,12 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
 	"reflect"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/provider/aws/cfschema"
@@ -76,7 +78,7 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 		return resource.Same, err
 	}
 
-	rules := listRules{unordered: map[string]bool{}, subset: map[string]bool{}}
+	rules := listRules{unordered: map[string]bool{}, subset: map[string]bool{}, equivalent: equivalentForms[r.typeName]}
 	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
 		rules.unordered[pointer] = true
 	}
@@ -215,6 +217,9 @@ type listRules struct {
 	// element covered by a different current one; elements only current
 	// has are the vendor's.
 	subset map[string]bool
+	// equivalent is, by pointer, a form the service returns a value in
+	// other than the one it was given (equivalentForms).
+	equivalent map[string]func(desired, current any) bool
 }
 
 // returnedWithDefaults is, by type, the key/value attribute lists a service
@@ -243,6 +248,25 @@ var returnedWithDefaults = map[string][]string{
 // value's own, with "*" for an array's elements, as
 // cfschema.Facts.Unordered writes them.
 func covers(desired, current any, pointer string, rules listRules) bool {
+	if same, ok := rules.equivalent[pointer]; ok && same(desired, current) {
+		return true
+	}
+	// A structure the service keeps as JSON text, such as a policy
+	// document, and one a manifest gives as text, are the same value.
+	if parsed, ok := jsonText(current); ok && isStructure(desired) {
+		return covers(desired, parsed, pointer, rules)
+	}
+	if parsed, ok := jsonText(desired); ok && isStructure(current) {
+		return covers(parsed, current, pointer, rules)
+	}
+	// A one-element list a service keeps as its element, as Logs and
+	// EventBridge keep an Action of one, is that element.
+	if d, ok := desired.([]any); ok && len(d) == 1 && !isList(current) {
+		return covers(d[0], current, pointer+"/*", rules)
+	}
+	if c, ok := current.([]any); ok && len(c) == 1 && !isList(desired) {
+		return covers(desired, c[0], pointer+"/*", rules)
+	}
 	switch d := desired.(type) {
 	case map[string]any:
 		c, ok := current.(map[string]any)
@@ -343,4 +367,65 @@ func refuseSecureString(typeName, name string, current map[string]any) error {
 	return kerrors.Validation(
 		"%s %q is a SecureString parameter, which kraai cannot compare or update without dropping its encryption; "+
 			"manage it outside the manifest, or declare it through a secrets binding", typeName, name)
+}
+
+func isList(v any) bool {
+	_, ok := v.([]any)
+	return ok
+}
+
+func isStructure(v any) bool {
+	switch v.(type) {
+	case map[string]any, []any:
+		return true
+	}
+	return false
+}
+
+// jsonText parses v when it is text holding a JSON object or array.
+func jsonText(v any) (any, bool) {
+	text, ok := v.(string)
+	if !ok {
+		return nil, false
+	}
+	trimmed := strings.TrimSpace(text)
+	if trimmed == "" || (trimmed[0] != '{' && trimmed[0] != '[') {
+		return nil, false
+	}
+	var parsed any
+	if err := json.Unmarshal([]byte(trimmed), &parsed); err != nil {
+		return nil, false
+	}
+	return parsed, true
+}
+
+// equivalentForms is, by type and pointer, a value the service returns in
+// another form than it was given, each observed: compared literally, the
+// plan would never converge.
+var equivalentForms = map[string]map[string]func(desired, current any) bool{
+	// A URL's target given as the function's ARN reads back as the bare
+	// function name.
+	"AWS::Lambda::Url": {"/properties/TargetFunctionArn": functionARNNamed},
+	// A permission's principal given as an account ID reads back as that
+	// account's root ARN.
+	realTypeLambdaPermission: {"/properties/Principal": accountAsRoot},
+}
+
+// functionARNNamed reports a function ARN, arn:...:function:NAME[:QUALIFIER],
+// read back as NAME.
+func functionARNNamed(desired, current any) bool {
+	arn, _ := desired.(string)
+	name, _ := current.(string)
+	parts := strings.Split(arn, ":")
+	return name != "" && strings.HasPrefix(arn, "arn:") && len(parts) >= 7 && parts[5] == "function" && parts[6] == name
+}
+
+// accountAsRoot reports an account ID read back as its root ARN.
+func accountAsRoot(desired, current any) bool {
+	account, _ := desired.(string)
+	arn, _ := current.(string)
+	if len(account) != 12 || strings.Trim(account, "0123456789") != "" {
+		return false
+	}
+	return strings.HasPrefix(arn, "arn:") && strings.HasSuffix(arn, ":iam::"+account+":root")
 }
