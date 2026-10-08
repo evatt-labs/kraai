@@ -74,8 +74,8 @@ type Status struct {
 	Applied map[string][]string `json:"applied,omitempty"`
 	// Fingerprints is, by resource, a SHA-256 of each write-only property
 	// the last create or update kraai made of it sent, a value a read never
-	// returns: a declared value hashing otherwise is a change. Never a
-	// property that may hold a secret.
+	// returns: a declared value hashing otherwise is a change. Only for the
+	// properties vetted as configuration rather than secrets.
 	Fingerprints map[string]map[string]string `json:"fingerprints,omitempty"`
 }
 

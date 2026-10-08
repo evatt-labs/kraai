@@ -56,7 +56,7 @@ func (r *resourceType) Create(ctx context.Context, spec resource.Spec) (*resourc
 		ID:           identifier,
 		Attributes:   properties,
 		Applied:      declaredNames(spec),
-		Fingerprints: fingerprints(r.typeName, schema, spec.Config),
+		Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 	}, nil
 }
 
@@ -178,7 +178,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 			ID:           identifier,
 			Attributes:   properties,
 			Applied:      declaredNames(spec),
-			Fingerprints: fingerprints(r.typeName, schema, spec.Config),
+			Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 		}, nil
 	}
 
@@ -191,7 +191,7 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		ID:           identifier,
 		Attributes:   updated,
 		Applied:      declaredNames(spec),
-		Fingerprints: fingerprints(r.typeName, schema, spec.Config),
+		Fingerprints: fingerprints(ctx, r.typeName, schema, spec.Config),
 	}, nil
 }
 
