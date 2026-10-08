@@ -155,6 +155,9 @@ func (r *resourceType) Update(ctx context.Context, ref resource.Ref, spec resour
 		}
 	}
 
+	if err := refuseSecureString(r.typeName, ref.Name, properties); err != nil {
+		return nil, err
+	}
 	// A copy: the tag is written into it, never into the caller's Config.
 	desired := maps.Clone(withoutSeeds(r.typeName, spec.Config))
 	r.keepIdentityTag(desired, properties, ref.Name)
