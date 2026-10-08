@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
@@ -145,6 +146,15 @@ func (r *resourceType) resolve(ctx context.Context, ref resource.Ref) (identifie
 	candidates, err := r.client.ListResources(ctx, r.typeName, resourceModel)
 	if err != nil {
 		return "", nil, false, err
+	}
+	if r.identifierFor != nil && ref.Match == "" {
+		id, err := r.identifierFor(ctx, name)
+		if err != nil {
+			return "", nil, false, err
+		}
+		if !slices.Contains(candidates, id) {
+			candidates = append([]string{id}, candidates...)
+		}
 	}
 	if ref.Match != "" {
 		return r.resolveDeclared(ctx, ref, candidates)
