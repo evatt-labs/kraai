@@ -7,6 +7,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"pgregory.net/rapid"
 
@@ -77,6 +78,7 @@ func TestTokenShapesAreScrubbed(t *testing.T) {
 		"a GitHub token":          {"token ghp_abcdefghijklmnopqrstuvwxyz0123456789", "ghp_abcdefghij", "[github token]"},
 		"a fine-grained token":    {"github_pat_11ABCDEFG0123456789_abcdefghijklmnop", "github_pat_11", "[github token]"},
 		"a connection password":   {"postgres://app:s3cr3t-pw@db.example.com/app", "s3cr3t-pw", "postgres://app:[password]@db.example.com"},
+		"a password with a slash": {"postgres://app:a/b+c=@db.example.com/app", "a/b+c=", "postgres://app:[password]@db.example.com"},
 		"a private key":           {"-----BEGIN RSA PRIVATE KEY-----\nMIIEow\n-----END RSA PRIVATE KEY-----", "MIIEow", "[private key]"},
 		"a truncated private key": {"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNz", "b3BlbnNz", "[private key]"},
 	} {
@@ -150,4 +152,25 @@ func TestASensitiveValueNeverLeavesThePlan(t *testing.T) {
 			}
 		}
 	})
+}
+
+// A function's environment is never shown, though no value in it is
+// marked sensitive: a variable set by hand, or resolved from a secret, is
+// what a live read returns.
+func TestAFunctionsEnvironmentIsNeverShown(t *testing.T) {
+	got := shownChanges(context.Background(), "AWS::Lambda::Function", []resource.Change{{
+		Property: "Environment", Kind: resource.ChangeUpdate,
+		Before: map[string]any{"Variables": map[string]any{"DB_PASSWORD": "hand-set-value"}},
+		After:  map[string]any{"Variables": map[string]any{"LOG_LEVEL": "debug"}},
+	}})
+	if got[0].Before != sensitiveValue || got[0].After != sensitiveValue {
+		t.Fatalf("change = %+v, want both sides masked", got[0])
+	}
+}
+
+// A cut never leaves half a character.
+func TestACutValueStaysValidText(t *testing.T) {
+	if got := shownValue(context.Background(), strings.Repeat("é", 100)); !utf8.ValidString(got) {
+		t.Fatalf("shownValue = %q, not valid UTF-8", got)
+	}
 }

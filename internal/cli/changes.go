@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"reflect"
 	"regexp"
+	"slices"
+	"strings"
 
 	"github.com/evatt-labs/kraai/internal/redact"
 	"github.com/evatt-labs/kraai/internal/resource"
@@ -25,7 +27,7 @@ var tokenShapes = []struct {
 }{
 	{regexp.MustCompile(`\b(?:AKIA|ASIA)[0-9A-Z]{16}\b`), "[aws access key]"},
 	{regexp.MustCompile(`\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b|\bgithub_pat_[A-Za-z0-9_]{20,}\b`), "[github token]"},
-	{regexp.MustCompile(`(://[^/\s:@]+):[^@\s/]+@`), "${1}:[password]@"},
+	{regexp.MustCompile(`(://[^/\s:@]+):[^@\s]+@`), "${1}:[password]@"},
 	{regexp.MustCompile(`-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)`), "[private key]"},
 }
 
@@ -56,7 +58,7 @@ func shownValue(ctx context.Context, value any) string {
 	}
 	text := shown(ctx, string(bytes.TrimRight(buf.Bytes(), "\n")))
 	if len(text) > maxShownValue {
-		text = text[:maxShownValue-3] + "..."
+		text = strings.ToValidUTF8(text[:maxShownValue-3], "") + "..."
 	}
 	return text
 }
@@ -93,11 +95,24 @@ type planChangeJSON struct {
 	After    string `json:"after,omitempty"`
 }
 
+// sensitiveProperties is, by type, the properties whose values may hold
+// secrets a manifest never wrote: a function's or container's environment,
+// where secret-backed variables are resolved, or set by hand. Their values
+// are never shown.
+var sensitiveProperties = map[string][]string{
+	"AWS::Lambda::Function":     {"Environment"},
+	"AWS::ECS::TaskDefinition":  {"ContainerDefinitions"},
+	"AWS::Amplify::App":         {"EnvironmentVariables", "BasicAuthConfig"},
+	"AWS::Amplify::Branch":      {"EnvironmentVariables", "BasicAuthConfig"},
+	"AWS::AppRunner::Service":   {"SourceConfiguration"},
+	"AWS::Batch::JobDefinition": {"ContainerProperties"},
+}
+
 // shownChanges renders changes for a plan. A property one side of which
 // holds a value the command must not print is sensitive on both: the
 // value it had is the earlier one of the same secret, which nothing marked
 // sensitive since, so neither side is shown.
-func shownChanges(ctx context.Context, changes []resource.Change) []planChangeJSON {
+func shownChanges(ctx context.Context, vendorType string, changes []resource.Change) []planChangeJSON {
 	if len(changes) == 0 {
 		return nil
 	}
@@ -109,7 +124,7 @@ func shownChanges(ctx context.Context, changes []resource.Change) []planChangeJS
 			Before:   shownValue(ctx, c.Before),
 			After:    shownValue(ctx, c.After),
 		}
-		if altered(ctx, c.Before) || altered(ctx, c.After) {
+		if slices.Contains(sensitiveProperties[vendorType], c.Property) || altered(ctx, c.Before) || altered(ctx, c.After) {
 			if change.Before != "" {
 				change.Before = sensitiveValue
 			}

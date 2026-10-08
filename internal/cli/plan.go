@@ -244,7 +244,7 @@ func writePlanText(ctx context.Context, w io.Writer, envName string, p *plan.Pla
 				_, _ = fmt.Fprintf(tw, "\t%s", shown(ctx, fmt.Sprint(a.Err)))
 			}
 			_, _ = fmt.Fprintln(tw)
-			for _, c := range shownChanges(ctx, a.Changes) {
+			for _, c := range shownChanges(ctx, a.VendorType, a.Changes) {
 				_, _ = fmt.Fprintf(tw, "      %s %s%s\n", changeSymbol(c.Kind), c.Property, changeText(c))
 			}
 			for _, note := range a.Notes {
@@ -433,7 +433,7 @@ func toPlanDocument(ctx context.Context, envName string, p *plan.Plan) planDocum
 			Wave:       a.Wave,
 			Name:       a.Ref.Name,
 			Kind:       a.Kind.String(),
-			Changes:    shownChanges(ctx, a.Changes),
+			Changes:    shownChanges(ctx, a.VendorType, a.Changes),
 		}
 		for _, note := range a.Notes {
 			entry.Notes = append(entry.Notes, shown(ctx, note))
