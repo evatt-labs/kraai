@@ -1,0 +1,7 @@
+# The live workflow's environment; see ../README.md. Its VPC is the one
+# vpc/ makes, read through OpenTofu's outputs.
+kind: ephemeral
+ttl: 3h
+terraform:
+  base:
+    dir: vpc

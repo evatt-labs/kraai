@@ -5,6 +5,10 @@ name: live
 # demand, never on push. Only the free fixtures run here; see
 # integration/README.md. Skipped until the repository variable
 # KRAAI_LIVE_ROLE_ARN names the role infra/ci-role makes.
+#
+# The environments' names are fixed (kci-free, kci-env), and runs never
+# overlap, so what a failed run left behind is converged and destroyed by
+# the next one.
 
 on:
   schedule:
@@ -31,7 +35,7 @@ jobs:
       matrix:
         fixture: [aws-free, aws-env]
     env:
-      KRAAI_ENV: kci-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.fixture == 'aws-free' && 'free' || 'env' }}
+      KRAAI_ENV: ${{ matrix.fixture == 'aws-free' && 'kci-free' || 'kci-env' }}
       FIXTURE: integration/${{ matrix.fixture }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,21 +53,17 @@ jobs:
           role-to-assume: ${{ vars.KRAAI_LIVE_ROLE_ARN }}
           role-session-name: kraai-live-${{ github.run_id }}
           aws-region: us-east-1
+          # The destroy can wait up to 45 minutes for a function's network
+          # interfaces; it must not run on expired credentials.
+          role-duration-seconds: 7200
       - name: Build kraai
         run: go build -o "$RUNNER_TEMP/kraai" ./cmd/kraai
-      - name: Write the environment
-        run: |
-          set -euo pipefail
-          if [ "$FIXTURE" = integration/aws-env ]; then
-            printf 'kind: ephemeral\nttl: 3h\nterraform:\n  base:\n    dir: vpc\n' > "$FIXTURE/environments/$KRAAI_ENV.yaml"
-          else
-            printf 'kind: ephemeral\nttl: 3h\n' > "$FIXTURE/environments/$KRAAI_ENV.yaml"
-          fi
       - name: Make the VPC
         if: matrix.fixture == 'aws-env'
         run: |
           set -euo pipefail
-          tofu -chdir="$FIXTURE/vpc" init -input=false
+          account=$(aws sts get-caller-identity --query Account --output text)
+          tofu -chdir="$FIXTURE/vpc" init -input=false -backend-config="bucket=kraai-lock-$account-us-east-1"
           tofu -chdir="$FIXTURE/vpc" apply -auto-approve -input=false -var "name=$KRAAI_ENV"
       - name: Apply
         run: '"$RUNNER_TEMP/kraai" apply "$KRAAI_ENV" --dir "$FIXTURE"'

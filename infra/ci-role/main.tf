@@ -10,9 +10,14 @@
 # every resource, since a handler publishes actions and not the identifiers
 # the provider assigns; except IAM, scoped to the roles the live
 # environments derive (kci-*), with managed policy attachments limited to
-# AWS's service-role policies. The role can still put an inline policy on a
-# kci-* role and run a function with it, so what it can do is bounded by
-# the code merged to main, not by this policy alone.
+# AWS's service-role policies. A Deny then confines every destructive verb
+# of the services that address a resource by name to the kci-* names the
+# live environments derive, and the lock bucket's objects: whatever the
+# Allow grants, the workflow cannot delete or overwrite anything else. EC2
+# resources are addressed by id and are not confined; a condition on
+# kraai's identity tag would be the way to. The role can still put an
+# inline policy on a kci-* role and run a function with it, so what it can
+# do is bounded by the code merged to main, not by this policy alone.
 terraform {
   required_version = ">= 1.8"
   required_providers {
@@ -51,7 +56,8 @@ locals {
     "ec2:DescribeSecurityGroups",
     "ec2:DescribeTags",
   ]
-  live_roles = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/kci-*"
+  account    = data.aws_caller_identity.current.account_id
+  live_roles = "arn:aws:iam::${local.account}:role/kci-*"
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -104,6 +110,54 @@ data "aws_iam_policy_document" "live" {
     sid       = "ServiceLinkedRoles"
     actions   = ["iam:CreateServiceLinkedRole"]
     resources = ["arn:aws:iam::*:role/aws-service-role/*"]
+  }
+  statement {
+    sid    = "OnlyLiveResourcesAreDestroyed"
+    effect = "Deny"
+    actions = [
+      "cloudwatch:DeleteAlarms",
+      "dynamodb:DeleteTable",
+      "ecs:DeleteCluster",
+      "ecs:DeregisterTaskDefinition",
+      "elasticache:DeleteCacheSubnetGroup",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "events:DeleteEventBus",
+      "events:DeleteRule",
+      "events:RemoveTargets",
+      "lambda:DeleteFunction",
+      "lambda:DeleteFunctionUrlConfig",
+      "lambda:RemovePermission",
+      "logs:DeleteLogGroup",
+      "rds:DeleteDBClusterParameterGroup",
+      "rds:DeleteDBSubnetGroup",
+      "s3:DeleteBucket",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+      "sqs:DeleteQueue",
+      "sqs:PurgeQueue",
+      "ssm:DeleteParameter",
+      "ssm:DeleteParameters",
+      "ssm:PutParameter",
+    ]
+    not_resources = [
+      "arn:aws:cloudwatch:*:${local.account}:alarm:kci-*",
+      "arn:aws:dynamodb:*:${local.account}:table/kci-*",
+      "arn:aws:ecs:*:${local.account}:cluster/kci-*",
+      "arn:aws:ecs:*:${local.account}:task-definition/kci-*",
+      "arn:aws:elasticache:*:${local.account}:subnetgroup:kci-*",
+      "arn:aws:elasticloadbalancing:*:${local.account}:targetgroup/kci-*",
+      "arn:aws:events:*:${local.account}:event-bus/kci-*",
+      "arn:aws:events:*:${local.account}:rule/kci-*",
+      "arn:aws:lambda:*:${local.account}:function:kci-*",
+      "arn:aws:logs:*:${local.account}:log-group:kci-*",
+      "arn:aws:rds:*:${local.account}:cluster-pg:kci-*",
+      "arn:aws:rds:*:${local.account}:subgrp:kci-*",
+      "arn:aws:s3:::kci-*",
+      "arn:aws:s3:::kci-*/*",
+      "arn:aws:s3:::kraai-lock-${local.account}-*/*",
+      "arn:aws:sqs:*:${local.account}:kci-*",
+      "arn:aws:ssm:*:${local.account}:parameter/kci-*",
+    ]
   }
 }
 

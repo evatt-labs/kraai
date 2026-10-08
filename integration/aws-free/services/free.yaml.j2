@@ -1,3 +1,7 @@
+# Names a type would otherwise take from the service, and the event rules'
+# names, which Cloud Control requires (#421), carry the environment's
+# prefix (environments/<name>.values.yaml): two environments never collide,
+# and the live role's Deny, which confines deletes to kci-*, covers them.
 services:
   free:
     dir: .
@@ -213,13 +217,13 @@ services:
       # balancer is free.
       - binding: TG
         type: AWS::ElasticLoadBalancingV2::TargetGroup
-        properties: { VpcId: "${VPC.VpcId}", Protocol: HTTP, Port: 8080, TargetType: ip }
+        properties: { Name: "{{ prefix }}-tg", VpcId: "${VPC.VpcId}", Protocol: HTTP, Port: 8080, TargetType: ip }
       - binding: RULE
         type: AWS::Events::Rule
         # Cloud Control's handler fails with a null pointer when Name is
         # omitted, although the schema makes it optional.
         properties:
-          Name: kraai-integration-rule
+          Name: "{{ prefix }}-rule"
           State: DISABLED
           ScheduleExpression: rate(1 day)
       # A rule on a custom bus has the bus in its ARN. Nothing is published
@@ -230,7 +234,7 @@ services:
       - binding: BUS_RULE
         type: AWS::Events::Rule
         properties:
-          Name: kraai-integration-bus-rule
+          Name: "{{ prefix }}-bus-rule"
           EventBusName: "${BUS.Name}"
           Description: kraai integration
           State: ENABLED
@@ -247,6 +251,7 @@ services:
       - binding: TASK
         type: AWS::ECS::TaskDefinition
         properties:
+          Family: "{{ prefix }}-task"
           RequiresCompatibilities: [FARGATE]
           NetworkMode: awsvpc
           Cpu: "256"
