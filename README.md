@@ -64,6 +64,13 @@ That has consequences worth knowing:
 - No state to lose, lock incorrectly, or drift from reality.
 - Adopting a resource created by hand means naming it in the manifest, which
   is the record.
+- A property kraai set and the manifest stops declaring is reset to the
+  service's default by the next apply. Each environment's status record
+  keeps, per resource, the names of the properties kraai last set, never
+  their values, which is how kraai tells a property the author removed from
+  one it never set; a property it never set is still left alone. A
+  create-only property is left as it is, since only a replace could reset
+  it.
 - Some resources are found again only by a tag kraai writes when it creates
   them — `kraai:resource-name` on an ACM certificate, an API Gateway API, a
   CloudFront distribution, a Route 53 hosted zone. That tag is the resource's
