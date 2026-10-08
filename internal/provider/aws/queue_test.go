@@ -105,8 +105,11 @@ func TestQueueDiffIsSameWhenTheNameMatches(t *testing.T) {
 // locatedClient is a fakeClient that knows its account and region.
 type locatedClient struct{ *fakeClient }
 
-func (locatedClient) AccountID(context.Context) (string, error) { return "123456789012", nil }
-func (locatedClient) Region() string                             { return "us-east-1" }
+func (locatedClient) AccountID(context.Context) (string, error) {
+	return "123456789012", nil
+}
+
+func (locatedClient) Region() string { return "us-east-1" }
 
 // A queue created moments ago, which SQS's list does not show yet, is
 // still found: its URL follows from its name, and a read by URL sees it.
