@@ -14,7 +14,7 @@ COVERPROFILE := coverage.out
 # with JOBS=n.
 JOBS ?= 4
 
-.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity declcheck observability-up observability-down
+.PHONY: check build vet test coverage-floor lint fmt fmt-check plan-examples schema-index direct-extract direct-parity declcheck observability-up observability-down ci-role-actions
 
 check: build vet test coverage-floor lint fmt-check
 
@@ -97,6 +97,16 @@ direct-extract:
 # merges the run into the recorded evidence; TYPES=AWS::X::Y,... limits it.
 direct-parity:
 	go test -tags integration ./internal/provider/aws/direct -run TestReadParity -count=1 -v -timeout 90m -args $(if $(UPDATE),-update-evidence) $(if $(TYPES),-types $(TYPES))
+
+# Read-only, needs AWS credentials: regenerates the IAM actions the live
+# workflow's role is granted (infra/ci-role/actions.json) from kraai's own
+# iam-policy over the two live fixtures. Review the diff, then apply
+# infra/ci-role.
+ci-role-actions:
+	@tmp=$$(mktemp -d) && trap 'rm -rf -- "$$tmp"' EXIT && \
+	go run ./cmd/kraai iam-policy policy --dir integration/aws-env > "$$tmp/env.json" && \
+	go run ./cmd/kraai iam-policy kraai-integration --dir integration/aws-free > "$$tmp/free.json" && \
+	jq -s '[.[].Statement[].Action] | flatten | unique' "$$tmp/env.json" "$$tmp/free.json" > infra/ci-role/actions.json
 
 # A local OpenTelemetry backend and the kraai dashboard: one grafana/otel-lgtm
 # container (collector, Prometheus, Tempo, Grafana), pinned by digest. Ports

@@ -1,0 +1,7 @@
+# Only for `make ci-role-actions`: the live workflow's environment with
+# stand-in network ids, so the IAM actions can be generated without a VPC.
+kind: ephemeral
+ttl: 1h
+terraform:
+  base:
+    file: outputs/policy.json
