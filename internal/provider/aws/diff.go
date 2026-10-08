@@ -34,7 +34,7 @@ func (r *resourceType) Diff(spec resource.Spec, state *resource.State) (resource
 	if err != nil {
 		return resource.Same, err
 	}
-	return r.compare(spec, state)
+	return r.compareDeclared(spec, state)
 }
 
 // translated applies r.translate to spec, or returns spec as it is when the
@@ -152,12 +152,30 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 			return resource.Immutable, nil
 		}
 	}
+	return resource.Same, nil
+}
+
+// compareDeclared is compare for a spec carrying the type's whole
+// translated config, the generic and native paths: besides what compare
+// finds, a property kraai set that the manifest stopped declaring, and a
+// fingerprinted write-only property that changed. A type whose Diff
+// narrows the config to what it compares calls compare instead, since a
+// property it left out of the narrowed config would read as removed.
+func (r *resourceType) compareDeclared(spec resource.Spec, state *resource.State) (resource.Difference, error) {
+	difference, err := r.compare(spec, state)
+	if err != nil || difference != resource.Same {
+		return difference, err
+	}
+	schema, err := r.getSchema(context.Background())
+	if err != nil {
+		return resource.Same, err
+	}
 	if schema.HasUpdate && len(r.removed(schema, spec, state.Attributes)) > 0 {
 		return resource.Mutable, nil
 	}
 	if changed := writeOnlyChanged(r.typeName, schema, spec); len(changed) > 0 {
 		for _, name := range changed {
-			if createOnly["/properties/"+name] {
+			if slices.Contains(r.createOnly(schema), "/properties/"+name) {
 				return resource.Immutable, nil
 			}
 		}

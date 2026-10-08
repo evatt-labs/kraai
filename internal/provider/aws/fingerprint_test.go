@@ -47,7 +47,7 @@ func TestWriteOnlyFingerprints(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := &resourceType{provider: Provider, typeName: TypeSSMParameter, lookup: resource.LookupByName, client: &fakeClient{schema: schema}}
 			spec := resource.Spec{Config: c.config, Applied: c.applied, Fingerprints: c.prints}
-			got, err := r.compare(spec, &resource.State{Attributes: map[string]any{}})
+			got, err := r.compareDeclared(spec, &resource.State{Attributes: map[string]any{}})
 			if err != nil || got != c.want {
 				t.Fatalf("compare = %v, %v; want %v", got, err, c.want)
 			}
@@ -62,7 +62,7 @@ func TestACreateOnlyFingerprintReplaces(t *testing.T) {
 	schema := cfschema.Facts{HasUpdate: true, WriteOnly: []string{"/properties/Seed"}, CreateOnly: []string{"/properties/Seed"}}
 	r := &resourceType{provider: Provider, typeName: "AWS::Example::Thing", lookup: resource.LookupByTag, client: &fakeClient{schema: schema}}
 	spec := resource.Spec{Config: map[string]any{"Seed": "b"}, Applied: []string{"Seed"}, Fingerprints: map[string]string{"Seed": fingerprint("a")}}
-	if got, err := r.compare(spec, &resource.State{Attributes: map[string]any{}}); err != nil || got != resource.Immutable {
+	if got, err := r.compareDeclared(spec, &resource.State{Attributes: map[string]any{}}); err != nil || got != resource.Immutable {
 		t.Fatalf("compare = %v, %v; want a replace", got, err)
 	}
 }

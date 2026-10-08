@@ -346,7 +346,7 @@ func (n *nativeResource) Diff(spec resource.Spec, state *resource.State) (resour
 		}
 		return resource.Mutable, nil
 	}
-	return n.compare(spec, state)
+	return n.compareDeclared(spec, state)
 }
 
 // Changes lists the properties Diff found differing, prepared as Diff
