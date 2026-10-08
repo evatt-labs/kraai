@@ -72,6 +72,9 @@ func (r *resourceType) compare(spec resource.Spec, state *resource.State) (resou
 	if err != nil {
 		return resource.Same, err
 	}
+	if err := refuseSecureString(r.typeName, spec.Name, state.Attributes); err != nil {
+		return resource.Same, err
+	}
 
 	rules := listRules{unordered: map[string]bool{}, subset: map[string]bool{}}
 	for _, pointer := range append(schema.Unordered, returnedSorted[r.typeName]...) {
@@ -326,4 +329,18 @@ func matchAll(n, m int, fits func(desired, current int) bool) bool {
 		}
 	}
 	return true
+}
+
+// refuseSecureString refuses a SecureString SSM parameter. Its schema
+// models only String and StringList, and a read does not decrypt, so its
+// ciphertext never equals a manifest's Value and every plan would show a
+// change; the update would then put the manifest's Type, silently dropping
+// the parameter's encryption. Reachable only by importing one.
+func refuseSecureString(typeName, name string, current map[string]any) error {
+	if typeName != TypeSSMParameter || current["Type"] != "SecureString" {
+		return nil
+	}
+	return kerrors.Validation(
+		"%s %q is a SecureString parameter, which kraai cannot compare or update without dropping its encryption; "+
+			"manage it outside the manifest, or declare it through a secrets binding", typeName, name)
 }
