@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
@@ -74,6 +75,15 @@ func newQueueResource(client ccAPI) *nativeResource {
 	n := newNativeResourceWith(client, nil, facts, resource.LookupByTag)
 	n.fromCapability = queueProperties
 	n.adoptMatch = queueMatch
+	if located, ok := client.(accountRegion); ok {
+		n.identifierFor = func(ctx context.Context, name string) (string, error) {
+			account, err := located.AccountID(ctx)
+			if err != nil {
+				return "", err
+			}
+			return queueURL(located.Region(), account, name), nil
+		}
+	}
 	// The queue was found by QueueName, untagged, until the second
 	// generation.
 	n.taggedSince = 2
@@ -89,6 +99,20 @@ func queueMatch(properties map[string]any, name string) bool {
 // for a FIFO queue, a redrive policy or a visibility timeout.
 func queueProperties(spec resource.Spec) (map[string]any, error) {
 	return map[string]any{"QueueName": spec.Name}, nil
+}
+
+// accountRegion is a client that knows the account and region it works
+// in, which a queue's URL is built from.
+type accountRegion interface {
+	AccountID(ctx context.Context) (string, error)
+	Region() string
+}
+
+// queueURL builds the URL SQS gives a queue of name, Cloud Control's
+// identifier for it. SQS's list can omit a queue for minutes after it is
+// created, where a read by URL finds it at once.
+func queueURL(region, account, name string) string {
+	return "https://sqs." + region + ".amazonaws.com/" + account + "/" + name
 }
 
 // queueARN builds a queue's ARN from its region, account and name, so a

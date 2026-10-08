@@ -117,6 +117,12 @@ type resourceType struct {
 	// such an instance when none carries the tag.
 	adoptMatch matchFunc
 
+	// identifierFor, set on a type whose identifier follows from its name,
+	// builds the identifier an instance of name would have, read before
+	// what the list returns: a list can lag a create that a read by
+	// identifier already sees.
+	identifierFor func(ctx context.Context, name string) (string, error)
+
 	// taggedSince is the generation of kraai's identity tagging (see
 	// lock.CurrentIdentityTagVersion) this type began carrying the tag at:
 	// only an environment applied before it may hold an untagged instance

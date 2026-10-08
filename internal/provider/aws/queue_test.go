@@ -101,3 +101,27 @@ func TestQueueDiffIsSameWhenTheNameMatches(t *testing.T) {
 		t.Fatalf("Diff(other name) = %v, %v; want Immutable: a queue cannot be renamed in place", renamed, err)
 	}
 }
+
+// locatedClient is a fakeClient that knows its account and region.
+type locatedClient struct{ *fakeClient }
+
+func (locatedClient) AccountID(context.Context) (string, error) {
+	return "123456789012", nil
+}
+
+func (locatedClient) Region() string { return "us-east-1" }
+
+// A queue created moments ago, which SQS's list does not show yet, is
+// still found: its URL follows from its name, and a read by URL sees it.
+func TestQueueIsFoundByItsURLWhileTheListLags(t *testing.T) {
+	url := "https://sqs.us-east-1.amazonaws.com/123456789012/env-svc-jobs"
+	fc := &fakeClient{
+		list:         nil,
+		byIdentifier: map[string]map[string]any{url: taggedProps("env-svc-jobs", map[string]any{"QueueName": "env-svc-jobs"})},
+		schema:       cfschema.Facts{HasUpdate: true},
+	}
+	state, err := newQueueResource(locatedClient{fc}).Get(context.Background(), resource.Ref{Name: "env-svc-jobs"})
+	if err != nil || state == nil || state.ID != url {
+		t.Fatalf("Get = %+v, %v; want the queue at %s", state, err, url)
+	}
+}
