@@ -20,7 +20,7 @@ func judge(ctx context.Context, set *policy.Set, gate policy.Gate, envName strin
 	if set.Empty() {
 		return nil, nil
 	}
-	input, err := policyInput(envName, m, p)
+	input, err := policyInput(ctx, envName, m, p)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +31,11 @@ func judge(ctx context.Context, set *policy.Set, gate policy.Gate, envName strin
 // prints, each action with the config its resource is built from, the
 // manifest's providers and services, and the environment overlay. Values
 // are left out: --set and values files are where credentials end up, and a
-// denial message prints to a CI log.
-func policyInput(envName string, m *manifest.Manifest, p *plan.Plan) (map[string]any, error) {
+// denial message prints to a CI log. Each action's changes are the ones the
+// plan prints, rendered and made safe the same way.
+func policyInput(ctx context.Context, envName string, m *manifest.Manifest, p *plan.Plan) (map[string]any, error) {
 	var input map[string]any
-	if err := roundTrip(toPlanDocument(envName, p), json.Marshal, json.Unmarshal, &input); err != nil {
+	if err := roundTrip(toPlanDocument(ctx, envName, p), json.Marshal, json.Unmarshal, &input); err != nil {
 		return nil, err
 	}
 	actions, _ := input["actions"].([]any)

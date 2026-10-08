@@ -225,6 +225,18 @@ func (i *instrumented) Locate(spec Spec) (string, string, bool, error) {
 	return locator.Locate(spec)
 }
 
+// Changes forwards to the inner resource when it lists its changes, and
+// otherwise lists none.
+func (i *instrumented) Changes(spec Spec, state *State) ([]Change, error) {
+	explainer, ok := i.inner.(interface {
+		Changes(Spec, *State) ([]Change, error)
+	})
+	if !ok {
+		return nil, nil
+	}
+	return explainer.Changes(spec, state)
+}
+
 // Notes forwards to the inner resource when it has notes, and otherwise
 // reports none.
 func (i *instrumented) Notes(spec Spec) []string {

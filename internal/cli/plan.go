@@ -168,9 +168,9 @@ func runPlan(
 	}
 
 	if jsonOut {
-		return writePlanJSON(cmd.OutOrStdout(), envName, result, denials)
+		return writePlanJSON(cmd.Context(), cmd.OutOrStdout(), envName, result, denials)
 	}
-	if err := writePlanText(cmd.OutOrStdout(), envName, result); err != nil {
+	if err := writePlanText(cmd.Context(), cmd.OutOrStdout(), envName, result); err != nil {
 		return err
 	}
 	return writeDenials(cmd.OutOrStdout(), denials)
@@ -221,7 +221,7 @@ func qualifiedType(a plan.Action) string {
 	return a.Provider + "/" + a.Type + " (" + a.VendorType + ")"
 }
 
-func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
+func writePlanText(ctx context.Context, w io.Writer, envName string, p *plan.Plan) error {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "%s\n\n", summaryLine(envName, countActions(p)))
@@ -241,11 +241,14 @@ func writePlanText(w io.Writer, envName string, p *plan.Plan) error {
 			_, _ = fmt.Fprintf(tw, "  %s\t%-9s\t%s\t%s\t%s.%s", actionSymbol(a.Kind), a.Kind,
 				strconv.Quote(a.Ref.Name), qualifiedType(a), a.ServiceKey, a.Binding)
 			if a.Kind == plan.ActionFailed {
-				_, _ = fmt.Fprintf(tw, "\t%v", a.Err)
+				_, _ = fmt.Fprintf(tw, "\t%s", shown(ctx, fmt.Sprint(a.Err)))
 			}
 			_, _ = fmt.Fprintln(tw)
+			for _, c := range shownChanges(ctx, a.VendorType, a.Changes) {
+				_, _ = fmt.Fprintf(tw, "      %s %s%s\n", changeSymbol(c.Kind), c.Property, changeText(c))
+			}
 			for _, note := range a.Notes {
-				_, _ = fmt.Fprintf(tw, "      note: %s\n", note)
+				_, _ = fmt.Fprintf(tw, "      note: %s\n", shown(ctx, note))
 			}
 		}
 		// tw also only ever writes into b, so this can't fail either.
@@ -392,13 +395,18 @@ type planActionJSON struct {
 	Kind       string   `json:"kind"`
 	Error      string   `json:"error,omitempty"`
 	Notes      []string `json:"notes,omitempty"`
+	// Changes is, for an update or replace, each property that changes,
+	// its values rendered as the text plan shows them and made safe
+	// (shownValue). Additive: absent for an action whose type does not
+	// list its changes.
+	Changes []planChangeJSON `json:"changes,omitempty"`
 }
 
 // toPlanDocument projects a *plan.Plan into the JSON-safe planDocument
 // contract described above. A nil Plan (defensive: Planner.Plan never
 // returns one on success, but writePlanText guards the same case) yields
 // an empty, zero-valued document rather than panicking.
-func toPlanDocument(envName string, p *plan.Plan) planDocument {
+func toPlanDocument(ctx context.Context, envName string, p *plan.Plan) planDocument {
 	c := countActions(p)
 	doc := planDocument{
 		Environment: envName,
@@ -425,10 +433,13 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 			Wave:       a.Wave,
 			Name:       a.Ref.Name,
 			Kind:       a.Kind.String(),
-			Notes:      a.Notes,
+			Changes:    shownChanges(ctx, a.VendorType, a.Changes),
+		}
+		for _, note := range a.Notes {
+			entry.Notes = append(entry.Notes, shown(ctx, note))
 		}
 		if a.Kind == plan.ActionFailed && a.Err != nil {
-			entry.Error = a.Err.Error()
+			entry.Error = shown(ctx, a.Err.Error())
 		}
 		doc.Actions = append(doc.Actions, entry)
 	}
@@ -447,8 +458,8 @@ func toPlanDocument(envName string, p *plan.Plan) planDocument {
 // so checking it would be a defensive branch with no genuine failure path
 // to exercise. w.Write, by contrast, is a real external I/O call and is
 // this function's one actual, testable failure path.
-func writePlanJSON(w io.Writer, envName string, result *plan.Plan, denials []string) error {
-	doc := toPlanDocument(envName, result)
+func writePlanJSON(ctx context.Context, w io.Writer, envName string, result *plan.Plan, denials []string) error {
+	doc := toPlanDocument(ctx, envName, result)
 	doc.PolicyDenials = denials
 	data, _ := json.MarshalIndent(doc, "", "  ")
 	data = append(data, '\n')

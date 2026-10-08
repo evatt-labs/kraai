@@ -33,3 +33,26 @@ func (d Difference) String() string {
 		return "Difference(" + strconv.Itoa(int(d)) + ")"
 	}
 }
+
+// Change is one top-level property an update or replace would change, for
+// the plan to show: what is live and what the manifest wants. Before is
+// nil for one being added, After for one being removed.
+type Change struct {
+	Property string
+	Kind     ChangeKind
+	Before   any
+	After    any
+}
+
+// ChangeKind is what happens to a property.
+type ChangeKind string
+
+const (
+	// ChangeAdd is a property the instance does not carry yet.
+	ChangeAdd ChangeKind = "add"
+	// ChangeUpdate is a property whose value changes.
+	ChangeUpdate ChangeKind = "change"
+	// ChangeRemove is a property kraai set and the manifest stopped
+	// declaring, reset to its default.
+	ChangeRemove ChangeKind = "remove"
+)

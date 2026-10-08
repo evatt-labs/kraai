@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -71,7 +72,7 @@ func twoWavePlan() *plan.Plan {
 
 func TestWritePlanText_MultiWaveAndEveryKind(t *testing.T) {
 	var buf bytes.Buffer
-	if err := writePlanText(&buf, "env", twoWavePlan()); err != nil {
+	if err := writePlanText(context.Background(), &buf, "env", twoWavePlan()); err != nil {
 		t.Fatalf("writePlanText: %v", err)
 	}
 	out := buf.String()
@@ -88,7 +89,7 @@ func TestWritePlanText_MultiWaveAndEveryKind(t *testing.T) {
 }
 
 func TestToPlanDocument_EveryKindAndWave(t *testing.T) {
-	doc := toPlanDocument("env", twoWavePlan())
+	doc := toPlanDocument(context.Background(), "env", twoWavePlan())
 
 	if doc.Summary != (planSummaryJSON{Create: 1, Replace: 1, NoChange: 1, Failed: 1, Total: 4, HasChanges: true, HasFailures: true}) {
 		t.Errorf("Summary = %+v", doc.Summary)
@@ -105,9 +106,9 @@ func TestToPlanDocument_EveryKindAndWave(t *testing.T) {
 }
 
 func TestToPlanDocument_NilPlan(t *testing.T) {
-	doc := toPlanDocument("env", nil)
+	doc := toPlanDocument(context.Background(), "env", nil)
 	if doc.Environment != "env" || doc.Summary.Total != 0 || len(doc.Actions) != 0 {
-		t.Errorf("toPlanDocument(nil) = %+v, want an empty document", doc)
+		t.Errorf("toPlanDocument(context.Background(), nil) = %+v, want an empty document", doc)
 	}
 }
 
@@ -128,14 +129,14 @@ func TestSummaryLine_Format(t *testing.T) {
 }
 
 func TestWritePlanText_WriterFailurePropagates(t *testing.T) {
-	err := writePlanText(failingWriter{}, "env", nil)
+	err := writePlanText(context.Background(), failingWriter{}, "env", nil)
 	if err == nil {
 		t.Fatalf("writePlanText with a failing writer = nil error, want one")
 	}
 }
 
 func TestWritePlanJSON_WriterFailurePropagates(t *testing.T) {
-	err := writePlanJSON(failingWriter{}, "env", nil, nil)
+	err := writePlanJSON(context.Background(), failingWriter{}, "env", nil, nil)
 	if err == nil {
 		t.Fatalf("writePlanJSON with a failing writer = nil error, want one")
 	}
@@ -143,7 +144,7 @@ func TestWritePlanJSON_WriterFailurePropagates(t *testing.T) {
 
 func TestWritePlanText_NilPlan(t *testing.T) {
 	var buf bytes.Buffer
-	if err := writePlanText(&buf, "env", nil); err != nil {
+	if err := writePlanText(context.Background(), &buf, "env", nil); err != nil {
 		t.Fatalf("writePlanText: %v", err)
 	}
 	if !strings.Contains(buf.String(), "no resources declared") {
@@ -186,7 +187,7 @@ func rolePlan() *plan.Plan {
 // every row would repeat the type verbatim for nearly every resource.
 func TestWritePlanText_NamesTheVendorTypeOnlyWhenItDiffers(t *testing.T) {
 	var buf bytes.Buffer
-	if err := writePlanText(&buf, "env", rolePlan()); err != nil {
+	if err := writePlanText(context.Background(), &buf, "env", rolePlan()); err != nil {
 		t.Fatalf("writePlanText: %v", err)
 	}
 	out := buf.String()
@@ -202,7 +203,7 @@ func TestWritePlanText_NamesTheVendorTypeOnlyWhenItDiffers(t *testing.T) {
 // vendor_type is always present, equal to type in the common case, so a
 // consumer reads one field rather than branching on whether it diverges.
 func TestPlanJSON_CarriesVendorTypeOnEveryAction(t *testing.T) {
-	doc := toPlanDocument("env", rolePlan())
+	doc := toPlanDocument(context.Background(), "env", rolePlan())
 
 	got := map[string]string{}
 	for _, a := range doc.Actions {
@@ -224,7 +225,7 @@ func TestPlanNotesAreRendered(t *testing.T) {
 	p.Actions[0].Notes = []string{"found by RouteKey: changing it leaves the old one unmanaged"}
 
 	var buf bytes.Buffer
-	if err := writePlanText(&buf, "env", p); err != nil {
+	if err := writePlanText(context.Background(), &buf, "env", p); err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(buf.String(), "note: found by RouteKey: changing it leaves the old one unmanaged") {
@@ -232,7 +233,7 @@ func TestPlanNotesAreRendered(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err := writePlanJSON(&buf, "env", p, nil); err != nil {
+	if err := writePlanJSON(context.Background(), &buf, "env", p, nil); err != nil {
 		t.Fatal(err)
 	}
 	var doc struct {

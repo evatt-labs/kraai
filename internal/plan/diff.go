@@ -29,3 +29,13 @@ type Differ interface {
 type LiveDiffer interface {
 	DiffLive(ctx context.Context, spec resource.Spec, state *resource.State) (resource.Difference, error)
 }
+
+// Explainer lists, for a resource the plan updates or replaces, which
+// properties change and how, for the plan to show. Optional: a type that
+// does not implement it shows its action alone. A value that may hold a
+// secret is the type's to mask; the CLI redacts what it knows besides.
+//
+// Non-mutating by contract, like everything plan calls.
+type Explainer interface {
+	Changes(spec resource.Spec, state *resource.State) ([]resource.Change, error)
+}

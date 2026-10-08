@@ -547,6 +547,17 @@ kraai gc [--dry-run]           # destroy the ephemeral environments whose ttl ha
 kraai secret set <environment> <BINDING>.<entry>  # set a source: external declared secret's value
 ```
 
+A plan shows, under each update or replace of a native binding, which
+properties change: `+` added, `~` changed (before `->` after), `-` removed
+(reset to its default). `plan --json` carries the same as `changes`. Values
+the manifest writes literally are shown, cut to 120 characters, as
+Terraform shows them; a value holding a sensitive Terraform output is shown
+as `(sensitive)` on both sides, and credential shapes (AWS access keys,
+GitHub tokens, a connection URI's password, a private key) are scrubbed
+from every value, note and error. Other types show their action alone for
+now; a function's environment, which holds the values of its secrets, is
+never shown.
+
 `gc` reads every environment the manifest directory declares and destroys
 those that are ephemeral and past the deadline their last apply recorded. A
 persistent environment is never touched, whatever its record says; a
