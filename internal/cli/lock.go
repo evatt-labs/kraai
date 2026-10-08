@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"time"
 
+	"github.com/evatt-labs/kraai/internal/apply"
+	"github.com/evatt-labs/kraai/internal/destroy"
 	"github.com/evatt-labs/kraai/internal/env"
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
@@ -75,6 +78,9 @@ func guard(
 	if adoptsUntagged(status, found) {
 		ctx = resource.WithTagVersion(ctx, status.TagVersion())
 	}
+	if found {
+		ctx = resource.WithApplied(ctx, status.Applied)
+	}
 	guarded, stop := lock.Keep(ctx, lease, leaseDuration, leaseRenewal)
 	return guarded, store, func() {
 		stop()
@@ -112,6 +118,9 @@ func withAdoption(ctx context.Context, store lock.Store, envName string) (contex
 	}
 	if adoptsUntagged(status, found) {
 		ctx = resource.WithTagVersion(ctx, status.TagVersion())
+	}
+	if found {
+		ctx = resource.WithApplied(ctx, status.Applied)
 	}
 	return ctx, nil
 }
@@ -157,7 +166,7 @@ func lockLost(ctx context.Context, envName string, err error) error {
 // records nothing.
 // clean is whether the apply finished without a failure, after which every
 // resource it planned carries kraai's identity tag.
-func recordStatus(ctx context.Context, store lock.Store, envName string, m *manifest.Manifest, outcome string, clean bool) error {
+func recordStatus(ctx context.Context, store lock.Store, envName string, m *manifest.Manifest, outcome string, clean bool, result *apply.Result) error {
 	if store == nil {
 		return nil
 	}
@@ -179,6 +188,7 @@ func recordStatus(ctx context.Context, store lock.Store, envName string, m *mani
 		IdentityTagVersion: tagVersionAfter(started, clean),
 		// For a kraai that reads only the first generation's field.
 		IdentityTagged: tagVersionAfter(started, clean) >= 1,
+		Applied:        appliedAfter(started.Applied, result),
 	}
 	if ttl := m.Environment.TTLDuration(); ttl > 0 && m.Environment.Kind == manifest.EnvironmentKindEphemeral {
 		deadline := now.Add(ttl)
@@ -194,4 +204,56 @@ func tagVersionAfter(prior lock.Status, clean bool) int {
 		return lock.CurrentIdentityTagVersion
 	}
 	return prior.TagVersion()
+}
+
+// appliedAfter is the record of what each resource's last create or update
+// set, after result: a resource this apply created, updated or replaced
+// records what that call set; every other keeps what it had, since an
+// unchanged resource was not written and a failed one may not have been.
+func appliedAfter(prior map[string][]string, result *apply.Result) map[string][]string {
+	out := maps.Clone(prior)
+	if result == nil {
+		return out
+	}
+	for _, r := range result.Results {
+		switch r.Outcome {
+		case apply.OutcomeCreated, apply.OutcomeUpdated, apply.OutcomeReplaced:
+			if r.Applied == nil {
+				continue
+			}
+			if out == nil {
+				out = map[string][]string{}
+			}
+			out[r.Ref.InstanceKey()] = r.Applied
+		case apply.OutcomeUnchanged, apply.OutcomeFailed, apply.OutcomeSkipped:
+		}
+	}
+	return out
+}
+
+// forgetDeleted drops from the environment's record what a destroy that
+// did not finish deleted, so a resource made again later under the same
+// name starts with nothing recorded.
+func forgetDeleted(ctx context.Context, store lock.Store, envName string, result *destroy.Result) error {
+	if store == nil || result == nil {
+		return nil
+	}
+	status, found, err := store.ReadStatus(ctx, envName)
+	if err != nil || !found || len(status.Applied) == 0 {
+		return err
+	}
+	changed := false
+	for _, r := range result.Results {
+		if r.Outcome != destroy.OutcomeDeleted {
+			continue
+		}
+		if _, ok := status.Applied[r.Ref.InstanceKey()]; ok {
+			delete(status.Applied, r.Ref.InstanceKey())
+			changed = true
+		}
+	}
+	if !changed {
+		return nil
+	}
+	return store.WriteStatus(ctx, status)
 }

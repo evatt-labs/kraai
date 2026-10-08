@@ -67,6 +67,11 @@ type Status struct {
 	// IdentityTagged is the first generation's record, read as version 1,
 	// and still written beside the version for a kraai that reads only it.
 	IdentityTagged bool `json:"identityTagged,omitempty"`
+	// Applied is, by resource (Ref.InstanceKey()), the names of the properties the
+	// last create or update kraai made of it set: names only, never a
+	// value. A name here that the manifest no longer declares is one kraai
+	// set and the author removed, which the next plan resets.
+	Applied map[string][]string `json:"applied,omitempty"`
 }
 
 // CurrentIdentityTagVersion is this kraai's generation of identity

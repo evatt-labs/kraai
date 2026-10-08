@@ -34,6 +34,20 @@ func ReadOnly(ctx context.Context) bool {
 	return readOnly
 }
 
+type appliedKey struct{}
+
+// WithApplied marks ctx with the environment's record of what kraai last
+// set on each resource (lock.Status.Applied), keyed by Ref.InstanceKey().
+func WithApplied(ctx context.Context, applied map[string][]string) context.Context {
+	return context.WithValue(ctx, appliedKey{}, applied)
+}
+
+// AppliedFrom returns the record WithApplied put on ctx, nil if none.
+func AppliedFrom(ctx context.Context) map[string][]string {
+	applied, _ := ctx.Value(appliedKey{}).(map[string][]string)
+	return applied
+}
+
 type tagVersionKey struct{}
 
 // WithTagVersion marks ctx as a run against an environment kraai last

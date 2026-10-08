@@ -105,6 +105,7 @@ func (p *Planner) Plan(ctx context.Context, m *manifest.Manifest, environmentNam
 	if err != nil {
 		return nil, err
 	}
+	stampApplied(items, resource.AppliedFrom(ctx))
 
 	waves, err := computeWaves(items, serviceDependsOn(m))
 	if err != nil {
@@ -204,4 +205,12 @@ func serviceDependsOn(m *manifest.Manifest) map[string][]string {
 		}
 	}
 	return out
+}
+
+// stampApplied hands each item the names of the properties kraai last set
+// on its resource, from the environment's status record.
+func stampApplied(items []plannedItem, applied map[string][]string) {
+	for i := range items {
+		items[i].spec.Applied = applied[items[i].ref.InstanceKey()]
+	}
 }

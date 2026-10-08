@@ -14,7 +14,7 @@ func TestBuildPatchNamesAWriteOnlyPropertyOnEveryUpdate(t *testing.T) {
 		{"TableClass": "STANDARD"},
 		{"TableClass": "STANDARD_INFREQUENT_ACCESS"},
 	} {
-		patch, err := buildPatch(current, desired)
+		patch, err := buildPatch(current, desired, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

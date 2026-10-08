@@ -42,9 +42,17 @@ func (c *Client) createBackend(ctx context.Context, typeName string, desired map
 // operation of the patch sets a top-level property, those changes are all
 // ones the direct calls make, and the instance's state allows them (see
 // directGiven); any other change is Cloud Control's, decided before any
-// call.
+// call. A patch removing a property is always Cloud Control's: the direct
+// calls only set.
 func (c *Client) updateBackend(ctx context.Context, typeName, identifier string, patch []byte) (b backend, current, changes map[string]any, err error) {
 	if !c.mutatesDirectly(typeName, nil) || !direct.Serves(typeName, identifier) {
+		return cloudControl{c}, nil, nil, nil
+	}
+	removes, err := removesAny(typeName, identifier, patch)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if removes {
 		return cloudControl{c}, nil, nil, nil
 	}
 	changes, err = patchChanges(typeName, identifier, patch)
@@ -113,6 +121,20 @@ func patchChanges(typeName, identifier string, patch []byte) (map[string]any, er
 		changes[property] = op.Value
 	}
 	return changes, nil
+}
+
+// removesAny reports whether patch removes a property.
+func removesAny(typeName, identifier string, patch []byte) (bool, error) {
+	var ops []patchOp
+	if err := json.Unmarshal(patch, &ops); err != nil {
+		return false, kerrors.Wrap(err, kerrors.CodeUnexpected, "decoding the patch for %s %q", typeName, identifier)
+	}
+	for _, op := range ops {
+		if op.Op == "remove" {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // directMutation marks the span of a mutation made through the type's own
