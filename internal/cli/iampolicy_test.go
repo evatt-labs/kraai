@@ -98,7 +98,7 @@ func TestRunIAMPolicy_PrintsAPolicyForTheManifestsAWSTypes(t *testing.T) {
 	var asked []string
 	actions := func(_ context.Context, _ *manifest.Manifest, types []string) ([]string, error) {
 		asked = types
-		return []string{"cloudcontrol:GetResource", "fake:Create"}, nil
+		return []string{"cloudformation:GetResource", "fake:Create"}, nil
 	}
 	out, err := execIAMPolicy(t, awsAssembler(t), awsFixtureResolver, actions, nil, []string{testEnvName, "--dir", dir})
 	if err != nil {
@@ -122,7 +122,7 @@ func TestRunIAMPolicy_PrintsAPolicyForTheManifestsAWSTypes(t *testing.T) {
 		!reflect.DeepEqual(doc.Statement[0].Resource, []string{"*"}) {
 		t.Fatalf("document = %+v", doc)
 	}
-	if !reflect.DeepEqual(doc.Statement[0].Action, []string{"cloudcontrol:GetResource", "fake:Create"}) {
+	if !reflect.DeepEqual(doc.Statement[0].Action, []string{"cloudformation:GetResource", "fake:Create"}) {
 		t.Fatalf("Action = %v", doc.Statement[0].Action)
 	}
 }
@@ -134,7 +134,7 @@ func TestRunIAMPolicy_PrintsAPolicyForTheManifestsAWSTypes(t *testing.T) {
 func TestRunIAMPolicy_SecretRefGrantsAppendScopedStatements(t *testing.T) {
 	dir := awsFixture(t)
 	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
-		return []string{"cloudcontrol:GetResource"}, nil
+		return []string{"cloudformation:GetResource"}, nil
 	}
 	secretRefs := func(context.Context, *manifest.Manifest) ([]aws.SecretRefGrant, error) {
 		return []aws.SecretRefGrant{
@@ -208,7 +208,7 @@ func execIAMPolicySecrets(
 func TestRunIAMPolicy_SecretsGrantsAppendScopedStatements(t *testing.T) {
 	dir := awsFixture(t)
 	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
-		return []string{"cloudcontrol:GetResource"}, nil
+		return []string{"cloudformation:GetResource"}, nil
 	}
 	var gotEnv string
 	secrets := func(_ context.Context, _ *manifest.Manifest, environmentName string) ([]aws.SecretRefGrant, error) {
@@ -250,7 +250,7 @@ func TestRunIAMPolicy_SecretsGrantsAppendScopedStatements(t *testing.T) {
 func TestRunIAMPolicy_SecretsStatementsErrorPropagates(t *testing.T) {
 	dir := awsFixture(t)
 	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
-		return []string{"cloudcontrol:GetResource"}, nil
+		return []string{"cloudformation:GetResource"}, nil
 	}
 	secrets := func(context.Context, *manifest.Manifest, string) ([]aws.SecretRefGrant, error) {
 		return nil, errors.New("SecretsPolicyStatements: access denied")
@@ -264,7 +264,7 @@ func TestRunIAMPolicy_SecretsStatementsErrorPropagates(t *testing.T) {
 func TestRunIAMPolicy_SecretRefStatementsErrorPropagates(t *testing.T) {
 	dir := awsFixture(t)
 	actions := func(context.Context, *manifest.Manifest, []string) ([]string, error) {
-		return []string{"cloudcontrol:GetResource"}, nil
+		return []string{"cloudformation:GetResource"}, nil
 	}
 	secretRefs := func(context.Context, *manifest.Manifest) ([]aws.SecretRefGrant, error) {
 		return nil, errors.New("unknown secret reference scheme")
