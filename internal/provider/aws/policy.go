@@ -24,12 +24,15 @@ var kraaiActions = []string{
 	"s3:ListBucket",
 	"s3:PutBucketPublicAccessBlock",
 	"s3:PutObject",
-	"cloudcontrol:CreateResource",
-	"cloudcontrol:DeleteResource",
-	"cloudcontrol:GetResource",
-	"cloudcontrol:GetResourceRequestStatus",
-	"cloudcontrol:ListResources",
-	"cloudcontrol:UpdateResource",
+	// Cloud Control's calls are authorized under CloudFormation's prefix,
+	// not cloudcontrol: a policy granting cloudcontrol:GetResource grants
+	// nothing.
+	"cloudformation:CreateResource",
+	"cloudformation:DeleteResource",
+	"cloudformation:GetResource",
+	"cloudformation:GetResourceRequestStatus",
+	"cloudformation:ListResources",
+	"cloudformation:UpdateResource",
 	"cloudformation:DescribeType",
 	"sts:GetCallerIdentity",
 }

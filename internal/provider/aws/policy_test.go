@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -48,7 +49,7 @@ func TestClientPolicyActions(t *testing.T) {
 		t.Fatalf("PolicyActions: %v", err)
 	}
 	for _, want := range []string{
-		"cloudcontrol:CreateResource", "cloudformation:DescribeType", "sts:GetCallerIdentity",
+		"cloudformation:CreateResource", "cloudformation:DescribeType", "sts:GetCallerIdentity",
 		"lambda:CreateFunction", "iam:PassRole", "s3:PutObject",
 	} {
 		if !contains(actions, want) {
@@ -246,4 +247,20 @@ func sortedStrings(list []string) bool {
 		}
 	}
 	return true
+}
+
+// Cloud Control's calls are authorized under CloudFormation's prefix: a
+// policy granting them as cloudcontrol: lets kraai read nothing.
+func TestPolicyGrantsCloudControlUnderCloudFormation(t *testing.T) {
+	for _, action := range kraaiActions {
+		if strings.HasPrefix(action, "cloudcontrol:") {
+			t.Errorf("%s is not an IAM action; Cloud Control's are cloudformation:", action)
+		}
+	}
+	for _, want := range []string{"cloudformation:GetResource", "cloudformation:ListResources", "cloudformation:CreateResource",
+		"cloudformation:UpdateResource", "cloudformation:DeleteResource", "cloudformation:GetResourceRequestStatus"} {
+		if !slices.Contains(kraaiActions, want) {
+			t.Errorf("kraai's own actions lack %s", want)
+		}
+	}
 }
