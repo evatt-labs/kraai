@@ -264,3 +264,30 @@ func TestPolicyGrantsCloudControlUnderCloudFormation(t *testing.T) {
 		}
 	}
 }
+
+// A type read or mutated through its own service is granted the calls its
+// override makes, which its schema's handlers do not list: a security
+// group's rules are read with DescribeSecurityGroupRules.
+func TestPolicyGrantsTheDirectCalls(t *testing.T) {
+	cf := &fakeCF{out: &cloudformation.DescribeTypeOutput{Schema: aws.String(`{"typeName":"AWS::EC2::SecurityGroup","handlers":{"read":{"permissions":["ec2:DescribeSecurityGroups"]}}}`)}}
+	actions, err := (&Client{cf: cf}).PolicyActions(context.Background(), []string{TypeSecurityGroup})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(actions, "ec2:DescribeSecurityGroupRules") {
+		t.Fatalf("actions = %v, want the direct reader's DescribeSecurityGroupRules", actions)
+	}
+}
+
+// Every SSM call kraai makes is granted: each method of ssmAPI is a scoped
+// secrets action, or DescribeParameters, granted unscoped. A call added
+// to the interface without its grant fails here, not in a live run.
+func TestEverySSMCallIsGranted(t *testing.T) {
+	api := reflect.TypeOf((*ssmAPI)(nil)).Elem()
+	for i := range api.NumMethod() {
+		action := "ssm:" + api.Method(i).Name
+		if action != "ssm:DescribeParameters" && !slices.Contains(secretsParameterActions, action) {
+			t.Errorf("kraai calls %s, which no secrets policy grants", action)
+		}
+	}
+}

@@ -14,8 +14,9 @@
 # of the services that address a resource by name to the kci-* names the
 # live environments derive, and the lock bucket's objects: whatever the
 # Allow grants, the workflow cannot delete or overwrite anything else. EC2
-# resources are addressed by id and are not confined; a condition on
-# kraai's identity tag would be the way to. The role can still put an
+# resources are addressed by id and are not confined, nor is deregistering
+# a task definition, which ECS authorizes only on every resource; a
+# condition on kraai's identity tag would be the way to. The role can still put an
 # inline policy on a kci-* role and run a function with it, so what it can
 # do is bounded by the code merged to main, not by this policy alone.
 terraform {
@@ -123,7 +124,6 @@ data "aws_iam_policy_document" "scoped" {
       "cloudwatch:DeleteAlarms",
       "dynamodb:DeleteTable",
       "ecs:DeleteCluster",
-      "ecs:DeregisterTaskDefinition",
       "elasticache:DeleteCacheSubnetGroup",
       "elasticloadbalancing:DeleteTargetGroup",
       "events:DeleteEventBus",
@@ -148,7 +148,6 @@ data "aws_iam_policy_document" "scoped" {
       "arn:aws:cloudwatch:*:${local.account}:alarm:kci-*",
       "arn:aws:dynamodb:*:${local.account}:table/kci-*",
       "arn:aws:ecs:*:${local.account}:cluster/kci-*",
-      "arn:aws:ecs:*:${local.account}:task-definition/kci-*",
       "arn:aws:elasticache:*:${local.account}:subnetgroup:kci-*",
       "arn:aws:elasticloadbalancing:*:${local.account}:targetgroup/kci-*",
       "arn:aws:events:*:${local.account}:event-bus/kci-*",
