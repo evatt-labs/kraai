@@ -56,14 +56,22 @@ minutes, while Lambda releases its network interfaces.
 applies each, asserts that a plan of what it applied changes nothing, and
 destroys it, whatever happened before. The environments are `kci-free` and
 `kci-env`, fixed so the next run converges onto and destroys whatever a
-failed run left; runs never overlap. In `aws-free`, the names a type would
+failed run left; runs never overlap. A run dispatched with `paid`
+(`gh workflow run live.yml -f paid=true`) also applies `kci-paid`, which is
+`aws-env` with Aurora DSQL, Aurora Serverless v2 and ElastiCache added
+(`environments/kci-paid.values.yaml`); they cost money while they exist, so
+the weekly run leaves them out. Each environment's VPC keeps its own
+OpenTofu state, `live/<environment>/vpc.tfstate` in the lock bucket. In `aws-free`, the names a type would
 otherwise take from the service carry the environment's `prefix` value
 (`environments/<name>.values.yaml`).
 
 It assumes the role `infra/ci-role` makes, trusted only for runs from
 `main` of this repository. The role may delete only `kci-*` resources, with
-one exception: ECS authorizes deregistering a task definition only on every
-resource, so the role can deregister any task definition in the account. An
+two exceptions: ECS authorizes deregistering a task definition only on every
+resource, so the role can deregister any task definition in the account, and
+an Aurora DSQL cluster's id is random, so its delete is confined by kraai's
+identity tag rather than its name. Secrets Manager is confined to the master
+passwords RDS manages, `rds!cluster-*`. An
 account administrator sets it up once:
 
 ```
