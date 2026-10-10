@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/url"
+	"time"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/manifest"
@@ -183,6 +184,11 @@ func registerAurora(client *Client) []resource.Registration {
 type auroraClusterResource struct {
 	*translatedResource
 	client *Client
+	// clock, snapshotPoll and snapshotWaitFor stand in for time.Now and the
+	// final snapshot's waits in tests; zero means the real ones.
+	clock           func() time.Time
+	snapshotPoll    time.Duration
+	snapshotWaitFor time.Duration
 }
 
 func newAuroraClusterResource(client *Client, subnetGroupKey, securityGroupKey string) *auroraClusterResource {

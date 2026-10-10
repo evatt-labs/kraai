@@ -286,6 +286,7 @@ func destroyResultsFixture() *destroy.Result {
 				Provider: "cf", Type: "worker", Wave: 2},
 			Ref:     resource.Ref{Provider: "cf", Type: "worker", Name: "env-api"},
 			Outcome: destroy.OutcomeDeleted,
+			Notes:   []string{"kept snap-1, the final snapshot"},
 		},
 		{
 			Item: plan.Item{ServiceKey: "api", Binding: "CACHE", Capability: manifest.CapabilityKeyValue,
@@ -320,6 +321,7 @@ func TestWriteDestroyText_MultiWaveAndEveryOutcome(t *testing.T) {
 		"wave 2:", "wave 1:", "wave 0:",
 		"-", "=", "!",
 		"queue delete boom",
+		"      note: kept snap-1, the final snapshot\n",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output = %q, want it to contain %q", out, want)
@@ -345,6 +347,9 @@ func TestToDestroyDocument_EveryOutcomeAndWave(t *testing.T) {
 	}
 	if doc.Results[1].Outcome != "skipped" {
 		t.Errorf("Results[1].Outcome = %q, want \"skipped\"", doc.Results[1].Outcome)
+	}
+	if got := doc.Results[0].Notes; len(got) != 1 || got[0] != "kept snap-1, the final snapshot" {
+		t.Errorf("Results[0].Notes = %q, want the delete's note", got)
 	}
 }
 

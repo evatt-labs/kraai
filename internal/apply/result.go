@@ -69,6 +69,9 @@ type ActionResult struct {
 	// Fingerprints is, for a create, update or replace, a hash of each
 	// write-only property the call sent (resource.State.Fingerprints).
 	Fingerprints map[string]string
+	// Notes is what the mutation told the operator beyond its outcome,
+	// such as a final snapshot a replace's delete kept.
+	Notes []string
 }
 
 // Result is the ordered outcome of applying every action in a plan.Plan,

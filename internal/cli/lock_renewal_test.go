@@ -10,6 +10,7 @@ import (
 	"github.com/evatt-labs/kraai/internal/kerrors"
 	"github.com/evatt-labs/kraai/internal/lock"
 	"github.com/evatt-labs/kraai/internal/manifest"
+	"github.com/evatt-labs/kraai/internal/resource"
 )
 
 // losingStore hands out a lease whose lock is lost at the first renewal.
@@ -65,5 +66,27 @@ func TestGuardStopsARunThatLosesItsLock(t *testing.T) {
 	other := errors.New("apply failed")
 	if got := lockLost(t.Context(), "env", other); !errors.Is(got, other) {
 		t.Fatalf("lockLost on a live context = %v, want the run's error", got)
+	}
+}
+
+// A run against an ephemeral environment is marked so, so its deletes keep
+// no copies, whether or not a lock store exists; any other run is not.
+func TestGuardMarksEphemeralRuns(t *testing.T) {
+	noStore := func(context.Context, *manifest.Manifest) (lock.Store, error) { return nil, lock.ErrNoStore }
+	for kind, want := range map[string]bool{
+		manifest.EnvironmentKindEphemeral:  true,
+		manifest.EnvironmentKindPersistent: false,
+		"":                                 false,
+	} {
+		m := &manifest.Manifest{}
+		m.Environment.Kind = kind
+		ctx, _, release, err := guard(t.Context(), io.Discard, "env", m, noStore)
+		if err != nil {
+			t.Fatal(err)
+		}
+		release()
+		if got := resource.Ephemeral(ctx); got != want {
+			t.Errorf("kind %q: Ephemeral = %v, want %v", kind, got, want)
+		}
 	}
 }

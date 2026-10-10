@@ -271,6 +271,7 @@
   "rds:CreateDBSubnetGroup",
   "rds:DeleteDBCluster",
   "rds:DeleteDBClusterParameterGroup",
+  "rds:DeleteDBClusterSnapshot",
   "rds:DeleteDBInstance",
   "rds:DeleteDBSubnetGroup",
   "rds:DescribeDBClusterAutomatedBackups",

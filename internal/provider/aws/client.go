@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudcontrol"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
@@ -105,6 +106,14 @@ type ec2API interface {
 	DeleteNetworkInterface(ctx context.Context, params *ec2.DeleteNetworkInterfaceInput, optFns ...func(*ec2.Options)) (*ec2.DeleteNetworkInterfaceOutput, error)
 }
 
+// rdsAPI is the subset of *rds.Client this package calls: the final
+// snapshot Cloud Control's delete of an Aurora cluster takes, which no
+// property of the cluster can turn off.
+type rdsAPI interface {
+	DescribeDBClusterSnapshots(ctx context.Context, params *rds.DescribeDBClusterSnapshotsInput, optFns ...func(*rds.Options)) (*rds.DescribeDBClusterSnapshotsOutput, error)
+	DeleteDBClusterSnapshot(ctx context.Context, params *rds.DeleteDBClusterSnapshotInput, optFns ...func(*rds.Options)) (*rds.DeleteDBClusterSnapshotOutput, error)
+}
+
 // Client is a thin Cloud Control and CloudFormation client whose exported
 // methods speak this package's vocabulary (a decoded properties map, an
 // identifier list) rather than the SDK's, so *Client satisfies ccAPI and
@@ -117,6 +126,7 @@ type Client struct {
 	sm  secretsManagerAPI
 	ssm ssmAPI
 	ec2 ec2API
+	rds rdsAPI
 
 	tagging taggingAPI
 
@@ -201,6 +211,11 @@ func WithEC2API(api ec2API) Option {
 	return func(c *Client) { c.ec2 = api }
 }
 
+// WithRDSAPI substitutes the RDS client, for tests.
+func WithRDSAPI(api rdsAPI) Option {
+	return func(c *Client) { c.rds = api }
+}
+
 // WithPollTimings overrides the backoff and overall timeout used to poll an
 // asynchronous operation to a terminal state, so tests can exercise polling
 // in milliseconds.
@@ -241,6 +256,7 @@ func New(ctx context.Context, settings Settings, opts ...Option) (*Client, error
 		sm:               secretsmanager.NewFromConfig(cfg),
 		ssm:              ssm.NewFromConfig(cfg),
 		ec2:              ec2.NewFromConfig(cfg),
+		rds:              rds.NewFromConfig(cfg),
 		tagging:          resourcegroupstaggingapi.NewFromConfig(cfg),
 		direct:           &direct.Client{HTTP: httpClient, Credentials: cfg.Credentials, Region: cfg.Region},
 		canMutate:        direct.CanMutateWith,

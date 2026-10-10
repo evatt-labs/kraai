@@ -71,7 +71,9 @@ two exceptions: ECS authorizes deregistering a task definition only on every
 resource, so the role can deregister any task definition in the account, and
 an Aurora DSQL cluster's id is random, so its delete is confined by kraai's
 identity tag rather than its name. Secrets Manager is confined to the master
-passwords RDS manages, `rds!cluster-*`. An
+passwords RDS manages, `rds!cluster-*`, and deleting a cluster snapshot to
+`kci-*` ones and the `rds-snapshot-*` ones Cloud Control names an Aurora
+cluster's final snapshot, which kraai deletes in an ephemeral environment. An
 account administrator sets it up once:
 
 ```
