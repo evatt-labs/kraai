@@ -3,10 +3,10 @@
     {
       "type": "AWS::ApiGatewayV2::Api",
       "smithyCommit": "6d00925efe97c160e67c2042e6c8fd2423ff3896",
-      "date": "2026-10-05",
+      "date": "2026-10-10",
       "region": "us-east-1",
       "outcome": "parity",
-      "instances": 2,
+      "instances": 3,
       "compared": [
         "ApiEndpoint",
         "ApiId",
@@ -24,7 +24,7 @@
       ],
       "absence": "parity",
       "probed": 1,
-      "reader": "6628e97f905b3a9794bd76c7900ce4335eeabb1d2f43e3243c2a4f3e1b9d196e"
+      "reader": "7ba25ac2d10b3f3c39f40b109d68fd0a7896c527a55cbd4d29b04fa61e423e3b"
     },
     {
       "type": "AWS::DynamoDB::Table",

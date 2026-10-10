@@ -240,6 +240,9 @@ func newNativeResourceWith(cc ccAPI, schemas propertySchemaSource, facts cfschem
 		// Every taggable type carries kraai's tag, the byName ones too: the
 		// derived name alone does not prove kraai created what answers to it.
 		rt.stampTag = tagStamper(facts.TagProperty, facts.TagShape)
+		if facts.TypeName == TypeAPIGatewayV2API {
+			rt.stampTag = apiDefinitionStamper(rt.stampTag)
+		}
 		switch lookup {
 		case resource.LookupByTag:
 			rt.match = tagMatcher(facts.TagProperty, facts.TagShape)
@@ -286,7 +289,12 @@ func (n *nativeResource) translateWith(spec resource.Spec, strict bool) (resourc
 			return resource.Spec{}, resolution{}, err
 		}
 	}
-	if _, authored := properties[n.facts.TagProperty]; authored && n.stampTag != nil {
+	// An API defined by Body carries its tags in the document, so every
+	// call that sends the document, an update's re-import too, must carry
+	// kraai's tag in it.
+	_, authored := properties[n.facts.TagProperty]
+	_, defined := properties["Body"]
+	if n.stampTag != nil && (authored || defined && n.facts.TypeName == TypeAPIGatewayV2API) {
 		n.stampTag(properties, spec.Name)
 	}
 	translated := spec

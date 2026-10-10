@@ -51,6 +51,20 @@ func compileUnsupported(o Override, schema *cfnSchema, routed map[string]bool, r
 	if len(o.Unsupported) > 0 {
 		r.Unsupported = o.Unsupported
 	}
+	for _, p := range sortedKeys(o.CreateUnsupported) {
+		_, known := schema.Properties[p]
+		switch {
+		case !known:
+			errs = append(errs, fmt.Errorf("createUnsupported %s is not a top-level property of %s", p, o.Type))
+		case strings.TrimSpace(o.CreateUnsupported[p]) == "":
+			errs = append(errs, fmt.Errorf("createUnsupported %s gives no reason", p))
+		case !routed[p]:
+			errs = append(errs, fmt.Errorf("createUnsupported %s is routed by no update call; name it unsupported instead", p))
+		}
+	}
+	if len(o.CreateUnsupported) > 0 {
+		r.CreateUnsupported = o.CreateUnsupported
+	}
 	for _, p := range sortedKeys(o.UnsupportedWhen) {
 		w := o.UnsupportedWhen[p]
 		_, known := schema.Properties[p]

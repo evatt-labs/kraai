@@ -4,6 +4,7 @@ import (
 	"context"
 	"maps"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -86,14 +87,24 @@ func TestCompileRefusesABadMutationShape(t *testing.T) {
 		"an unknown filter in a chain": {parameter, withCreateInput("Value", "{Value:only:upper}"),
 			"filters {Value} by upper"},
 		"removed tags, which no property shapes": {api, func(o *Override) {
-			u := o.Update[1]
+			u := o.Update[2]
 			tags := *u.Tags
 			remove := tags.Remove
 			remove.Input = map[string]any{"ResourceArn": "arn:aws:apigateway:{region}::/apis/{ApiId}", "TagKeys": "{removed:wire}"}
 			tags.Remove = remove
 			u.Tags = &tags
-			o.Update[1] = u
+			o.Update[2] = u
 		}, "sends {removed:wire}, which the read does not map"},
+		"createUnsupported naming no property": {api, func(o *Override) {
+			o.CreateUnsupported = map[string]string{"Nope": "why"}
+		}, "createUnsupported Nope is not a top-level property"},
+		"createUnsupported with no reason": {api, func(o *Override) {
+			o.CreateUnsupported = map[string]string{"Body": " "}
+		}, "createUnsupported Body gives no reason"},
+		"createUnsupported no update routes": {api, func(o *Override) {
+			o.CreateUnsupported = map[string]string{"Description": "why"}
+			o.Update = slices.DeleteFunc(o.Update, func(u UpdateCall) bool { return u.Operation == "UpdateApi" })
+		}, "createUnsupported Description is routed by no update call"},
 		"an identifier path past a scalar":    {role, withCreateIdentifier(map[string]string{"RoleName": "Role.RoleName.x"}), "create does not map the identifier RoleName"},
 		"an identifier path to a structure":   {role, withCreateIdentifier(map[string]string{"RoleName": "Role"}), "create does not map the identifier RoleName"},
 		"an identifier path the output lacks": {role, withCreateIdentifier(map[string]string{"RoleName": "Role.Nope"}), "create does not map the identifier RoleName"},

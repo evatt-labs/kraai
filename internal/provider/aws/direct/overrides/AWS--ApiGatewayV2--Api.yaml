@@ -54,6 +54,16 @@ create:
   identifier:
     ApiId: ApiId
 update:
+  # An API defined by an OpenAPI document is changed by re-importing it,
+  # which Cloud Control cannot do: its update sends the API's other
+  # properties beside Body, which API Gateway refuses. The document carries
+  # the API's tags, kraai's included, and a re-import sets them to its own.
+  # First, since a re-import rewrites what UpdateApi below may change.
+  - operation: ReimportApi
+    properties: [Body]
+    input:
+      ApiId: "{ApiId}"
+      Body: "{Body:json}"
   - operation: UpdateApi
     properties: [ApiKeySelectionExpression, CorsConfiguration, Description, DisableExecuteApiEndpoint, IpAddressType, Name, RouteSelectionExpression, Version]
     input:
@@ -85,12 +95,13 @@ delete:
   input:
     ApiId: "{ApiId}"
   absentErrors: [NotFoundException]
+createUnsupported:
+  Body: an OpenAPI definition is imported by ImportApi, which no direct create makes
 unsupported:
-  Body: an OpenAPI definition is imported by ImportApi, which no direct call makes
+  BasePath: changes how a definition is imported, which no evidence covers
+  FailOnWarnings: changes how a definition is imported, which no evidence covers
   BodyS3Location: an OpenAPI definition is imported by ImportApi, which no direct call makes
-  BasePath: applies only to an imported OpenAPI definition
-  FailOnWarnings: applies only to an imported OpenAPI definition
-  DisableSchemaValidation: applies only to an imported OpenAPI definition
+  DisableSchemaValidation: applies only to ImportApi, which no direct call makes
   CredentialsArn: quick create also makes a route, an integration and a stage, which a direct delete would not remove
   RouteKey: quick create also makes a route, an integration and a stage, which a direct delete would not remove
   Target: quick create also makes a route, an integration and a stage, which a direct delete would not remove
@@ -101,6 +112,15 @@ lifecycle:
     Description: kraai lifecycle probe
     CorsConfiguration: {AllowOrigins: [https://example.com], MaxAge: 60}
   update:
+    # Re-imports a definition onto the API created above, keeping what the
+    # create set, since a re-import sets the API to its document.
+    Body:
+      openapi: "3.0.1"
+      info: {title: "{name}", description: kraai lifecycle probe, version: "1"}
+      x-amazon-apigateway-cors: {allowOrigins: [https://example.com], maxAge: 60}
+      tags:
+        - {name: "kraai:resource-name", x-amazon-apigateway-tag-value: "{name}"}
+      paths: {}
     Description: kraai lifecycle probe, updated
     CorsConfiguration: {AllowOrigins: [https://example.org], AllowMethods: [GET], AllowCredentials: true}
     DisableExecuteApiEndpoint: true

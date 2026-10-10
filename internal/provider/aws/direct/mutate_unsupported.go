@@ -23,6 +23,17 @@ func CanMutateWith(typeName string, properties map[string]any) bool {
 // the instance's current state, which the caller must then read first.
 func RoutesOnState(typeName string) bool { return len(readers[typeName].UnsupportedWhen) > 0 }
 
+// CanCreateWith is CanMutateWith for a create of desired: false also when
+// desired names a property only an update's direct calls set.
+func CanCreateWith(typeName string, desired map[string]any) bool {
+	for p := range readers[typeName].CreateUnsupported {
+		if desired[p] != nil {
+			return false
+		}
+	}
+	return CanMutateWith(typeName, desired)
+}
+
 // CanMutateGiven is false when changes name a property the override routes
 // to Cloud Control for an instance whose state, as read or as changes set
 // it, holds one of the condition's values.
