@@ -1,8 +1,10 @@
 version: 1
 
 # Applied and destroyed by the live workflow (.github/workflows/live.yml);
-# see ../README.md. Every capability here costs nothing at rest, and the
-# network is a VPC the workflow makes with OpenTofu (vpc/).
+# see ../README.md. Every capability here costs nothing at rest, except in
+# an environment whose values set paid, which adds Aurora DSQL, Aurora
+# Serverless v2 and ElastiCache; the network is a VPC the workflow makes
+# with OpenTofu (vpc/).
 providers:
   compute:
     vendor: aws
@@ -16,6 +18,8 @@ providers:
   queues:
     vendor: aws
   database:
+    vendor: aws
+  keyvalue:
     vendor: aws
   objects:
     vendor: aws

@@ -1,0 +1,8 @@
+# The live workflow's on-demand environment, with the paid stores; see
+# ../README.md. Its VPC is the one vpc/ makes, read through OpenTofu's
+# outputs.
+kind: ephemeral
+ttl: 3h
+terraform:
+  base:
+    dir: vpc

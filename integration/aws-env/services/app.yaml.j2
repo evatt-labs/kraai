@@ -14,6 +14,12 @@ services:
       - binding: DB
         driver: dynamodb
         partitionKey: { name: pk }
+{% if paid %}
+      - { binding: PG, driver: postgres }
+      - { binding: SQL, driver: postgres, engine: aurora, network: NET }
+    keyvalue:
+      - { binding: CACHE, driver: redis, network: NET }
+{% endif %}
     objects:
       - { binding: FILES }
     secrets:

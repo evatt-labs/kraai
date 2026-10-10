@@ -49,9 +49,10 @@ data "aws_iam_openid_connect_provider" "github" {
 }
 
 locals {
-  actions      = jsondecode(file("${path.module}/actions.json"))
-  iam_actions  = [for a in local.actions : a if startswith(a, "iam:")]
-  rest_actions = [for a in local.actions : a if !startswith(a, "iam:")]
+  actions        = jsondecode(file("${path.module}/actions.json"))
+  iam_actions    = [for a in local.actions : a if startswith(a, "iam:")]
+  secret_actions = [for a in local.actions : a if startswith(a, "secretsmanager:")]
+  rest_actions   = [for a in local.actions : a if !startswith(a, "iam:") && !startswith(a, "secretsmanager:")]
   # What OpenTofu reads and writes to make the fixture's VPC, beside what
   # kraai itself needs.
   tofu_actions = [
@@ -65,6 +66,9 @@ locals {
   ]
   account    = data.aws_caller_identity.current.account_id
   live_roles = "arn:aws:iam::${local.account}:role/kci-*"
+  # The only secrets the fixtures make are the master passwords RDS
+  # manages for their Aurora clusters, which RDS names rds!cluster-<id>.
+  rds_secrets = "arn:aws:secretsmanager:*:${local.account}:secret:rds!cluster-*"
   # A role holds at most 10,240 bytes of inline policy, which the actions
   # exceed, so they are split across managed policies, each well under the
   # 6,144 characters one may hold.
@@ -113,6 +117,11 @@ data "aws_iam_policy_document" "scoped" {
     }
   }
   statement {
+    sid       = "RDSManagedSecrets"
+    actions   = local.secret_actions
+    resources = [local.rds_secrets]
+  }
+  statement {
     sid       = "ServiceLinkedRoles"
     actions   = ["iam:CreateServiceLinkedRole"]
     resources = ["arn:aws:iam::*:role/aws-service-role/*"]
@@ -125,6 +134,7 @@ data "aws_iam_policy_document" "scoped" {
       "dynamodb:DeleteTable",
       "ecs:DeleteCluster",
       "elasticache:DeleteCacheSubnetGroup",
+      "elasticache:DeleteServerlessCache",
       "elasticloadbalancing:DeleteTargetGroup",
       "events:DeleteEventBus",
       "events:DeleteRule",
@@ -133,7 +143,9 @@ data "aws_iam_policy_document" "scoped" {
       "lambda:DeleteFunctionUrlConfig",
       "lambda:RemovePermission",
       "logs:DeleteLogGroup",
+      "rds:DeleteDBCluster",
       "rds:DeleteDBClusterParameterGroup",
+      "rds:DeleteDBInstance",
       "rds:DeleteDBSubnetGroup",
       "s3:DeleteBucket",
       "s3:DeleteObject",
@@ -148,13 +160,19 @@ data "aws_iam_policy_document" "scoped" {
       "arn:aws:cloudwatch:*:${local.account}:alarm:kci-*",
       "arn:aws:dynamodb:*:${local.account}:table/kci-*",
       "arn:aws:ecs:*:${local.account}:cluster/kci-*",
+      "arn:aws:elasticache:*:${local.account}:serverlesscache:kci-*",
+      "arn:aws:elasticache:*:${local.account}:serverlesscachesnapshot:kci-*",
       "arn:aws:elasticache:*:${local.account}:subnetgroup:kci-*",
       "arn:aws:elasticloadbalancing:*:${local.account}:targetgroup/kci-*",
       "arn:aws:events:*:${local.account}:event-bus/kci-*",
       "arn:aws:events:*:${local.account}:rule/kci-*",
       "arn:aws:lambda:*:${local.account}:function:kci-*",
       "arn:aws:logs:*:${local.account}:log-group:kci-*",
+      "arn:aws:rds:*:${local.account}:cluster:kci-*",
       "arn:aws:rds:*:${local.account}:cluster-pg:kci-*",
+      "arn:aws:rds:*:${local.account}:cluster-snapshot:kci-*",
+      "arn:aws:rds:*:${local.account}:db:kci-*",
+      "arn:aws:rds:*:${local.account}:snapshot:kci-*",
       "arn:aws:rds:*:${local.account}:subgrp:kci-*",
       "arn:aws:s3:::kci-*",
       "arn:aws:s3:::kci-*/*",
@@ -162,6 +180,20 @@ data "aws_iam_policy_document" "scoped" {
       "arn:aws:sqs:*:${local.account}:kci-*",
       "arn:aws:ssm:*:${local.account}:parameter/kci-*",
     ]
+  }
+  # A DSQL cluster's id is random, so its delete is confined by kraai's
+  # identity tag instead of its ARN. The role can tag a cluster, so this
+  # stops a mistake, not the workflow itself.
+  statement {
+    sid       = "OnlyLiveClustersAreDestroyed"
+    effect    = "Deny"
+    actions   = ["dsql:DeleteCluster"]
+    resources = ["*"]
+    condition {
+      test     = "StringNotLike"
+      variable = "aws:ResourceTag/kraai:resource-name"
+      values   = ["kci-*"]
+    }
   }
 }
 

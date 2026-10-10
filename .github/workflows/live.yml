@@ -2,18 +2,25 @@ name: live
 
 # Applies the live fixtures to the Evatt Labs AWS account, asserts that a
 # plan of what was applied changes nothing, and destroys them. Weekly and on
-# demand, never on push. Only the free fixtures run here; see
-# integration/README.md. Skipped until the repository variable
-# KRAAI_LIVE_ROLE_ARN names the role infra/ci-role makes.
+# demand, never on push. A run dispatched with paid also applies kci-paid,
+# which adds Aurora DSQL, Aurora Serverless v2 and ElastiCache to aws-env;
+# the weekly run never does. See integration/README.md. Skipped until the
+# repository variable KRAAI_LIVE_ROLE_ARN names the role infra/ci-role
+# makes.
 #
-# The environments' names are fixed (kci-free, kci-env), and runs never
-# overlap, so what a failed run left behind is converged and destroyed by
-# the next one.
+# The environments' names are fixed (kci-free, kci-env, kci-paid), and runs
+# never overlap, so what a failed run left behind is converged and destroyed
+# by the next one that applies it.
 
 on:
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
+    inputs:
+      paid:
+        description: Also apply kci-paid, whose Aurora and ElastiCache cost money while they exist.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -28,15 +35,18 @@ jobs:
     if: vars.KRAAI_LIVE_ROLE_ARN != ''
     runs-on: ubuntu-latest
     # A function's network interfaces can hold its group for up to about
-    # twenty minutes after it is destroyed.
-    timeout-minutes: 75
+    # twenty minutes after it is destroyed, and an Aurora cluster and its
+    # instance take tens of minutes to create and delete; under the role's
+    # two-hour session.
+    timeout-minutes: 110
     strategy:
       fail-fast: false
       matrix:
-        fixture: [aws-free, aws-env]
+        target: ${{ fromJSON(inputs.paid && '[{"fixture":"aws-free","env":"kci-free"},{"fixture":"aws-env","env":"kci-env"},{"fixture":"aws-env","env":"kci-paid"}]' || '[{"fixture":"aws-free","env":"kci-free"},{"fixture":"aws-env","env":"kci-env"}]') }}
+    name: aws (${{ matrix.target.env }})
     env:
-      KRAAI_ENV: ${{ matrix.fixture == 'aws-free' && 'kci-free' || 'kci-env' }}
-      FIXTURE: integration/${{ matrix.fixture }}
+      KRAAI_ENV: ${{ matrix.target.env }}
+      FIXTURE: integration/${{ matrix.target.fixture }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,7 +55,7 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
-        if: matrix.fixture == 'aws-env'
+        if: matrix.target.fixture == 'aws-env'
         with:
           tofu_wrapper: false
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
@@ -59,11 +69,11 @@ jobs:
       - name: Build kraai
         run: go build -o "$RUNNER_TEMP/kraai" ./cmd/kraai
       - name: Make the VPC
-        if: matrix.fixture == 'aws-env'
+        if: matrix.target.fixture == 'aws-env'
         run: |
           set -euo pipefail
           account=$(aws sts get-caller-identity --query Account --output text)
-          tofu -chdir="$FIXTURE/vpc" init -input=false -backend-config="bucket=kraai-lock-$account-us-east-1"
+          tofu -chdir="$FIXTURE/vpc" init -input=false -backend-config="bucket=kraai-lock-$account-us-east-1" -backend-config="key=live/$KRAAI_ENV/vpc.tfstate"
           tofu -chdir="$FIXTURE/vpc" apply -auto-approve -input=false -var "name=$KRAAI_ENV"
       - name: Apply
         run: '"$RUNNER_TEMP/kraai" apply "$KRAAI_ENV" --dir "$FIXTURE"'
@@ -73,5 +83,5 @@ jobs:
         if: always()
         run: '"$RUNNER_TEMP/kraai" destroy "$KRAAI_ENV" --dir "$FIXTURE"'
       - name: Destroy the VPC
-        if: always() && matrix.fixture == 'aws-env'
+        if: always() && matrix.target.fixture == 'aws-env'
         run: tofu -chdir="$FIXTURE/vpc" destroy -auto-approve -input=false -var "name=$KRAAI_ENV"
