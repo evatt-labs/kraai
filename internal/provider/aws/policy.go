@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/evatt-labs/kraai/internal/kerrors"
+	"github.com/evatt-labs/kraai/internal/provider/aws/direct"
 	"github.com/evatt-labs/kraai/internal/secretref"
 )
 
@@ -80,6 +81,15 @@ func (c *Client) PolicyActions(ctx context.Context, vendorTypes []string) ([]str
 			set[action] = true
 		}
 		for _, action := range typeActions[typeName] {
+			set[action] = true
+		}
+		// A type read or mutated through its own service makes calls no
+		// handler lists, such as a security group's rules read.
+		directActions, err := direct.IAMActions(typeName)
+		if err != nil {
+			return nil, err
+		}
+		for _, action := range directActions {
 			set[action] = true
 		}
 		// A type the tagging index serves is looked up through it.
@@ -161,6 +171,7 @@ var secretsParameterActions = []string{
 	"ssm:AddTagsToResource",
 	"ssm:DeleteParameter",
 	"ssm:GetParameter",
+	"ssm:ListTagsForResource",
 	"ssm:PutParameter",
 }
 

@@ -76,6 +76,7 @@
   "ec2:DescribeNetworkAcls",
   "ec2:DescribeNetworkInterfaces",
   "ec2:DescribeRouteTables",
+  "ec2:DescribeSecurityGroupRules",
   "ec2:DescribeSecurityGroups",
   "ec2:DescribeSubnets",
   "ec2:DescribeVpcAttribute",
@@ -342,6 +343,7 @@
   "ssm:DeleteParameter",
   "ssm:DescribeParameters",
   "ssm:GetParameter",
+  "ssm:ListTagsForResource",
   "ssm:PutParameter",
   "sts:GetCallerIdentity",
   "tag:GetResources"
