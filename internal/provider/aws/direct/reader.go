@@ -65,6 +65,8 @@ type Reader struct {
 	// Unsupported is the override's unsupported paths and reasons: see
 	// Override.Unsupported.
 	Unsupported map[string]string
+	// CreateUnsupported is Override.CreateUnsupported.
+	CreateUnsupported map[string]string
 	// CanonicalCase is Override.CanonicalCase.
 	CanonicalCase map[string][]string
 	// UnsupportedWhen is the override's conditional routes, by property.

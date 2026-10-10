@@ -40,6 +40,12 @@ type Override struct {
 	// update naming one makes no direct call: Cloud Control makes it. A
 	// top-level entry counts as routed for lifecycle completeness.
 	Unsupported map[string]string `yaml:"unsupported,omitempty"`
+	// CreateUnsupported names, by top-level property, what the direct
+	// create cannot set though an update call routes it, and why: a create
+	// naming one is Cloud Control's, an update setting one is direct, such
+	// as an API's OpenAPI document, imported by Cloud Control and
+	// re-imported by ReimportApi.
+	CreateUnsupported map[string]string `yaml:"createUnsupported,omitempty"`
 	// UnsupportedWhen routes a property's change to Cloud Control only for
 	// an instance in a given state, such as an S3 bucket's tags once ABAC
 	// is enabled, which S3 then takes only through S3 Control.

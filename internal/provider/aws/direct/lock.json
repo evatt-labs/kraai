@@ -4,7 +4,7 @@
     "apigatewayv2/service/2018-11-29/apigatewayv2-2018-11-29.json": {
       "file": "models/apigatewayv2-2018-11-29.json",
       "sourceSha256": "423a8e8562ca06a12ee6c90f8d0b39ae05e184354de4d83c74d8118d9179fcc4",
-      "subsetSha256": "bed7d303097330a16c1a4f9f7aab61114d187acc6587f63e2400e8b59937815c"
+      "subsetSha256": "1cefc5883cf8b606bdc89e3e7c9715a7d88ef8b9960ae77a2668418426910878"
     },
     "dynamodb/service/2012-08-10/dynamodb-2012-08-10.json": {
       "file": "models/dynamodb-2012-08-10.json",

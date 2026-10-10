@@ -216,6 +216,9 @@ func readerBody(b *bytes.Buffer, r Reader, production bool) {
 	if len(r.Unsupported) > 0 {
 		fmt.Fprintf(b, "Unsupported: %#v,\n", r.Unsupported)
 	}
+	if len(r.CreateUnsupported) > 0 {
+		fmt.Fprintf(b, "CreateUnsupported: %#v,\n", r.CreateUnsupported)
+	}
 	if len(r.CanonicalCase) > 0 {
 		fmt.Fprintf(b, "CanonicalCase: %#v,\n", r.CanonicalCase)
 	}

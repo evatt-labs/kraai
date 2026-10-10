@@ -35,6 +35,9 @@ func (n *nativeResource) ValidateSpec(spec resource.Spec) error {
 	if err := n.validateMatch(spec, properties); err != nil {
 		return err
 	}
+	if err := refuseDefinitionInS3(n.typeName, properties); err != nil {
+		return err
+	}
 	if _, grants := spec.Config[nativeGrantKey]; grants {
 		if _, ok := arnProperty(n.facts); !ok {
 			return kerrors.Validation(

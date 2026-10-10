@@ -81,7 +81,12 @@ That has consequences worth knowing:
   CloudFront distribution, a Route 53 hosted zone. That tag is the resource's
   identity, not a label: strip or rewrite it and the resource is orphaned,
   invisible to every later plan and destroy, with nothing that can clean it
-  up. Tag policies and cost-allocation tidy-ups must leave it alone.
+  up. Tag policies and cost-allocation tidy-ups must leave it alone. An API
+  Gateway API defined by an OpenAPI `Body` carries its tags, kraai's and
+  any declared under `Tags`, in the document's root `tags` list, the only
+  place API Gateway takes them beside a definition; kraai writes them there,
+  and changes the API by re-importing the document. One defined by
+  `BodyS3Location` is refused, since kraai cannot write into it.
 
 Ordering comes from a **dependency graph**, not fixed phases. Registrations
 declare what must exist first; the planner topologically sorts that into

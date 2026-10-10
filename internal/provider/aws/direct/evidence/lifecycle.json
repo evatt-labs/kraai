@@ -2,9 +2,10 @@
   "types": [
     {
       "type": "AWS::ApiGatewayV2::Api",
-      "date": "2026-10-05",
+      "date": "2026-10-10",
       "outcome": "parity",
       "updated": [
+        "Body",
         "CorsConfiguration",
         "Description",
         "DisableExecuteApiEndpoint",
@@ -12,7 +13,7 @@
         "Tags",
         "Version"
       ],
-      "reader": "6628e97f905b3a9794bd76c7900ce4335eeabb1d2f43e3243c2a4f3e1b9d196e"
+      "reader": "7ba25ac2d10b3f3c39f40b109d68fd0a7896c527a55cbd4d29b04fa61e423e3b"
     },
     {
       "type": "AWS::DynamoDB::Table",

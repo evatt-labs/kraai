@@ -27,9 +27,9 @@ func (c *Client) readsDirectly(typeName string) bool {
 }
 
 // createBackend is where a create of desired goes: directly when the type
-// is mutable and desired names nothing the direct calls cannot make.
+// is mutable and desired names nothing the direct create cannot make.
 func (c *Client) createBackend(ctx context.Context, typeName string, desired map[string]any) backend {
-	if c.mutatesDirectly(typeName, desired) {
+	if c.mutatesDirectly(typeName, desired) && direct.CanCreateWith(typeName, desired) {
 		directMutation(ctx, typeName, "create")
 		return directAPI{c}
 	}
