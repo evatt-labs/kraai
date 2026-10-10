@@ -816,10 +816,14 @@ entry over the same engine.
 Known gaps, each with a tracking issue. AWS `dns`, `tls` and `cdn` build a
 static site's zone, certificate, distribution and apex record, but have not
 yet been exercised against a live account
-([#117](https://github.com/evatt-labs/kraai/issues/117)). AWS `database`
-(DynamoDB under `driver: dynamodb`, Aurora DSQL and Aurora Serverless v2 under `driver: postgres`), `keyvalue` (ElastiCache Serverless,
-`driver: redis`) and `queues` (SQS) plan against a live account and have not
-been applied from CI ([#232](https://github.com/evatt-labs/kraai/issues/232)).
+([#117](https://github.com/evatt-labs/kraai/issues/117)). The
+[live workflow](.github/workflows/live.yml) applies, re-plans and destroys
+AWS `compute`, `network`, `objects`, `queues` (SQS), `secrets` (SSM) and
+`database` under `driver: dynamodb` every week; the Aurora DSQL and Aurora
+Serverless v2 `database` drivers and `keyvalue` (ElastiCache Serverless,
+`driver: redis`) plan against a live account and have not been applied from
+CI, nor has Cloudflare or Neon
+([#232](https://github.com/evatt-labs/kraai/issues/232)).
 A `network` binding names a VPC and at least two of its subnets that
 Terraform owns, usually as `{{ terraform.base.vpc_id }}` and
 `{{ terraform.base.private_subnet_ids|json }}`; kraai creates one security
@@ -829,9 +833,7 @@ service's functions and nothing else in the VPC. What a function reaches
 beyond the VPC, the internet or S3 and DynamoDB, is the subnets' routing,
 set by the VPC's owner. Destroying a function inside a network can take
 tens of minutes: Lambda releases its network interfaces slowly and leaves
-them detached in the group, and kraai deletes those before the group. AWS `secrets`
-(SSM Parameter Store `SecureString` parameters) plans against a live
-account and has not been applied from CI either.
+them detached in the group, and kraai deletes those before the group.
 Cloudflare offers two compute products and kraai implements neither — Workers
 ([#135](https://github.com/evatt-labs/kraai/issues/135)) and Containers
 ([#138](https://github.com/evatt-labs/kraai/issues/138)). Azure and GCP have

@@ -61,7 +61,10 @@ otherwise take from the service carry the environment's `prefix` value
 (`environments/<name>.values.yaml`).
 
 It assumes the role `infra/ci-role` makes, trusted only for runs from
-`main` of this repository. An account administrator sets it up once:
+`main` of this repository. The role may delete only `kci-*` resources, with
+one exception: ECS authorizes deregistering a task definition only on every
+resource, so the role can deregister any task definition in the account. An
+account administrator sets it up once:
 
 ```
 make ci-role-actions                # regenerate infra/ci-role/actions.json; review the diff
