@@ -181,6 +181,18 @@ data "aws_iam_policy_document" "scoped" {
       "arn:aws:ssm:*:${local.account}:parameter/kci-*",
     ]
   }
+  # The final snapshot Cloud Control's delete of an Aurora cluster takes is
+  # named rds-snapshot-<random> and untagged, so kraai deletes it by that
+  # shape; every other cluster snapshot in the account is refused.
+  statement {
+    sid     = "OnlyFinalSnapshotsAreDestroyed"
+    effect  = "Deny"
+    actions = ["rds:DeleteDBClusterSnapshot"]
+    not_resources = [
+      "arn:aws:rds:*:${local.account}:cluster-snapshot:kci-*",
+      "arn:aws:rds:*:${local.account}:cluster-snapshot:rds-snapshot-*",
+    ]
+  }
   # A DSQL cluster's id is random, so its delete is confined by kraai's
   # identity tag instead of its ARN. The role can tag a cluster, so this
   # stops a mistake, not the workflow itself.

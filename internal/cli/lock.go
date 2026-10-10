@@ -52,6 +52,11 @@ var leaseRenewal = leaseDuration / 4
 func guard(
 	ctx context.Context, stderr io.Writer, envName string, m *manifest.Manifest, stores LockStoreAssembler,
 ) (guarded context.Context, store lock.Store, release func(), err error) {
+	// Before anything can return ctx: a delete in an ephemeral environment
+	// keeps no copy of what it deletes, a lock or not.
+	if m.Environment.Kind == manifest.EnvironmentKindEphemeral {
+		ctx = resource.WithEphemeral(ctx)
+	}
 	store, err = stores(ctx, m)
 	if errors.Is(err, lock.ErrNoStore) {
 		_, _ = fmt.Fprintf(stderr, "warning: %v; proceeding without a lock on %q\n", err, envName)

@@ -21,6 +21,8 @@ import (
 // createCalls stay zero to prove that.
 type fakeResource struct {
 	deleteErr error
+	// note, when set, is what Delete tells the operator.
+	note string
 
 	// delay, when set, makes Delete block briefly so a concurrency test can
 	// observe overlap instead of every call finishing before the next
@@ -56,6 +58,9 @@ func (f *fakeResource) Update(context.Context, resource.Ref, resource.Spec) (*re
 
 func (f *fakeResource) Delete(ctx context.Context, _ resource.Ref) error {
 	atomic.AddInt32(&f.deleteCalls, 1)
+	if f.note != "" {
+		resource.Note(ctx, f.note)
+	}
 
 	cur := atomic.AddInt32(&f.inFlight, 1)
 	defer atomic.AddInt32(&f.inFlight, -1)

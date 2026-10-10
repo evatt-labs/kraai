@@ -49,6 +49,9 @@ type ActionResult struct {
 	Outcome Outcome
 	// Err is set if and only if Outcome is OutcomeFailed.
 	Err error
+	// Notes is what the delete told the operator beyond its outcome, such
+	// as a final snapshot it kept.
+	Notes []string
 }
 
 // Result is the ordered outcome of destroying every action in a plan.Plan,

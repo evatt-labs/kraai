@@ -373,6 +373,9 @@ func writeApplyText(w io.Writer, envName string, result *apply.Result) error {
 				_, _ = fmt.Fprintf(tw, "\t%v", r.Err)
 			}
 			_, _ = fmt.Fprintln(tw)
+			for _, note := range r.Notes {
+				_, _ = fmt.Fprintf(tw, "      note: %s\n", note)
+			}
 		}
 		_ = tw.Flush()
 	}
@@ -411,15 +414,16 @@ type applySummaryJSON struct {
 // applyResultJSON is one apply.ActionResult, projected to JSON-safe fields.
 // Error is only set for a failed outcome.
 type applyResultJSON struct {
-	ServiceKey string `json:"service_key"`
-	Binding    string `json:"binding"`
-	Capability string `json:"capability"`
-	Provider   string `json:"provider"`
-	Type       string `json:"type"`
-	Wave       int    `json:"wave"`
-	Name       string `json:"name"`
-	Outcome    string `json:"outcome"`
-	Error      string `json:"error,omitempty"`
+	ServiceKey string   `json:"service_key"`
+	Binding    string   `json:"binding"`
+	Capability string   `json:"capability"`
+	Provider   string   `json:"provider"`
+	Type       string   `json:"type"`
+	Wave       int      `json:"wave"`
+	Name       string   `json:"name"`
+	Outcome    string   `json:"outcome"`
+	Error      string   `json:"error,omitempty"`
+	Notes      []string `json:"notes,omitempty"`
 }
 
 // toApplyDocument projects a *apply.Result into the JSON-safe applyDocument
@@ -450,6 +454,7 @@ func toApplyDocument(envName string, result *apply.Result) applyDocument {
 			Wave:       r.Wave,
 			Name:       r.Ref.Name,
 			Outcome:    r.Outcome.String(),
+			Notes:      r.Notes,
 		}
 		if r.Outcome == apply.OutcomeFailed && r.Err != nil {
 			entry.Error = r.Err.Error()

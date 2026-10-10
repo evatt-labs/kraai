@@ -250,6 +250,9 @@ func writeDestroyText(w io.Writer, envName string, result *destroy.Result) error
 				_, _ = fmt.Fprintf(tw, "\t%v", r.Err)
 			}
 			_, _ = fmt.Fprintln(tw)
+			for _, note := range r.Notes {
+				_, _ = fmt.Fprintf(tw, "      note: %s\n", note)
+			}
 		}
 		_ = tw.Flush()
 	}
@@ -284,15 +287,16 @@ type destroySummaryJSON struct {
 // destroyResultJSON is one destroy.ActionResult, projected to JSON-safe
 // fields. Error is only set for a failed outcome.
 type destroyResultJSON struct {
-	ServiceKey string `json:"service_key"`
-	Binding    string `json:"binding"`
-	Capability string `json:"capability"`
-	Provider   string `json:"provider"`
-	Type       string `json:"type"`
-	Wave       int    `json:"wave"`
-	Name       string `json:"name"`
-	Outcome    string `json:"outcome"`
-	Error      string `json:"error,omitempty"`
+	ServiceKey string   `json:"service_key"`
+	Binding    string   `json:"binding"`
+	Capability string   `json:"capability"`
+	Provider   string   `json:"provider"`
+	Type       string   `json:"type"`
+	Wave       int      `json:"wave"`
+	Name       string   `json:"name"`
+	Outcome    string   `json:"outcome"`
+	Error      string   `json:"error,omitempty"`
+	Notes      []string `json:"notes,omitempty"`
 }
 
 // toDestroyDocument projects a *destroy.Result into the JSON-safe
@@ -323,6 +327,7 @@ func toDestroyDocument(envName string, result *destroy.Result) destroyDocument {
 			Wave:       r.Wave,
 			Name:       r.Ref.Name,
 			Outcome:    r.Outcome.String(),
+			Notes:      r.Notes,
 		}
 		if r.Outcome == destroy.OutcomeFailed && r.Err != nil {
 			entry.Error = r.Err.Error()

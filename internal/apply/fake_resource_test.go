@@ -20,6 +20,8 @@ type fakeResource struct {
 	createState *resource.State
 	createErr   error
 	deleteErr   error
+	// deleteNote, when set, is what Delete tells the operator.
+	deleteNote string
 
 	// delay, when set, makes Create block briefly so a concurrency test can
 	// observe overlap instead of every call finishing before the next
@@ -107,8 +109,11 @@ func (f *fakeResource) Update(context.Context, resource.Ref, resource.Spec) (*re
 	return nil, resource.ErrImmutable
 }
 
-func (f *fakeResource) Delete(context.Context, resource.Ref) error {
+func (f *fakeResource) Delete(ctx context.Context, _ resource.Ref) error {
 	atomic.AddInt32(&f.deleteCalls, 1)
+	if f.deleteNote != "" {
+		resource.Note(ctx, f.deleteNote)
+	}
 	return f.deleteErr
 }
 

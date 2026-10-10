@@ -48,7 +48,10 @@ var typeActions = map[string][]string{
 	// detached in it are.
 	TypeSecurityGroup: {"ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"},
 	TypeS3Bucket:      {"s3:ListAllMyBuckets"},
-	TypeRDSDBCluster:  {"secretsmanager:GetSecretValue"},
+	// An Aurora cluster's credential is read from Secrets Manager, and the
+	// final snapshot its delete takes is found, and in an ephemeral
+	// environment deleted.
+	TypeRDSDBCluster: {"secretsmanager:GetSecretValue", "rds:DescribeDBClusterSnapshots", "rds:DeleteDBClusterSnapshot"},
 }
 
 // PolicyActions returns, sorted and without duplicates, every IAM action a

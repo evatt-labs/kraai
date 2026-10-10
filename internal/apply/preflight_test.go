@@ -113,3 +113,22 @@ func TestApply_Replace_DeleteFailureNeverCallsCreate(t *testing.T) {
 		t.Errorf("createCalls = %d, want 0: a failed delete must never be followed by create", db.createCalls)
 	}
 }
+
+// What a replace's delete tells the operator, such as a final snapshot it
+// kept, reaches the result.
+func TestApply_Replace_CarriesTheDeletesNotes(t *testing.T) {
+	db := newFakeResource()
+	db.deleteNote = "kept the final snapshot"
+	reg := newRegistry(t, resource.Registration{
+		Provider: "neon", Type: "branch", Capability: "database",
+		Lookup: resource.LookupByName, Resource: db,
+	})
+	p := &plan.Plan{Actions: []plan.Action{action("api", "DB", "neon", "branch", 0, plan.ActionReplace)}}
+	result, err := New(reg, WithAllowReplace(true)).Apply(context.Background(), p)
+	if err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if got := findResult(t, result, "api-DB").Notes; len(got) != 1 || got[0] != db.deleteNote {
+		t.Errorf("Notes = %q, want %q", got, db.deleteNote)
+	}
+}

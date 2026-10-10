@@ -122,7 +122,9 @@ func (d *Destroyer) execute(ctx context.Context, act plan.Action, locker *resour
 	// plan.ActionFailed reaches here deliberately: Delete is idempotent, so
 	// attempting it on a resource Get could not read is safe and can only
 	// make progress.
+	ctx, notes := resource.WithNotes(ctx)
 	err := locker.Do(scope, func() error { return reg.Resource.Delete(ctx, act.Ref) })
+	result.Notes = notes.All()
 	if err != nil {
 		result.Outcome = OutcomeFailed
 		result.Err = kerrors.Wrap(err, kerrors.CodeUnexpected,

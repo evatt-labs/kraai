@@ -169,7 +169,9 @@ func (a *Applier) execute(
 	spec.Secrets = secrets.forAction(act.ServiceKey, act.Binding, reads)
 	spec.Attributes = attrs.ForAction(act.ServiceKey, act.Binding, reads)
 
-	state, outcome, err := a.mutate(ctx, act, reg, spec, locker)
+	mutateCtx, notes := resource.WithNotes(ctx)
+	state, outcome, err := a.mutate(mutateCtx, act, reg, spec, locker)
+	result.Notes = notes.All()
 	if err != nil {
 		result.Outcome = OutcomeFailed
 		result.Err = kerrors.Wrap(err, kerrors.CodeUnexpected,

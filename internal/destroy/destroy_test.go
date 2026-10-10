@@ -592,3 +592,27 @@ func TestResult_HasFailures(t *testing.T) {
 		t.Errorf("HasFailures() = false, want true")
 	}
 }
+
+// What a delete tells the operator reaches its own result, and no other's.
+func TestDestroy_CarriesEachDeletesNotes(t *testing.T) {
+	db, queue := newFakeResource(), newFakeResource()
+	db.note = "kept the final snapshot"
+	reg := newRegistry(t,
+		resource.Registration{Provider: "aws", Type: "cluster", Capability: "database", Lookup: resource.LookupByName, Resource: db},
+		resource.Registration{Provider: "aws", Type: "queue", Capability: "queues", Lookup: resource.LookupByName, Resource: queue},
+	)
+	p := &plan.Plan{Actions: []plan.Action{
+		action("api", "DB", "aws", "cluster", 0, plan.ActionNoChange),
+		action("api", "JOBS", "aws", "queue", 0, plan.ActionNoChange),
+	}}
+	result, err := New(reg).Destroy(context.Background(), p)
+	if err != nil {
+		t.Fatalf("Destroy: %v", err)
+	}
+	if got := findResult(t, result, "api-DB").Notes; len(got) != 1 || got[0] != db.note {
+		t.Errorf("DB notes = %q, want %q", got, db.note)
+	}
+	if got := findResult(t, result, "api-JOBS").Notes; len(got) != 0 {
+		t.Errorf("JOBS notes = %q, want none", got)
+	}
+}

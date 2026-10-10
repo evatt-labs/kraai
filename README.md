@@ -566,6 +566,13 @@ record, no ttl, time left, or a lock another run holds is left alone. Each reap
 is an ordinary locked destroy, and a destroy that fails keeps the record so the
 next sweep retries. Run it on a schedule beside the preview workflow.
 
+A destroy deletes a store's data with the store, except where the vendor
+keeps a copy kraai cannot decline: deleting an Aurora cluster through Cloud
+Control always takes a final snapshot. In an ephemeral environment kraai
+deletes that snapshot too; in a persistent one it keeps it, and the destroy
+prints a note naming it, since it is billed until someone deletes it. A
+replace that deletes a cluster does the same.
+
 `iam-policy` prints an IAM policy document granting every action the
 manifest's AWS resources need to be planned, applied and destroyed: each
 resource type's handler permissions, published in its CloudFormation schema,
