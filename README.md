@@ -834,7 +834,8 @@ AWS `compute`, `network`, `objects`, `queues` (SQS), `secrets` (SSM) and
 `database` under `driver: dynamodb` every week, and the Aurora DSQL and
 Aurora Serverless v2 `database` drivers and `keyvalue` (ElastiCache
 Serverless, `driver: redis`) on demand, since they cost money while they
-exist; Cloudflare and Neon have not been applied from CI
+exist. It applies a Neon `database` branch every week too; Cloudflare has
+not been applied from CI
 ([#232](https://github.com/evatt-labs/kraai/issues/232)).
 A `network` binding names a VPC and at least two of its subnets that
 Terraform owns, usually as `{{ terraform.base.vpc_id }}` and
