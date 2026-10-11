@@ -50,13 +50,31 @@ leaves state the next run finds.
 Destroying the function inside the network can take up to about twenty
 minutes, while Lambda releases its network interfaces.
 
+## neon
+
+A branch of the Neon project `el-smoke`, which exists for smoke tests and
+holds no data. It needs `NEON_API_KEY`. No provider in it can hold an
+environment lock or status record, so its runs are unguarded, kraai says
+so, and `kraai gc` cannot reap it: a branch a failed destroy leaves stays,
+with any compute it started, until the next run converges onto its fixed
+name and destroys it.
+
+```
+go run ./cmd/kraai apply   kci-neon --dir integration/neon
+go run ./cmd/kraai plan    kci-neon --dir integration/neon   # 1 unchanged
+go run ./cmd/kraai destroy kci-neon --dir integration/neon
+```
+
 ## The live workflow
 
-`.github/workflows/live.yml` runs both fixtures weekly and on demand: it
-applies each, asserts that a plan of what it applied changes nothing, and
-destroys it, whatever happened before. The environments are `kci-free` and
-`kci-env`, fixed so the next run converges onto and destroys whatever a
-failed run left; runs never overlap. A run dispatched with `paid`
+`.github/workflows/live.yml` runs `aws-free`, `aws-env` and `neon` weekly
+and on demand: it applies each, asserts that a plan of what it applied
+changes nothing, and destroys it, whatever happened before. The
+environments are `kci-free`, `kci-env` and `kci-neon`, fixed so the next run
+converges onto and destroys whatever a failed run left; runs never overlap.
+The `neon` job reads `NEON_API_KEY` from the repository's `live`
+environment, which deploys only from `main`; the AWS jobs stay outside it,
+since an environment changes the OIDC subject the role trusts. A run dispatched with `paid`
 (`gh workflow run live.yml -f paid=true`) also applies `kci-paid`, which is
 `aws-env` with Aurora DSQL, Aurora Serverless v2 and ElastiCache added
 (`environments/kci-paid.values.yaml`); they cost money while they exist, so

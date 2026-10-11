@@ -1,0 +1,12 @@
+version: 1
+
+# Applied and destroyed by integration runs; see ../README.md. A branch of
+# the el-smoke project, which exists for smoke tests and holds no data.
+providers:
+  database:
+    vendor: neon
+    settings:
+      project: el-smoke
+      database: neondb
+      role: app_user
+      region: aws-us-east-2
