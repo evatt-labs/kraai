@@ -65,16 +65,32 @@ go run ./cmd/kraai plan    kci-neon --dir integration/neon   # 1 unchanged
 go run ./cmd/kraai destroy kci-neon --dir integration/neon
 ```
 
+## cloudflare
+
+Every Cloudflare type kraai implements: a D1 database, a KV namespace, an
+R2 bucket and a queue. It needs `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`, and R2 enabled on the account. Like `neon`, it has
+nowhere to lock or keep a status record, so a failed destroy's leftovers
+wait for the next run.
+
+```
+go run ./cmd/kraai apply   kci-cf --dir integration/cloudflare
+go run ./cmd/kraai plan    kci-cf --dir integration/cloudflare   # 4 unchanged
+go run ./cmd/kraai destroy kci-cf --dir integration/cloudflare
+```
+
 ## The live workflow
 
-`.github/workflows/live.yml` runs `aws-free`, `aws-env` and `neon` weekly
-and on demand: it applies each, asserts that a plan of what it applied
-changes nothing, and destroys it, whatever happened before. The
-environments are `kci-free`, `kci-env` and `kci-neon`, fixed so the next run
-converges onto and destroys whatever a failed run left; runs never overlap.
-The `neon` job reads `NEON_API_KEY` from the repository's `live`
-environment, which deploys only from `main`; the AWS jobs stay outside it,
-since an environment changes the OIDC subject the role trusts. A run dispatched with `paid`
+`.github/workflows/live.yml` runs `aws-free`, `aws-env`, `neon` and
+`cloudflare` weekly and on demand: it applies each, asserts that a plan of
+what it applied changes nothing, and destroys it, whatever happened before.
+The environments are `kci-free`, `kci-env`, `kci-neon` and `kci-cf`, fixed so
+the next run converges onto and destroys whatever a failed run left; runs
+never overlap. The `neon` and `cloudflare` jobs read `NEON_API_KEY` and
+`CLOUDFLARE_API_TOKEN` from the repository's `live` environment, which
+deploys only from `main`, and find the Cloudflare account as the one the
+token lists; the AWS jobs stay outside it, since an environment changes the
+OIDC subject the role trusts. A run dispatched with `paid`
 (`gh workflow run live.yml -f paid=true`) also applies `kci-paid`, which is
 `aws-env` with Aurora DSQL, Aurora Serverless v2 and ElastiCache added
 (`environments/kci-paid.values.yaml`); they cost money while they exist, so

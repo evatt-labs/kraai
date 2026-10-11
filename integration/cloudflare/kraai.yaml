@@ -1,0 +1,14 @@
+version: 1
+
+# Applied and destroyed by integration runs; see ../README.md. Every
+# Cloudflare type kraai implements: a D1 database, a KV namespace, an R2
+# bucket and a queue, all free at this size.
+providers:
+  database:
+    vendor: cloudflare
+  keyvalue:
+    vendor: cloudflare
+  objects:
+    vendor: cloudflare
+  queues:
+    vendor: cloudflare

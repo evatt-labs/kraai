@@ -1,0 +1,7 @@
+services:
+  data:
+    dir: .
+    databases: [{ binding: DB, driver: sqlite }]
+    keyvalue: [{ binding: CACHE }]
+    objects: [{ binding: ASSETS }]
+    queues: [{ binding: JOBS }]
