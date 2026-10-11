@@ -1,0 +1,3 @@
+# The live workflow's environment for this fixture; see ../README.md. No
+# ttl: with nowhere to keep a status record, kraai gc cannot reap it.
+kind: ephemeral

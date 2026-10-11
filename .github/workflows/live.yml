@@ -1,7 +1,8 @@
 name: live
 
-# Applies the live fixtures to the Evatt Labs AWS account, asserts that a
-# plan of what was applied changes nothing, and destroys them. Weekly and on
+# Applies the live fixtures to the Evatt Labs AWS account and Neon
+# organization, asserts that a plan of what was applied changes nothing,
+# and destroys them. Weekly and on
 # demand, never on push. A run dispatched with paid also applies kci-paid,
 # which adds Aurora DSQL, Aurora Serverless v2 and ElastiCache to aws-env;
 # the weekly run never does. See integration/README.md. Skipped until the
@@ -85,3 +86,38 @@ jobs:
       - name: Destroy the VPC
         if: always() && matrix.target.fixture == 'aws-env'
         run: tofu -chdir="$FIXTURE/vpc" destroy -auto-approve -input=false -var "name=$KRAAI_ENV"
+
+  # The live environment holds the vendors' tokens and deploys only from
+  # main. It stays off the aws job: an environment changes the OIDC
+  # token's subject, which the role trusts by branch.
+  neon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: live
+    permissions:
+      contents: read
+    env:
+      KRAAI_ENV: kci-neon
+      FIXTURE: integration/neon
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build kraai
+        run: go build -o "$RUNNER_TEMP/kraai" ./cmd/kraai
+      - name: Apply
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: '"$RUNNER_TEMP/kraai" apply "$KRAAI_ENV" --dir "$FIXTURE"'
+      - name: Assert a plan changes nothing
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: '"$RUNNER_TEMP/kraai" plan "$KRAAI_ENV" --dir "$FIXTURE" --detailed-exitcode'
+      - name: Destroy
+        if: always()
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: '"$RUNNER_TEMP/kraai" destroy "$KRAAI_ENV" --dir "$FIXTURE"'
