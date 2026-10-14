@@ -1,17 +1,17 @@
 name: live
 
-# Applies the live fixtures to the Evatt Labs AWS account and Neon
-# organization, asserts that a plan of what was applied changes nothing,
-# and destroys them. Weekly and on
-# demand, never on push. A run dispatched with paid also applies kci-paid,
-# which adds Aurora DSQL, Aurora Serverless v2 and ElastiCache to aws-env;
-# the weekly run never does. See integration/README.md. Skipped until the
-# repository variable KRAAI_LIVE_ROLE_ARN names the role infra/ci-role
+# Applies the live fixtures to the Evatt Labs AWS account, Neon
+# organization and Cloudflare account, asserts that a plan of what was
+# applied changes nothing, and destroys them. Weekly and on demand, never
+# on push. A run dispatched with paid also applies kci-paid, which adds
+# Aurora DSQL, Aurora Serverless v2 and ElastiCache to aws-env; the weekly
+# run never does. See integration/README.md. The AWS jobs are skipped until
+# the repository variable KRAAI_LIVE_ROLE_ARN names the role infra/ci-role
 # makes.
 #
-# The environments' names are fixed (kci-free, kci-env, kci-paid), and runs
-# never overlap, so what a failed run left behind is converged and destroyed
-# by the next one that applies it.
+# The environments' names are fixed (kci-free, kci-env, kci-paid, kci-neon,
+# kci-cf), and runs never overlap, so what a failed run left behind is
+# converged and destroyed by the next one that applies it.
 
 on:
   schedule:
@@ -120,4 +120,44 @@ jobs:
         if: always()
         env:
           NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: '"$RUNNER_TEMP/kraai" destroy "$KRAAI_ENV" --dir "$FIXTURE"'
+
+  cloudflare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: live
+    permissions:
+      contents: read
+    env:
+      KRAAI_ENV: kci-cf
+      FIXTURE: integration/cloudflare
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build kraai
+        run: go build -o "$RUNNER_TEMP/kraai" ./cmd/kraai
+      # The token is owned by the account, the only one it can list.
+      - name: Find the account
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          id=$(curl -sSf -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" https://api.cloudflare.com/client/v4/accounts | jq -r 'if (.result | length) == 1 then .result[0].id else error("expected one account") end')
+          echo "CLOUDFLARE_ACCOUNT_ID=$id" >> "$GITHUB_ENV"
+      - name: Apply
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: '"$RUNNER_TEMP/kraai" apply "$KRAAI_ENV" --dir "$FIXTURE"'
+      - name: Assert a plan changes nothing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: '"$RUNNER_TEMP/kraai" plan "$KRAAI_ENV" --dir "$FIXTURE" --detailed-exitcode'
+      - name: Destroy
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: '"$RUNNER_TEMP/kraai" destroy "$KRAAI_ENV" --dir "$FIXTURE"'
