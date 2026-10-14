@@ -817,8 +817,7 @@ anything.
 
 **Read the count alongside the depth, not instead of it.** Cloudflare covers
 more capabilities; AWS is the more developed provider. AWS is the only one
-that deploys application code, the only one exercised end to end against live
-infrastructure, and the only one built on a uniform CRUD plane — the
+that deploys application code, and the only one built on a uniform CRUD plane — the
 **Cloud Control API**, reaching 1,600+ resource types from fetched
 CloudFormation schemas rather than one hand-written implementation per
 service. A manifest can declare any AWS-published type natively, with no
@@ -834,9 +833,8 @@ AWS `compute`, `network`, `objects`, `queues` (SQS), `secrets` (SSM) and
 `database` under `driver: dynamodb` every week, and the Aurora DSQL and
 Aurora Serverless v2 `database` drivers and `keyvalue` (ElastiCache
 Serverless, `driver: redis`) on demand, since they cost money while they
-exist. It applies a Neon `database` branch every week too; Cloudflare has
-not been applied from CI
-([#232](https://github.com/evatt-labs/kraai/issues/232)).
+exist. It applies a Neon `database` branch and every Cloudflare type kraai
+implements, D1, KV, R2 and Queues, every week too.
 A `network` binding names a VPC and at least two of its subnets that
 Terraform owns, usually as `{{ terraform.base.vpc_id }}` and
 `{{ terraform.base.private_subnet_ids|json }}`; kraai creates one security
