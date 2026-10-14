@@ -146,9 +146,16 @@ func (e *APIError) Error() string {
 
 // envelope is Cloudflare's uniform response wrapper.
 type envelope[T any] struct {
-	Success bool           `json:"success"`
-	Errors  []APIErrorItem `json:"errors"`
-	Result  T              `json:"result"`
+	Success    bool           `json:"success"`
+	Errors     []APIErrorItem `json:"errors"`
+	Result     T              `json:"result"`
+	ResultInfo *resultInfo    `json:"result_info"`
+}
+
+// resultInfo is the envelope's paging block. R2's listings page by cursor,
+// carried here while more remain; on the last page it is null.
+type resultInfo struct {
+	Cursor string `json:"cursor"`
 }
 
 // request is one API call's inputs.
@@ -165,13 +172,20 @@ type request struct {
 // introduce type parameters — the services below call it with their own
 // result types.
 func do[T any](ctx context.Context, c *Client, req request) (T, error) {
+	result, _, err := doPage[T](ctx, c, req)
+	return result, err
+}
+
+// doPage is do for a cursor-paged listing: it also returns the cursor of the
+// next page, empty on the last one.
+func doPage[T any](ctx context.Context, c *Client, req request) (T, string, error) {
 	var zero T
 
 	var payload io.Reader
 	if req.body != nil {
 		encoded, err := json.Marshal(req.body)
 		if err != nil {
-			return zero, kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding request for %s", req.path)
+			return zero, "", kerrors.Wrap(err, kerrors.CodeUnexpected, "encoding request for %s", req.path)
 		}
 		payload = bytes.NewReader(encoded)
 	}
@@ -183,7 +197,7 @@ func do[T any](ctx context.Context, c *Client, req request) (T, error) {
 
 	httpReq, err := http.NewRequestWithContext(ctx, req.method, endpoint, payload)
 	if err != nil {
-		return zero, kerrors.Wrap(err, kerrors.CodeUnexpected, "building request for %s", req.path)
+		return zero, "", kerrors.Wrap(err, kerrors.CodeUnexpected, "building request for %s", req.path)
 	}
 	httpReq.Header.Set("Authorization", "Bearer "+c.token)
 	if req.body != nil {
@@ -195,7 +209,7 @@ func do[T any](ctx context.Context, c *Client, req request) (T, error) {
 		// Not wrapped: a transport error can carry the full URL, and while
 		// these paths hold no credential the token lives in a header that
 		// some proxies echo. The path alone is enough to act on.
-		return zero, kerrors.Validation("cloudflare API request to %s failed", req.path)
+		return zero, "", kerrors.Validation("cloudflare API request to %s failed", req.path)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -209,14 +223,14 @@ func do[T any](ctx context.Context, c *Client, req request) (T, error) {
 	// body that merely happens to be exactly that long.
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	if err != nil {
-		return zero, kerrors.Wrap(err, kerrors.CodeUnexpected, "reading response from %s", req.path)
+		return zero, "", kerrors.Wrap(err, kerrors.CodeUnexpected, "reading response from %s", req.path)
 	}
 	if int64(len(raw)) > limit {
 		if httpFailed {
 			// The detail is unreadable but the status is the actionable part.
-			return zero, &APIError{Status: resp.StatusCode, Path: req.path}
+			return zero, "", &APIError{Status: resp.StatusCode, Path: req.path}
 		}
-		return zero, kerrors.Validation(
+		return zero, "", kerrors.Validation(
 			"response from %s exceeded the %d-byte ceiling", req.path, limit)
 	}
 
@@ -229,15 +243,19 @@ func do[T any](ctx context.Context, c *Client, req request) (T, error) {
 	// mean what it says; blaming the API for a body this end could not read
 	// sends the reader to the wrong dashboard.
 	if httpFailed {
-		return zero, &APIError{Status: resp.StatusCode, Path: req.path, Errors: env.Errors}
+		return zero, "", &APIError{Status: resp.StatusCode, Path: req.path, Errors: env.Errors}
 	}
 	if decodeErr != nil {
-		return zero, kerrors.Wrap(decodeErr, kerrors.CodeUnexpected, "decoding response from %s", req.path)
+		return zero, "", kerrors.Wrap(decodeErr, kerrors.CodeUnexpected, "decoding response from %s", req.path)
 	}
 	if !env.Success {
-		return zero, &APIError{Status: resp.StatusCode, Path: req.path, Errors: env.Errors}
+		return zero, "", &APIError{Status: resp.StatusCode, Path: req.path, Errors: env.Errors}
 	}
-	return env.Result, nil
+	cursor := ""
+	if env.ResultInfo != nil {
+		cursor = env.ResultInfo.Cursor
+	}
+	return env.Result, cursor, nil
 }
 
 // doNoResult issues req and discards the result, for deletes.
