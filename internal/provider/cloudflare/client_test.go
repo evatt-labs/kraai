@@ -56,6 +56,21 @@ func ok(result string) (int, string) {
 	return 200, `{"success":true,"errors":[],"result":` + result + `}`
 }
 
+// okPage is a page of a cursor-paged listing: R2 carries the next page's
+// cursor in result_info, and sends a null result_info on the last page.
+func okPage(result, cursor string) (int, string) {
+	info := `null`
+	if cursor != "" {
+		info = `{"cursor":"` + cursor + `","per_page":1000}`
+	}
+	return 200, `{"success":true,"errors":[],"result":` + result + `,"result_info":` + info + `}`
+}
+
+// noSuchBucketReply is R2's answer for a bucket that does not exist.
+func noSuchBucketReply() (int, string) {
+	return 404, `{"success":false,"errors":[{"code":10006,"message":"The specified bucket does not exist."}],"messages":[],"result":null}`
+}
+
 func TestAuthorizationHeaderIsSent(t *testing.T) {
 	client, seen := newTestClient(t, func(*recorded) (int, string) { return ok(`{"subdomain":"my-sub"}`) })
 
@@ -255,9 +270,9 @@ func TestR2DeleteEmptiesThenRemoves(t *testing.T) {
 		switch {
 		case r.method == "GET" && strings.HasSuffix(r.path, "/objects"):
 			if r.query.Get("cursor") == "" {
-				return ok(`{"objects":[{"key":"a"},{"key":"b"}],"cursor":"page2"}`)
+				return okPage(`[{"key":"a"},{"key":"b"}]`, "page2")
 			}
-			return ok(`{"objects":[{"key":"c"}],"cursor":""}`)
+			return okPage(`[{"key":"c"}]`, "")
 		case r.method == "DELETE" && strings.Contains(r.path, "/objects/"):
 			deletedObjects.Add(1)
 			return ok(`{}`)
@@ -285,7 +300,7 @@ func TestR2DeleteStopsOnANonAdvancingCursor(t *testing.T) {
 	client, _ := newTestClient(t, func(r *recorded) (int, string) {
 		if r.method == "GET" && strings.HasSuffix(r.path, "/objects") {
 			calls.Add(1)
-			return ok(`{"objects":[],"cursor":"stuck"}`)
+			return okPage(`[]`, "stuck")
 		}
 		return ok(`{}`)
 	})
@@ -302,7 +317,7 @@ func TestR2DeleteStopsOnANonAdvancingCursor(t *testing.T) {
 func TestR2ObjectKeysAreEscaped(t *testing.T) {
 	client, seen := newTestClient(t, func(r *recorded) (int, string) {
 		if r.method == "GET" && strings.HasSuffix(r.path, "/objects") {
-			return ok(`{"objects":[{"key":"nested/path/file.txt"}],"cursor":""}`)
+			return okPage(`[{"key":"nested/path/file.txt"}]`, "")
 		}
 		return ok(`{}`)
 	})
@@ -322,4 +337,69 @@ func TestR2ObjectKeysAreEscaped(t *testing.T) {
 		}
 	}
 	t.Fatal("no object delete was issued")
+}
+
+// A bucket that is already gone is deleted: a retried teardown must not fail
+// on what an earlier run removed, whether the listing of its objects or the
+// delete itself is what finds it missing.
+func TestR2DeleteOfAnAbsentBucketSucceeds(t *testing.T) {
+	for name, absentAt := range map[string]string{"listing": "GET", "delete": "DELETE"} {
+		t.Run(name, func(t *testing.T) {
+			client, _ := newTestClient(t, func(r *recorded) (int, string) {
+				if r.method == absentAt {
+					return noSuchBucketReply()
+				}
+				return okPage(`[]`, "")
+			})
+			if err := client.R2.Delete(t.Context(), "env-bucket"); err != nil {
+				t.Fatalf("Delete of an absent bucket: %v", err)
+			}
+		})
+	}
+}
+
+// Only R2's own "no such bucket" is absence; any other 404 is a failure.
+func TestR2DeleteReportsOtherNotFounds(t *testing.T) {
+	client, _ := newTestClient(t, func(*recorded) (int, string) {
+		return 404, `{"success":false,"errors":[{"code":7003,"message":"Could not route"}],"result":null}`
+	})
+	if err := client.R2.Delete(t.Context(), "env-bucket"); err == nil {
+		t.Fatal("a 404 that is not R2's no-such-bucket was taken as deleted")
+	}
+}
+
+// The bucket listing pages by cursor, not by page number; a bucket on a later
+// page must be found, or teardown would read it as deleted and orphan it.
+func TestR2FindByNameFollowsTheCursor(t *testing.T) {
+	client, seen := newTestClient(t, func(r *recorded) (int, string) {
+		if r.query.Get("cursor") == "" {
+			return okPage(`{"buckets":[{"name":"env-bucket-old"}]}`, "next")
+		}
+		return okPage(`{"buckets":[{"name":"env-bucket"}]}`, "")
+	})
+	found, err := client.R2.FindByName(t.Context(), "env-bucket")
+	if err != nil {
+		t.Fatalf("FindByName: %v", err)
+	}
+	if found == nil || found.Name != "env-bucket" {
+		t.Fatalf("found = %+v, want the bucket on the second page", found)
+	}
+	if got := (*seen)[1].query.Get("cursor"); got != "next" {
+		t.Fatalf("second request cursor = %q", got)
+	}
+}
+
+// A bucket listing that repeats its cursor cannot conclude the bucket is
+// absent.
+func TestR2FindByNameRefusesARepeatedCursor(t *testing.T) {
+	client, seen := newTestClient(t, func(*recorded) (int, string) {
+		return okPage(`{"buckets":[]}`, "stuck")
+	})
+	found, err := client.R2.FindByName(t.Context(), "env-bucket")
+	if err == nil {
+		t.Fatalf("a stuck listing answered %+v instead of failing", found)
+	}
+	if len(*seen) > 2 {
+		t.Fatalf("listed %d times against a repeating cursor", len(*seen))
+	}
 }
