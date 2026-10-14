@@ -182,7 +182,7 @@ func TestR2DeletesByNameWithoutALookup(t *testing.T) {
 			deletes.Add(1)
 			return ok(`{}`)
 		case c.method == "GET" && strings.HasSuffix(c.path, "/objects"):
-			return ok(`{"objects":[],"cursor":""}`)
+			return ok(`[]`)
 		case c.method == "GET":
 			lookups.Add(1)
 			return ok(`[]`)
@@ -208,7 +208,7 @@ func TestR2DeletesByNameWithoutALookup(t *testing.T) {
 // creating one that is already there.
 func TestR2GetDistinguishesExisting(t *testing.T) {
 	client, seen := newClient(t, func(call) (int, string) {
-		return ok(`[{"name":"env-a-api-bucket"},{"name":"env-a-api-bucket-staging"}]`)
+		return ok(`{"buckets":[{"name":"env-a-api-bucket"},{"name":"env-a-api-bucket-staging"}]}`)
 	})
 	reg := registryFor(t, client)
 	entry, _ := reg.Lookup("cloudflare/r2_bucket")
@@ -231,7 +231,7 @@ func TestR2GetDistinguishesExisting(t *testing.T) {
 // name_contains is a substring filter, not an equality test.
 func TestR2GetRequiresAnExactMatch(t *testing.T) {
 	client, _ := newClient(t, func(call) (int, string) {
-		return ok(`[{"name":"env-a-api-bucket-staging"}]`)
+		return ok(`{"buckets":[{"name":"env-a-api-bucket-staging"}]}`)
 	})
 	reg := registryFor(t, client)
 	entry, _ := reg.Lookup("cloudflare/r2_bucket")
